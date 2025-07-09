@@ -1,3 +1,6 @@
+dev:
+	bundle exec jekyll serve
+
 spellcheck s:
 	@for i in _posts/*.md; do aspell -c $$i; done
 	@for i in _drafts/*.md; do aspell -c $$i; done
@@ -12,3 +15,4 @@ drafts d:
 
 future f:
 	jekyll server --drafts --future
+
