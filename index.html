@@ -1,0 +1,64 @@
+---
+layout: default
+---
+
+<div class="header-intro">
+  <h2>Jason Lee</h2>
+  <ul class="nav-links">
+        <!-- <li><a href="/reading">Reading Notes</a></li>
+        <li><a href="/cooking">Cooking</a></li> -->
+  </ul>
+
+  <p>
+  I work on collaborative learning with LLMs at
+    <a href="https://deepmind.google">Google DeepMind</a>.
+  Previously, I wrote my master's thesis on
+    <a href="{{ site.baseurl }}{% link _posts/2018-05-09-federated-learning.md %}">federated learning</a>,
+  spent a few wonderful months at Mozilla working on a
+    <a href="{{ site.baseurl }}{% link _posts/2018-08-27-federated-learning-firefox.md %}">Firefox implementation</a>,
+    and then continued to work on federated learning at
+    <a href="https://research.google">Google Research</a>
+    for a few years.
+  I also did some work on
+    <a href="{{ site.baseurl }}{% link _posts/2017-10-12-differential-privacy.md %}">Differential Privacy</a>
+  and recommender systems at Mozilla, and on NLP at Amazon.
+  </p>
+
+  <p>I occasionally like to develop apps, such as a <a
+    href="https://florian.github.io/clipgerapp/">clipboard manager</a> or a <a
+    href="https://florian.github.io/HNClient/">Hacker News client</a>.
+  Before I got into machine learning, I published several popular
+  <a href="http://github.com/florian">JavaScript libraries</a>.
+  </p>
+</div>
+
+<div class="home">
+    {% for post in paginator.posts %}
+      {% assign currentdate = post.date | date: "%Y" %}
+      {% if currentdate != date %}
+        {% unless forloop.first %}</ul>{% endunless %}
+        <h2 class="year-header" id="y{{post.date | date: "%Y"}}">{{ currentdate }}</h2>
+        <ul class="post-list">
+          {% assign date = currentdate %}
+        {% endif %}
+        <li>
+          <a href="{{ post.url | prepend: site.baseurl }}">
+            <aside class="dates">{{ post.date | date: "%b %d" }}</aside>
+            {{ post.title }}
+            <h2>{{ post.description }}</h2>
+          </a>
+        </li>
+      {% if forloop.last %}</ul>{% endif %}
+    {% endfor %}
+
+  {% if paginator.previous_page or paginator.next_page %}
+  <div class="pagination">
+    {% if paginator.previous_page %}
+      <a class="pagination-link" href="{{ paginator.previous_page_path }}" class="previous"><span class="arrow">&larr;</span> Previous</a>
+    {% endif %}
+    {% if paginator.next_page %}
+      <a class="pagination-link" href="{{ paginator.next_page_path }}" class="next">Next <span class="arrow">&rarr;</span></a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>

@@ -1,0 +1,665 @@
+/* Spacing */
+.post h1, h3, h4, h5, p, .post-body ul, .post-list li {
+margin-bottom: 20px;
+}
+
+/**
+ * Basic styling
+ */
+
+html, body { height: 100%; }
+
+body {
+    font-family: $base-font-family;
+    font-size: $base-font-size;
+    line-height: $base-line-height;
+    color: $text-color;
+    background-color: $background-color;
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -moz-font-feature-settings: "liga", "kern";
+    font-weight: 300;
+}
+
+/**
+ * Set `margin-bottom` to maintain vertical rhythm
+ */
+h1, h2, h3, h4, h5, h6,
+p, blockquote,
+ul, ol, dl, figure,
+%vertical-rhythm {
+  margin-bottom: $spacing-unit / 2;
+}
+
+article h2, h3, h4, h5, h6 {
+  margin: 0;
+  padding-top: 15px;
+  //padding-bottom: 13px;
+}
+
+
+hr {
+    background-color: #DFE1E4;
+    width: 100px;
+    height: 1px;
+    border: 0;
+    margin: 2rem auto;
+}
+
+/**
+ * Images
+ */
+img {
+    max-width: 100%;
+    vertical-align: middle;
+}
+
+
+
+/**
+ * Figures
+ */
+figure > img {
+    display: block;
+}
+
+figcaption {
+    font-size: $small-font-size;
+}
+
+
+
+/**
+ * Lists
+ */
+ul, ol {
+    margin-left: $spacing-unit;
+}
+
+article ul, article ol {
+ margin-top: -7px;
+ margin-left: 40px;
+ margin-bottom: 3px;
+}
+
+li {
+    list-style-position: inside;
+    > ul,
+    > ol {
+         margin-bottom: 0;
+    }
+}
+
+li {
+    padding: 7px 0;
+    text-indent: -1em;
+}
+
+ul ul {
+  margin-top: 0;
+}
+
+ul ul li {
+  padding: 0;
+  padding-top: 6px;
+}
+
+article li::before {
+ content: "–";
+ padding-right: 8px;
+}
+
+ol {
+ list-style: decimal;
+
+ li:before {
+  content: '';
+  padding: 0;
+ }
+}
+
+
+/**
+ * Headings
+ */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: bold;
+}
+
+h1 {
+    font-size: 28px;
+    letter-spacing: -1px;
+    color: #222;
+    font-weight: bold;;
+}
+
+// Styling
+em {
+    font-style: italic;
+}
+
+strong {
+    font-weight: 600;
+}
+
+/**
+ * Links
+ */
+a {
+    color: $link-color;
+    text-decoration: none;
+
+    &:visited {
+        color: $link-color;
+    }
+
+    &:hover {
+        color: $link-color;
+        text-decoration: underline;
+    }
+}
+
+// Custom colour selection
+::selection {
+    background-color: $brand-color;
+    color: #fff;
+}
+
+::-moz-selection {
+    background-color: $brand-color;
+    color: #fff;
+}
+
+
+/**
+ * Blockquotes
+ */
+blockquote {
+    color: $grey-color;
+    border-left: 4px solid $grey-color-light;
+    padding-left: $spacing-unit / 2;
+    font-size: 18px;
+    letter-spacing: -1px;
+    font-style: italic;
+    font-family: Georgia, sans-serif;
+
+    > :last-child {
+        margin-bottom: 0;
+    }
+}
+
+/**
+ * Code formatting
+ */
+
+.highlight {
+    background-color: #f5f5f5;
+    border-radius: .15rem;
+}
+
+pre,
+code {
+    font-size: 14px;
+    font-family: 'Menlo', 'Monaco', "Courier New", monospace;
+    //white-space: pre-wrap;
+    border-radius: 3px;
+    //background-color: #F5F5F5;
+    //color: #c65e24;
+}
+
+code {
+    padding: 3px 7px;
+    box-sizing: content-box;
+    border-radius: 5px;
+    //white-space: nowrap;
+    line-break: anywhere;
+}
+
+pre code {
+    display: block;
+    padding: 15px;
+    line-height: 1.8;
+    //white-space: pre-wrap;
+}
+
+.lineno {
+    font-size: 10px;
+    padding-right: 10px;
+    color: #aaa;
+}
+
+pre {
+    word-break: break-all;
+}
+
+/**
+ * Wrapper
+ */
+.wrapper {
+    max-width: 650px;
+    margin: 0 auto;
+    padding: 50px 0px;
+    @extend %clearfix;
+
+    @include media-query($on-laptop) {
+        max-width: -webkit-calc(#{$content-width} - (#{$spacing-unit}));
+        max-width:         calc(#{$content-width} - (#{$spacing-unit}));
+        padding-right: $spacing-unit / 2;
+        padding-left: $spacing-unit / 2;
+
+        .header-intro p {
+         text-align: initial
+        }
+    }
+}
+
+/**
+ * Clearfix
+ */
+%clearfix {
+
+    &:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+}
+
+
+/**
+ * Site header
+ */
+
+.header-intro {
+    font-size: 18px;
+    color: #777;
+}
+
+.header-intro h2 {
+    color: #444;
+    display: inline-block;
+    margin-bottom: 25px;
+}
+
+.nav-links {
+  float: right;
+  margin: 0;
+
+  li {
+   display: inline;
+   font-size: 16px;
+   margin: 0;
+   padding: 0;
+  }
+
+  li + li {
+    padding-left: 15px;
+  }
+
+  a {
+   border-bottom-style: dotted;
+   opacity: .7;
+   font-size: 15px;
+  }
+
+  a:hover {
+   border-bottom-style: solid;
+   opacity: 1;
+  }
+}
+
+.header-intro a, .header-intro a:visited {
+    color: #666;
+    border-bottom: 1px dotted rgb(142, 142, 142);
+}
+
+.header-intro a:hover {
+    color: $brand-color;
+    border-bottom-color: $brand-color;
+    text-decoration: none;
+}
+
+.page-link {
+    display: inline-block;
+    line-height: 100%;
+    font-size: 14px;
+    margin: 0;
+    margin-bottom: 20px;
+    font-size: 17px;
+}
+
+/**
+ * Page content
+ */
+
+.year-header {
+ text-align: center;
+ margin-top: 50px;
+ color: #555;
+
+ &:before, &:after {
+  content: '';
+  display: inline-block;
+  width: calc(50% - 40px);
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 5px;
+ }
+
+ &:before {
+  margin-right: 19px;
+ }
+
+ &:after {
+  margin-left: 19px;
+ }
+}
+
+.post-list {
+    margin-left: 0;
+    list-style: none;
+
+    > li {
+        margin-bottom: $spacing-unit;
+        padding: 0;
+        text-indent: 0;
+    }
+}
+
+.post-list a:hover,
+.post-list a:hover .dates {
+    text-decoration: none;
+    color: $brand-color;
+}
+
+.post-list * {
+    -webkit-transition: all 0.15s ease;
+    -moz-transition: all 0.15s ease;
+    -ms-transition: all 0.15s ease;
+    -o-transition: all 0.15s ease;
+    transition: all 0.15s ease;
+}
+
+/*=========================================
+Post List
+=========================================== */
+.post-list,#archive-list {
+    margin-top: 30px;
+}
+
+.post-list li,#archive-list li {
+    list-style-type: none;
+}
+
+.post-list li:last-child {
+    margin-bottom: 0;
+}
+
+.post-list li+li {
+    padding-top: 20px;
+    border-top: 1px solid #DFE1E4;
+}
+
+.post-list a {
+    color: #333;
+    display: block;
+    font: 600 21px/1.7 $base-font-family;
+}
+
+.post-list h2 {
+    font: normal 19px/1.5em $base-font-family;
+    color: #aaa;
+    max-width: 600px;
+    margin-top: 2px;
+}
+
+.post-list .dates {
+    float: right;
+    position: relative;
+    top: 1px;
+    font: 300 17px/1.8 $base-font-family;
+    color: #bbb;
+}
+
+.post-meta {
+    font-size: $small-font-size;
+    color: $grey-color;
+}
+
+/**
+ * Posts
+ */
+.post-header {
+    margin-bottom: $spacing-unit;
+    position: relative;
+}
+
+a.home-link {
+    position: absolute;
+    right: 0;
+    color: $brand-color;
+    font-size: 20px;
+}
+
+.post-title {
+    max-width: 570px;
+    width: 80%;
+    letter-spacing: -1px;
+    line-height: 1;
+
+    @include media-query($on-laptop) {
+        font-size: 36px;
+    }
+}
+
+.post-content {
+    margin-bottom: $spacing-unit;
+
+    h2 {
+        font-size: 30px;
+
+        @include media-query($on-laptop) {
+            font-size: 28px;
+        }
+    }
+
+    h3 {
+        font-size: 25px;
+
+        @include media-query($on-laptop) {
+            font-size: 21px;
+        }
+    }
+
+    h4 {
+        font-size: 20px;
+
+        @include media-query($on-laptop) {
+            font-size: 18px;
+        }
+    }
+}
+
+.related {
+    padding-top: 20px;
+}
+.related li {
+    list-style: none;
+    padding: 2px 0;
+    text-indent: 0;
+}
+.related li .post-meta {
+    font-size: 15px;
+}
+.related a:link, .related a:hover {
+    text-decoration: none;
+}
+
+// PAGINATION
+.pagination {
+    border-top: 1px solid #eee;
+    margin-top: 50px;
+    padding-top: 20px;
+}
+
+.pagination-link {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 4px;
+    padding: 7px 18px 6px;
+    //box-shadow: 0 0 0 1px hsla(5, 84%, 64%, 1);
+}
+
+span.arrow {
+    position: relative;
+    top: 0;
+    font-size: 17px;
+}
+
+.image {
+    margin: 0 auto;
+
+    &.nocaption img {
+      padding: 30px 0;
+    }
+}
+
+caption {
+    margin-top: 20px;
+    margin-bottom: 40px;
+    font-style: italic;
+}
+
+p, article li {
+ text-align: justify
+}
+
+article p {
+ line-height: 33px;
+ margin-bottom: 15px;
+ padding-top: 13px;
+
+ &:first-of-type {
+  padding-top: 0;
+ }
+}
+
+article table:not(.image) {
+ margin: 35px auto;
+
+ td, th {
+  border: 1px solid gray;
+  padding: 3px 17px;
+  text-align: center;
+ }
+
+ th {
+  font-weight: bold;
+ }
+}
+
+.fa {
+  display: inline-block;
+  font-family: FontAwesome;
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.fa-link:before {
+  content: "\f0c1";
+}
+
+/*
+ * This code is courtesy Ben Balter, modified by Parker Moore for jekyllrb.com
+ * http://ben.balter.com/2014/03/13/pages-anchor-links/
+ */
+
+h2, h3, h4, h5, h6 {
+ position: relative;
+ //border: 1px solid;
+}
+
+a.header-link {
+  display: inline-block;
+  position: absolute;
+  left: -35px;
+  top: -1px;
+  padding-right: 17px;
+  padding-top: 22px;
+  padding-bottom: 20px;
+  opacity: 0;
+  //border: 1px solid;
+  font-size: 0.8em;
+  -webkit-transition: opacity 0.2s ease-in-out 0.1s;
+  -moz-transition: opacity 0.2s ease-in-out 0.1s;
+  -ms-transition: opacity 0.2s ease-in-out 0.1s;
+  color: #777;
+  font-size: 17px;
+
+  &:hover {
+   color: #222;
+  }
+}
+
+h4 a.header-link {
+ padding-top: 18px;
+ padding-bottom: 3px;
+}
+
+h2:hover .header-link,
+h3:hover .header-link,
+h4:hover .header-link,
+h5:hover .header-link,
+h6:hover .header-link {
+  opacity: 1;
+}
+
+article .MathJax_Display {
+  margin: 20px 0;
+}
+
+.references-list {
+    counter-reset: list;
+    margin-top: 0;
+    margin-left: 20px;
+}
+
+.references-list > li {
+    list-style: none;
+}
+
+.references-list > li:before {
+    counter-increment: list;
+    content: "[" counter(list) "]";
+    opacity: .75;
+}
+
+.references-list li span {
+  position: relative;
+  left: 15px;
+  padding-top: 25px;
+}
+
+.ref-pointer {
+  padding-top: 100px;
+}
+
+.ref-backlink:before {
+  content: "[↩]"
+}
+
+.pdf-link:before {
+  content: "[PDF]"
+}
+
+.notes-link:before {
+  content: "[notes]"
+}
+
+

@@ -1,0 +1,22 @@
+# Site settings
+title: "Jason Lee"
+email:
+description: > # this means to ignore newlines until "baseurl:"
+#baseurl: "/beta/" # the subpath of your site, e.g. /blog/
+baseurl: "" # the subpath of your site, e.g. /blog/
+url: "https://florian.github.io/" # the base hostname & protocol for your site
+github_username: florian
+
+# Build settings
+markdown: kramdown
+permalink: ":title/"
+highlighter: rouge
+plugins: [jekyll-paginate]
+
+# Pagination
+paginate: 100
+paginate_path: "blog/page/:num/"
+
+# Minification
+sass:
+  style: compressed
