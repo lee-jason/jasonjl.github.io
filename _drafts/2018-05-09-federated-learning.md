@@ -22,7 +22,7 @@ This would allow training a model on the same data distribution that is also use
 However, directly collecting this data is a terrible idea because it is extremely private.
 Users do not want to send everything they type to a server.
 
-Sending only randomized versions of the original data to the server, based on the ideas of [Differential Privacy]({{ site.baseurl }}{% link _posts/2017-10-12-differential-privacy.md %}), is one potential solution to this problem.
+Sending only randomized versions of the original data to the server, based on the ideas of [Differential Privacy]({{ site.baseurl }}/), is one potential solution to this problem.
 The second solution is [*Federated Learning*](https://research.googleblog.com/2017/04/federated-learning-collaborative.html), a new approach to machine learning where the training data does not leave the users' computer at all.
 Instead of sharing their data, users compute weight updates themselves using their locally available data.
 It is a way of training a model without directly inspecting users' data on a server.
@@ -101,7 +101,7 @@ Since only the average update is required to compute the next model, these compr
 It is acceptable that individual updates are compressed in a lossy manner, as long as the overall average does not change too much.
 
 On a high level, compression algorithms for Federated Learning can be put into two classes:
-- *Sketched updates*: Clients compute a normal weight update and perform a compression afterwards. The compressed update is often an [unbiased estimator]({{ site.baseurl }}{% link _posts/2018-07-17-estimators.md %}) of the true update, meaning they are the same on average. One of the more sophisticated such techniques is [Probabilistic Quantization]({{ site.baseurl }}{% link _posts/2018-02-25-probabilistic-quantization.md %}), which I described in more detail in another blog post
+- *Sketched updates*: Clients compute a normal weight update and perform a compression afterwards. The compressed update is often an [unbiased estimator]({{ site.baseurl }}/), which I described in more detail in another blog post
 - *Structured updates*: During the optimization process, the update is restricted to be of a form that allows for an efficient compression. For example, the updates might be forced to be sparse or low-rank. The optimization then finds the best possible update of this form
 
 There are no strong guarantees about which method works the best.
@@ -119,7 +119,7 @@ In this case, the user's data would not be private because it is still represent
 While this might sound unlikely if not done on purpose, there have been experiments that show it is possible to reconstruct some data points.
 In one case, researchers were able to reconstruct images of faces that were used to train a face recognition model {% include ref.html i=6 %}.
 
-[Differential Privacy]({{ site.baseurl }}{% link _posts/2017-10-12-differential-privacy.md %}), which I wrote about in another post, is one solution to this problem.
+[Differential Privacy]({{ site.baseurl }}/), which I wrote about in another post, is one solution to this problem.
 By formalizing what privacy means, we can analyze how well the learning algorithm respects privacy.
 To employ this technique to Federated Learning, the notion of privacy is adapted to a user level: It should be very hard to tell whether a user contributed to the training of the model.
 This is done using a stochastic framework.

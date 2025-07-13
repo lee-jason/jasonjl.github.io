@@ -36,12 +36,12 @@ very elegant, so I decided it would be worth writing a blog post about.
 Fundamentally, it removes a lot of information from individual updates which
 allows us to encode them using much fewer bits. Still, by taking into account
 the aggregated weight updates from a lot of users, not much information is lost.
-This concept reminds me a lot of [Differential Privacy]({{ site.baseurl }}{% link _posts/2017-10-12-differential-privacy.md %}).
+This concept reminds me a lot of [Differential Privacy]({{ site.baseurl }}/).
 
 To understand the idea, it is important to realize that only the average is
 important. If a weight update \\(h\\) is randomized to a compressed version \\(h'\\),
 then \\(E[h'] = h\\) needs to hold. In other words, the compressed estimate needs to
-be correct on average. This is called an [unbiased estimator]({{ site.baseurl }}{% link _posts/2018-07-17-estimators.md %}) in statistics.
+be correct on average. This is called an [unbiased estimator]({{ site.baseurl }}/) in statistics.
 
 Having an unbiased estimator allows us to approximate the true weight update
 more closely and closely as more weight updates are sent. This is known as the [law of

@@ -24,7 +24,7 @@ Individuals by themselves often do not have enough data to fit good models.
 The parts of the algorithm that touch the users' data are executed locally on their machines.
 Instead of sharing data, clients then only send back abstract model improvements, for example weight updates, to the server.
 This way, a high-quality model can be trained collaboratively without needing to collect data.
-The [Federated Learning blog post]({{ site.baseurl }}{% link _posts/2018-05-09-federated-learning.md %}) on this site provides a much broader overview of this area.
+The [Federated Learning blog post]({{ site.baseurl }}/) on this site provides a much broader overview of this area.
 
 Over the past three months, we implemented a Federated Learning system for Firefox.
 The aim of this project was to improve part of the suggestions displayed in the Firefox URL bar, though in theory the system is flexible enough to be used in many other situations.

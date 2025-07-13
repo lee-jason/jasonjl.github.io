@@ -6,7 +6,7 @@ description: "Why working on federated learning is interesting, meaningful and f
 categories: federated-learning
 ---
 
-Much has been written about how [federated learning]({{ site.baseurl }}{% link _posts/2018-05-09-federated-learning.md %}) (FL) can enable training much better models and help build more intelligent systems.
+Much has been written about how [federated learning]({{ site.baseurl }}/) (FL) can enable training much better models and help build more intelligent systems.
 This essay instead discusses a more personal aspect: Why working on FL as an individual is interesting, meaningful and fun.
 
 You can either take this as an advertisement for why one should work one FL, or as a personal reflection on why I am still passionate about it after working in the space for a few years.

@@ -10,17 +10,18 @@ layout: default
   </ul>
 
   <p>
-  I work on collaborative learning with LLMs at
+    Hello, its me
+  <!-- I work on collaborative learning with LLMs at
     <a href="https://deepmind.google">Google DeepMind</a>.
   Previously, I wrote my master's thesis on
-    <a href="{{ site.baseurl }}{% link _posts/2018-05-09-federated-learning.md %}">federated learning</a>,
+    <a href="{{ site.baseurl }}/">federated learning</a>,
   spent a few wonderful months at Mozilla working on a
-    <a href="{{ site.baseurl }}{% link _posts/2018-08-27-federated-learning-firefox.md %}">Firefox implementation</a>,
+    <a href="{{ site.baseurl }}/">Firefox implementation</a>,
     and then continued to work on federated learning at
     <a href="https://research.google">Google Research</a>
     for a few years.
   I also did some work on
-    <a href="{{ site.baseurl }}{% link _posts/2017-10-12-differential-privacy.md %}">Differential Privacy</a>
+    <a href="{{ site.baseurl }}/">Differential Privacy</a>
   and recommender systems at Mozilla, and on NLP at Amazon.
   </p>
 
@@ -29,7 +30,7 @@ layout: default
     href="https://florian.github.io/HNClient/">Hacker News client</a>.
   Before I got into machine learning, I published several popular
   <a href="http://github.com/florian">JavaScript libraries</a>.
-  </p>
+  </p> -->
 </div>
 
 <div class="home">
@@ -45,6 +46,7 @@ layout: default
           <a href="{{ post.url | prepend: site.baseurl }}">
             <aside class="dates">{{ post.date | date: "%b %d" }}</aside>
             {{ post.title }}
+            <img class="preview" src="{{ post.img }}" />
             <h2>{{ post.description }}</h2>
           </a>
         </li>

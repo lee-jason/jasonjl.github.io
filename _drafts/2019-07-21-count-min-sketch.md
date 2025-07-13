@@ -36,8 +36,8 @@ Even if we are only interested in the most important ones, this method has huge 
 Since we do not know for which items to store counts, our hash table will grow to contain billions of elements.
 
 The *Count-Min Sketch*, or *CMS* for short, is a data structure that solves this problem in an approximate way.
-Similarly to [Bloom Filters]({{ site.baseurl }}{% link _posts/2017-09-03-bloom-filters.md %}), we save a lot of space by using probabilistic techniques.
-In fact, a CMS works a bit like a [Counting Bloom Filter]({{ site.baseurl }}{% link _posts/2017-09-03-bloom-filters.md %}#removing-values), though they do have different use cases.
+Similarly to [Bloom Filters]({{ site.baseurl }}/), we save a lot of space by using probabilistic techniques.
+In fact, a CMS works a bit like a [Counting Bloom Filter]({{ site.baseurl }}/#removing-values), though they do have different use cases.
 
 ### Approximate Counts with Hashing
 

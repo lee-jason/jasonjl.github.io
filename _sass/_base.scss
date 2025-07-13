@@ -424,6 +424,10 @@ Post List
     color: #bbb;
 }
 
+.post-list .preview {
+    display: block;
+}
+
 .post-meta {
     font-size: $small-font-size;
     color: $grey-color;

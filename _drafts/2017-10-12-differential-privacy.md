@@ -57,7 +57,7 @@ Now, the question is, how can we use this technique to collect more complex data
 [RAPPOR](https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/42852.pdf) is an algorithm developed
 by Google whose main purpose is to collect data while adding random noise to guarantee Differential Privacy.
 
-Each user is assigned to one of \\( m\\) cohorts. The value to encode is passed through \\( h\\) hash functions to encode it into a Bloom filter, and noise is added with probabilities \\( p, q, f \\). Bloom Filters were also described in more detail on [this blog before]({{ site.baseurl }}{% link _posts/2017-09-03-bloom-filters.md %}).
+Each user is assigned to one of \\( m\\) cohorts. The value to encode is passed through \\( h\\) hash functions to encode it into a Bloom filter, and noise is added with probabilities \\( p, q, f \\). Bloom Filters were also described in more detail on [this blog before]({{ site.baseurl }}/).
 
 In RAPPOR, we need to set different parameters:
 
