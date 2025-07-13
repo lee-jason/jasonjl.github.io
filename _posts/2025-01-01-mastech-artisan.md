@@ -1,3 +1,12 @@
+---
+layout: post
+title:  "Logging Information on Browser Crashes"
+date:   2015-06-21 01:00:00
+description: "Mastech to Artisan"
+image: "https://google.com"
+categories: browsers, javascript, logging
+---
+
 # Hooking up mastech ms6514 to artisan
 device, meter, mastech
 
