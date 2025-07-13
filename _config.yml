@@ -3,9 +3,9 @@ title: "Jason Lee"
 email:
 description: > # this means to ignore newlines until "baseurl:"
 #baseurl: "/beta/" # the subpath of your site, e.g. /blog/
-baseurl: "" # the subpath of your site, e.g. /blog/
-url: "https://florian.github.io/" # the base hostname & protocol for your site
-github_username: florian
+baseurl: "https://jasonjl.me/jasonjl.github.io/" # the subpath of your site, e.g. /blog/
+url: "https://jasonjl.me/jasonjl.github.io/" # the base hostname & protocol for your site
+github_username: lee-jason
 
 # Build settings
 markdown: kramdown
@@ -14,7 +14,7 @@ highlighter: rouge
 plugins: [jekyll-paginate]
 
 # Pagination
-paginate: 100
+paginate: 20
 paginate_path: "blog/page/:num/"
 
 # Minification
