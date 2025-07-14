@@ -24,7 +24,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gems-
       - name: Build & Deploy to GitHub Pages
-        uses: joshlarsen/jekyll4-deploy-gh-pages@master
+        uses: lee-jason/jekyll4-deploy-gh-pages@master
         with:
           jekyll_config: '_config.yml,_config_staging.yml'
         env:
