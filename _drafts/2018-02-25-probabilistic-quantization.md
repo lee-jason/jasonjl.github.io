@@ -14,8 +14,7 @@ training process is distributed among many users {% include ref.html i=1 %}. It 
 machine learning with the constraint that the communication can be slow and
 unstable.
 
-This is easily worth its [own post]({{ site.baseurl }}{% link
-_posts/2018-05-09-federated-learning.md %}) but in a nutshell Federated
+This is easily worth its  but in a nutshell Federated
 Learning works like this: A central server maintains a machine learning model.
 Training data is only available locally on the users' devices, so from time to
 time they get a copy of the model and improve it using their locally available
