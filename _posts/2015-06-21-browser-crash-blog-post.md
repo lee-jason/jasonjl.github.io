@@ -9,8 +9,6 @@ comments: true
 ---
 
 
-# Logging Information on Browser Crashes
-
 Every now and then your web application does something so wild and unpredictable that it crashes the browser that you're running it on. In order to create a better product for our users, we would need to log pertinent information every time our app crashes. Unfortunately there is no way to send a crash log before or during the crash due to the unpredictable nature of the crash and the browser's web environment no longer working. The best thing to do is to send the logs after the crash. This post will go through a technique to detect when the user's previous session has crashed so that we can perform the relevant logging actions.
 
 ## Preface

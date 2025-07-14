@@ -7,8 +7,6 @@ categories: guide, javascript, jsx, react
 comments: true
 ---
 
-# Rendering List of Elements in React With JSX
-
 Understanding how JSX is processed can be slightly tricky to understand. Knowing when its appropriate to use JavaScript code and when to use HTML in your JSX can be very nuanced when writing React code. Understanding how the JSX will compile is critical in writing basic React that will render in predictable ways every time. This guide will go over the slightly tricky scenario of getting a list to render and how it can help us understand more about React and JSX.
 
 **Preface:** Unfortunately, the JSX code highlighting may not be perfect. Each JSX React code example is followed by the transformed version to JavaScript, followed by the actual rendered code in the page. Feel free to inspect the elements to get a better idea of how React renders your code.

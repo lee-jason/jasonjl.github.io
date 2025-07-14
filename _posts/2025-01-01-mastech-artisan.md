@@ -1,13 +1,12 @@
 ---
 layout: post
-title:  "Logging Information on Browser Crashes"
+title:  "Hooking up mastech ms6514 to artisan"
 date:   2025-06-21 01:00:00
 description: "Mastech to Artisan"
 image: "https://placehold.co/600x400"
 categories: coffee
 ---
 
-# Hooking up mastech ms6514 to artisan
 device, meter, mastech
 
 download artisan
