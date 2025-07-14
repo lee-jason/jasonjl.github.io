@@ -46,7 +46,9 @@ layout: default
           <a href="{{ post.url | prepend: site.baseurl }}">
             <aside class="dates">{{ post.date | date: "%b %d" }}</aside>
             {{ post.title }}
-            <img class="preview" src="{{ post.img }}" />
+            {% if post.image %}
+            <img src="{{ site.baseurl }}/assets/posts/{{ post.slug }}/{{ post.image }}" alt="{{ include.description }}" width="{{ include.image_width | default: "" }}"/>
+            {% endif %}
             <h2>{{ post.description }}</h2>
           </a>
         </li>
