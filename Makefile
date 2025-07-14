@@ -1,5 +1,5 @@
 dev:
-	bundle exec jekyll serve --drafts
+	bundle exec jekyll serve
 
 spellcheck s:
 	@for i in _posts/*.md; do aspell -c $$i; done
