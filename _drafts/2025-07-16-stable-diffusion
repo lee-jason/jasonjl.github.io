@@ -1,0 +1,39 @@
+training
+- VAE encoding Variational Autoencoder (VAE)
+Converts an image into a 3d vector (64x64x4), a representation of an image.
+representation is created by a neural net that creates a resulting output
+Its only goal is to 'compress' an image to be consumed by a computer for stable diffusion training
+its successful if we can properly decode from the encoded output
+
+Decoder 
+Another neural net created model that converts an encoded image back to the original
+Each neural net depends and learns off each other, decoder needs to keep up with changes to encoders model
+Learning rate is managed to keep them stabilized.
+
+- Stable diffusion
+Stable diffusion model tells us that given a text prompt, how do we get from a noisy image, to the slightly cleaned up version of that image as it relates to the input text
+training
+trained on a corpus of captioned images.
+Image gets encoded, then noise is introduced to create more training images in series of steps 
+model is trained on given the text -> next image dimensions  (given the text, tell me what the denoised version of that text looks like)
+
+Each step of the noised up training image is associated to it's 'step' in the process. So we need to ask diffusion, given this encoded image at step 500, what does the next step look like. It'll look up next steps for images at step 500, rather than all the training data.
+
+- Scheduler
+The scheduler controls how fast we get to that next step for each time we run the scheduler. It doesn't go 100% all the time .
+The scheduler sees what the model's available timesteps are 0-1000, then asks it creates a stepped plan of a sequence of denoise steps (1000, 700, 500, 200, 100, 50, 10, 1)
+Asking to denoise an image at timestep 1 would produce very little fine changes.
+denoise at 1000 would be a bigger leap since its noisy.
+
+You cannot ask a diffusion model to denoise an image from static with all step 1. The training data has never been trained on turning static to something at the 'timestep 1' level. The source image needs to line up with what you want next
+Which is why scheduler starts from the beginning, a noisy image, then asking step by step to clean it up
+
+Schedulers are dumb, they do not interpret the output results and intelligently pick the next one
+
+
+- Notes
+Scheduler strategy should be paired with the amount of training steps done for a given diffusion model
+-- Diffusion model trained on just 10 steps should pick a linear scheduler to go through all the steps
+-- Diffusion model trained on 1000 steps should pick a quadratic scheduler to jump massively in the beginning then fine tune at the end.
+
+
