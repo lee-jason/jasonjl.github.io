@@ -1,4 +1,4 @@
-name: Jekyll Deploy
+name: Jekyll Build and Push
 
 on:
   push:
@@ -23,7 +23,15 @@ jobs:
           key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-gems-
-      - name: Build & Deploy to GitHub Pages
+      - name: Create .env file
+        run: |
+          cat > .env << EOF
+          AWS_S3_ASSET_HOST=${{ env.AWS_S3_ASSET_HOST }}
+          EOF
+      - name: Debug .env
+        run: |
+          echo cat .env
+      - name: Build & Push to GitHub Pages
         uses: lee-jason/jekyll4-deploy-gh-pages@master
         with:
           jekyll_config: '_config.yml,_config_prod.yml'
