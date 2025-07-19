@@ -24,6 +24,12 @@ jobs:
           key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-gems-
+      - name: Debug Environment Variables
+        run: |
+          echo "All environment variables containing AWS:"
+          env | grep -i aws || echo "No AWS environment variables found"
+          echo "Direct access to AWS_S3_ASSETS_HOST: '$AWS_S3_ASSETS_HOST'"
+          echo "GitHub context: ${{ github.ref }}"
       - name: Create .env file
         run: |
           cat > .env << EOF
