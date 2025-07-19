@@ -23,22 +23,11 @@ jobs:
           key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-gems-
-      - name: Debug Variables
-        run: |
-          echo "Testing vars access:"
-          echo "vars.AWS_S3_ASSETS_HOST: '${{ vars.AWS_S3_ASSETS_HOST }}'"
-          echo "Testing env access:"
-          echo "env.AWS_S3_ASSETS_HOST: '${{ env.AWS_S3_ASSETS_HOST }}'"
-          echo "Testing secrets access:"
-          echo "secrets.AWS_S3_ASSETS_HOST: '${{ secrets.AWS_S3_ASSETS_HOST }}'"
       - name: Create .env file
         run: |
           cat > .env << EOF
           AWS_S3_ASSETS_HOST=${{ vars.AWS_S3_ASSETS_HOST }}
           EOF
-      - name: Debug .env
-        run: |
-          cat .env
       - name: Build & Push to GitHub Pages
         uses: lee-jason/jekyll4-deploy-gh-pages@master
         with:

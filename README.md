@@ -9,21 +9,30 @@
 
 ```sh
 gem install jekyll jekyll-paginate
+cp .env_sample .env # fill in all env details
 ```
+
+[AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+
 
 ## Development
 ```sh
-`make dev` # as it's rendered in prod
-`make drafts` # show draft posts
+make dev # as it's rendered in prod
+make drafts # show draft posts
 ```
 
 Create posts in `_posts` prefixed with date
 
 ### Deploying assets
-
-
+Ensure you installed AWS cli \
+Put assets in `assets/posts/blog-slug` \
+`make dev` will attempt to sync 
 
 ## Deployment
+
+### Github Action Vars
+define `AWS_S3_ASSETS_HOST` in action environment vars
+
 on `main` branch \
 `git push`
 

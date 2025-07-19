@@ -1,9 +1,15 @@
 include .env
 export
 
-dev:
+install:
 	bundle install
+
+sync_assets:
 	aws s3 sync ./assets s3://${AWS_S3_ASSETS_BUCKET} --acl public-read
+
+dev:
+	make install
+	make sync_assets
 	bundle exec jekyll serve
 
 spellcheck s:
@@ -16,8 +22,12 @@ clean c:
 	rm -f _posts/*.bak
 
 drafts d:
+	make install
+	make sync_assets
 	jekyll server --drafts
 
 future f:
+	make install
+	make sync_assets
 	jekyll server --drafts --future
 
