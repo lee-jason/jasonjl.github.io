@@ -36,8 +36,7 @@ jobs:
           AWS_S3_ASSETS_HOST=${{ env.AWS_S3_ASSETS_HOST }}
           EOF
       - name: Debug .env
-        run: |
-          cat .env
+        run: env
       - name: Build & Push to GitHub Pages
         uses: lee-jason/jekyll4-deploy-gh-pages@master
         with:
