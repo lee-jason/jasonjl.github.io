@@ -31,7 +31,7 @@ jobs:
           EOF
       - name: Debug .env
         run: |
-          echo cat .env
+          cat .env
       - name: Build & Push to GitHub Pages
         uses: lee-jason/jekyll4-deploy-gh-pages@master
         with:
