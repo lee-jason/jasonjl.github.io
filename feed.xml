@@ -1,0 +1,750 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Jason Lee</title>
+    <description></description>
+    <link>https://jasonjl.me/jasonjl.github.io/https://jasonjl.me/jasonjl.github.io//</link>
+    <atom:link href="https://jasonjl.me/jasonjl.github.io/https://jasonjl.me/jasonjl.github.io//feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Sat, 19 Jul 2025 03:29:32 +0000</pubDate>
+    <lastBuildDate>Sat, 19 Jul 2025 03:29:32 +0000</lastBuildDate>
+    <generator>Jekyll v4.4.1</generator>
+    
+      <item>
+        <title>Hooking up mastech ms6514 to artisan</title>
+        <description>&lt;p&gt;device, meter, mastech&lt;/p&gt;
+
+&lt;p&gt;download artisan&lt;/p&gt;
+
+&lt;p&gt;download 
+https://artisan-scope.org/devices/meters/
+https://www.silabs.com/developer-tools/usb-to-uart-bridge-vcp-drivers?tab=downloads&lt;/p&gt;
+
+&lt;table class=&quot;image&quot;&gt;
+	&lt;caption align=&quot;bottom&quot; style=&quot;&quot;&gt;caption&lt;/caption&gt;
+
+&lt;tr&gt;&lt;td&gt;&lt;img src=&quot;/posts/mastech-artisan/x.png&quot; alt=&quot;caption&quot; width=&quot;&quot; style=&quot;&quot; class=&quot;&quot; /&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;
+
+&lt;p&gt;comm port CP2102 USB to UART Bridge Controller
+Baud rate 9600&lt;/p&gt;
+
+&lt;p&gt;Set the usb , hold usb button on mastech&lt;/p&gt;
+</description>
+        <pubDate>Sat, 21 Jun 2025 01:00:00 +0000</pubDate>
+        <link>https://jasonjl.me/jasonjl.github.io/https://jasonjl.me/jasonjl.github.io//mastech-artisan/</link>
+        <guid isPermaLink="true">https://jasonjl.me/jasonjl.github.io/https://jasonjl.me/jasonjl.github.io//mastech-artisan/</guid>
+        
+        
+        <category>coffee</category>
+        
+      </item>
+    
+      <item>
+        <title>Logging Information on Browser Crashes</title>
+        <description>&lt;p&gt;Every now and then your web application does something so wild and unpredictable that it crashes the browser that you’re running it on. In order to create a better product for our users, we would need to log pertinent information every time our app crashes. Unfortunately there is no way to send a crash log before or during the crash due to the unpredictable nature of the crash and the browser’s web environment no longer working. The best thing to do is to send the logs after the crash. This post will go through a technique to detect when the user’s previous session has crashed so that we can perform the relevant logging actions.&lt;/p&gt;
+
+&lt;h2 id=&quot;preface&quot;&gt;Preface&lt;/h2&gt;
+
+&lt;p&gt;Currently I’ve only been able to support this technique on Google’s Chrome and Mozilla’s Firefox browser. This technique takes advantage of these two browser’s support for restorable sessionStorage. The &lt;a href=&quot;https://wiki.whatwg.org/wiki/FAQ#What_is_the_WHATWG.3F&quot;&gt;WHATWG&lt;/a&gt; HTML spec currently describes sessionStorage to delete itself once the browser context ends but also makes a note that browsing contexts can continue to persist even after the browser is closed. This is useful if the browser chooses to save the session to reload it after the user closes the browser window or if the browser window crashes.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://html.spec.whatwg.org/multipage/webstorage.html#the-sessionstorage-attribute&quot;&gt;WHATWG spec on sessionStorage&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;simulating-the-crash&quot;&gt;Simulating the Crash&lt;/h2&gt;
+
+&lt;p&gt;First, we’ll have to find out ways to simulate crashes on our browsers. Fortunately for our sake, its pretty easy to do for both Mozilla and Chrome.&lt;/p&gt;
+
+&lt;h3 id=&quot;crashing-on-chrome&quot;&gt;Crashing on Chrome&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Go to the page you want to crash&lt;/li&gt;
+  &lt;li&gt;Paste this into your url ‘chrome://crash’&lt;/li&gt;
+  &lt;li&gt;Press Enter&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;That was pretty easy. This brings up Chrome’s ‘Aw Snap!’ error page which simulates as if an irrecoverable error actually happened on the previous site you were on.&lt;/p&gt;
+
+&lt;h3 id=&quot;crashing-on-firefox&quot;&gt;Crashing on Firefox&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Go to the page you want to crash&lt;/li&gt;
+  &lt;li&gt;Open your Task Manager on Windows or Activity Monitor on OSX&lt;/li&gt;
+  &lt;li&gt;Find your firefox process and end the process or force quit it&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Force stopping the processes trigger’s Firefox’s crash conditions and emulates a real crash scenario. Firefox should ask you to restore your previous tabs along with your previous session as well.&lt;/p&gt;
+
+&lt;h3 id=&quot;go-ahead-try-it&quot;&gt;Go ahead, try it!&lt;/h3&gt;
+
+&lt;p&gt;Now that we know how to crash this page, go ahead and try it! When you come back there should be an alert letting you know that you came back from a crash and at what time&lt;/p&gt;
+
+&lt;h2 id=&quot;acting-on-the-crash&quot;&gt;Acting on the Crash&lt;/h2&gt;
+
+&lt;p&gt;Now that we know how to crash the browsers we just need to place the code in.&lt;/p&gt;
+
+&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// Check if we&apos;re coming back from a crash&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;if &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;sessionStorage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;getItem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;good_exit&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;===&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;pending&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// We&apos;re coming back from a crash&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;alert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;You came back from a crash at &lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Date&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;());&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// Do your crash logging here&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// You can access any sessionStorage data from the crashed session&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Set the good_exit flag to pending when the page loads&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;sessionStorage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;setItem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;good_exit&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;pending&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Set up listeners for successful exits&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;window&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;addEventListener&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;beforeunload&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;sessionStorage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;setItem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;good_exit&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The code above is checking if the user successfully closes, refreshes, or browses to another page by applying a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;good_exit = true&lt;/code&gt; flag in our sessionStorage. When the user successfully loads the page, the ‘good_exit’ flag will be set to ‘pending’ as we’re not sure if the user will successfully exit from this session. If the user unsuccessfully closes, refreshes, or browsers to another page and manages to crash the browser, the ‘good_exit’ flag will not be changed to ‘true’ and will stay as ‘pending. Everytime the user loads the page we check whether they’re coming back from a crash. If they are, then we apply our crashalytics code.&lt;/p&gt;
+
+&lt;h2 id=&quot;things-to-do-after-a-crash&quot;&gt;Things to do after a crash&lt;/h2&gt;
+
+&lt;p&gt;Remember that your sessionStorage is saved and recovered so anything that your user was doing before the crash can be recovered. This means you can store the last visited url, the time that they visited your site, any actions they have taken on the page, anything that you can store in sessionStorage can be recovered.&lt;/p&gt;
+
+&lt;p&gt;Say for instance the last thing the user was doing before the crash was typing a very long response in a text box. You can save the contents of the text box every few seconds into sessionStorage so that you can reload it once the user comes back from the crash. Or if you just want some analytics on the last actions the user took you can create a sessionStorage item to log and trace the actions taken by the user by listening to clicks and key inputs on your document. When the visitor returns you can post that information back to your server so you have something to go on when trying to fix your buggy site. Or when a user comes back to your page you can directly ask them to submit a bug report about what they were doing before they crashed. Many native desktop programs already do something like this and now you too can bring this feature to your buggy web application!&lt;/p&gt;
+
+&lt;h2 id=&quot;caveats&quot;&gt;Caveats&lt;/h2&gt;
+
+&lt;p&gt;An already listed caveat is this may or may not currently work for Internet Explorer or Safari. I wasn’t able to reliable crash those browsers to test whether they bring back sessions after crashes. Another caveat is that since sessionStorage content isn’t shared between tabs, users will have to refresh or reload the same tab with the same sessionStorage in order for the crash logging code to execute. If users open a new tab to connect after a crash then there will be no record of there being a crash. It will act as if you started a new browser session. As you can see this method isn’t 100% reliable, but it does give options to cover some of your user base.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;tested on Chrome version 43.0.2357.81 and Firefox 38.0.5 on June 21, 2015&lt;/em&gt;&lt;/p&gt;
+</description>
+        <pubDate>Sun, 21 Jun 2015 01:00:00 +0000</pubDate>
+        <link>https://jasonjl.me/jasonjl.github.io/https://jasonjl.me/jasonjl.github.io//browser-crash/</link>
+        <guid isPermaLink="true">https://jasonjl.me/jasonjl.github.io/https://jasonjl.me/jasonjl.github.io//browser-crash/</guid>
+        
+        
+        <category>browsers,</category>
+        
+        <category>javascript,</category>
+        
+        <category>logging</category>
+        
+      </item>
+    
+      <item>
+        <title>Rendering List of Elements in React With JSX</title>
+        <description>&lt;p&gt;Understanding how JSX is processed can be slightly tricky to understand. Knowing when its appropriate to use JavaScript code and when to use HTML in your JSX can be very nuanced when writing React code. Understanding how the JSX will compile is critical in writing basic React that will render in predictable ways every time. This guide will go over the slightly tricky scenario of getting a list to render and how it can help us understand more about React and JSX.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Preface:&lt;/strong&gt; Unfortunately, the JSX code highlighting may not be perfect. Each JSX React code example is followed by the transformed version to JavaScript, followed by the actual rendered code in the page. Feel free to inspect the elements to get a better idea of how React renders your code.&lt;/p&gt;
+
+&lt;p&gt;You may have landed here because you tried to render a list in React and wondered why it didn’t work. You may have tried passing and rendering the list as a prop and wondered why your list is still all inline. You may feel this way if you came from an Angular background where rendering with ng-repeat was largely left to magic. React gives you a finer level of control that makes using it more easier to understand.&lt;/p&gt;
+
+&lt;p&gt;The following example shows what happens when simply rendering a list in React without any processing. Inspect the code and notice how all the elements are displayed in a single list item.&lt;/p&gt;
+
+&lt;h2 id=&quot;bad-example&quot;&gt;Bad Example&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;JSX&lt;/strong&gt;&lt;/p&gt;
+&lt;div class=&quot;language-jsx highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;SimpleList&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;React&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;createClass&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;render&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;ul&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;li&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;props&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;listItems&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;li&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;ul&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;Compiled to JavaScript&lt;/strong&gt;&lt;/p&gt;
+&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;SimpleList&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;React&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;createClass&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;render&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;React&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;createElement&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;ul&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;React&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;createElement&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;li&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;props&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;listItems&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;Rendered Result&lt;/strong&gt;
+The above example doesn’t cut it.&lt;/p&gt;
+
+&lt;p&gt;You may also have tried to individually pick out elements in the array and plant them in your render code. This would work, but its not very flexible. Notice how the second render call with the longer list is only able to display the first five elements.&lt;/p&gt;
+
+&lt;h2 id=&quot;bad-example-1&quot;&gt;Bad Example&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;JSX&lt;/strong&gt;&lt;/p&gt;
+&lt;div class=&quot;language-jsx highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;SimpleList&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;React&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;createClass&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;render&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;ul&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;li&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;props&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;listItems&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;li&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;li&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;props&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;listItems&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;li&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;li&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;props&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;listItems&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;li&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;li&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;props&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;listItems&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;li&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;li&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;props&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;listItems&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;li&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;ul&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;Compiled to JavaScript&lt;/strong&gt;&lt;/p&gt;
+&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;SimpleList&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;React&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;createClass&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;render&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;React&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;createElement&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;ul&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;React&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;createElement&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;li&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;props&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;listItems&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]),&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;React&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;createElement&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;li&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;props&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;listItems&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]),&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;React&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;createElement&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;li&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;props&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;listItems&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]),&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;React&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;createElement&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;li&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;props&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;listItems&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]),&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;React&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;createElement&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;li&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;props&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;listItems&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;Rendered Result&lt;/strong&gt;
+A good solution would be flexible to the amount of items in a list and would render with its own containing element in a repeating fashion. Notice how the following render function is able to accomodate arrays of all sizes. This is due to rendering in a list of React Elements created from the list of numbers coming in from the props.&lt;/p&gt;
+
+&lt;h2 id=&quot;good-example&quot;&gt;Good Example&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;JSX&lt;/strong&gt;&lt;/p&gt;
+&lt;div class=&quot;language-jsx highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;SimpleList&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;React&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;createClass&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;render&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;ul&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;si&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;props&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;listItems&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;listValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+          &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;li&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;listValue&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;li&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;;&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;ul&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;Compiled to JavaScript&lt;/strong&gt;&lt;/p&gt;
+&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;SimpleList&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;React&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;createClass&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;render&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;React&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;createElement&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;ul&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;props&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;listItems&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;listValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+          &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;React&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;createElement&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;li&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;listValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;Rendered Result&lt;/strong&gt;
+The solution above is flexible enough to accomodate as many or as little list items that comes from the props field.&lt;/p&gt;
+
+&lt;h2 id=&quot;lets-break-it-down-to-see-why-it-works&quot;&gt;Lets break it down to see why it works&lt;/h2&gt;
+
+&lt;p&gt;First each React class object needs to have a render function. Think of the render like a screen refresh. The render function is supposed to return a value or list of values (most commonly composed of React Elements) that will be drawn onto the screen. The render function is automatically called whenever the object’s state is signalled to change. States are outside the scope of this guide but you can read more about state &lt;a href=&quot;https://facebook.github.io/react/docs/tutorial.html#reactive-state&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Notice how HTML is plainly inserted into a JavaScript function. The JSX transformer/compiler will automatically detect HTML and React tags inside JavaScript and convert them to the equivalent JavaScript expression. If you would like to read more about the end result feel free to &lt;a href=&quot;https://facebook.github.io/react/jsx-compiler.html&quot;&gt;try out&lt;/a&gt; the compiler and &lt;a href=&quot;https://facebook.github.io/react/docs/jsx-in-depth.html&quot;&gt;read up&lt;/a&gt; on what it does to your tags.&lt;/p&gt;
+
+&lt;p&gt;Also take note of the curly brackets peppered through out the HTML tags. The brackets signify to the JSX transformer that there is actual JavaScript inside of it. Combining JSX and JavaScript together allows us to use the ease of HTML tagging and the logical power of JavaScript to create dynamic HTML templates right inside of our React code. In the case of the list example, note how we start with a containing &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;ul&amp;gt;…&amp;lt;/ul&amp;gt;&lt;/code&gt; block. This &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;/ul&amp;gt;&lt;/code&gt; block is then split with a pair of brackets that perform a &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map&quot;&gt;mapping&lt;/a&gt; to create and return a new list of React Elements &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;li&amp;gt;{listValue}&amp;lt;/li&amp;gt;&lt;/code&gt;. Also notice again how &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;{listValue}&lt;/code&gt; had to be surrounded again in brackets since its embedded within HTML elements. If you want to know more about what you can do with React Elements take a look &lt;a href=&quot;https://facebook.github.io/react/docs/top-level-api.html#react.createelement&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;The React renderer is actually quite flexible. You don’t necessarily have to feed it just Numbers or just React Elements but can mix and match all sorts of JavaScript objects. You can filter and parse the original objects in your list and use JavaScript logic to render a completely new list with dynamic React Elements. You can even plug in your own Custom React components in your render function as well, but you already knew that didn’t you. Truly understanding how your JSX code will be compiled to plain old JavaScript is the key to writing predictable React everytime.&lt;/p&gt;
+</description>
+        <pubDate>Sat, 18 Apr 2015 01:00:00 +0000</pubDate>
+        <link>https://jasonjl.me/jasonjl.github.io/https://jasonjl.me/jasonjl.github.io//react_list_rendering/</link>
+        <guid isPermaLink="true">https://jasonjl.me/jasonjl.github.io/https://jasonjl.me/jasonjl.github.io//react_list_rendering/</guid>
+        
+        
+        <category>guide,</category>
+        
+        <category>javascript,</category>
+        
+        <category>jsx,</category>
+        
+        <category>react</category>
+        
+      </item>
+    
+      <item>
+        <title>A Review of Hired</title>
+        <description>&lt;p&gt;After gaining back my technical skills and feeling confident in interviewing again I decided to become useful and jump into the endless sea of available technical jobs. Of course I applied to the typical big engineering companies and some other smaller ones but sometimes you just need to know what else is out there. I think &lt;a href=&quot;https://hired.com/&quot;&gt;Hired&lt;/a&gt; fills this void perfectly.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;preface:&lt;/strong&gt; It seems like this is the second time I’ve plugged Hired, I ensure you reader that I am not in their books.&lt;/p&gt;
+
+&lt;p&gt;Hired is just like a typical job hunting site, except this time the roles are reversed; the recruiters hunt while you respond. Pretty crazy concept right? Instead of having you search for positions through Monster, Dice, or other job listing sites, you publicly advertise yourself and your abilities and the companies come to you.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-story&quot;&gt;The Story&lt;/h2&gt;
+
+&lt;p&gt;I’ve been around six to seven months unemployed. During that time I’ve been working on personal projects to familiarize myself with the current trends in web development. I finally felt that I was ready to contribute with my new-found skills and was ready to go on the hunt. I had some companies in mind, the typical engineering bigs, Amazon, Microsoft, Facebook so on and a few smaller ones. I also wanted to see what else was out there and decided to try out Hired.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-rundown&quot;&gt;The Rundown&lt;/h2&gt;
+
+&lt;p&gt;I sign up, set up my profile, and list my skills and locations I want to work. In the same week I get a call from my ‘Talent Advocate’ to walk me through the whole process, the kind of work I’m looking for, and some advice on how to make my profile stand out to employers. It was essentially a recruiting phone screen that you can’t mess up. After the screen I fix up my profile a little, add a nice picture, list out my GitHub projects, and make my location preference much more specific. My Advocate then places a one-liner describing me and my work that companies will view when browsing over my profile. After that I’m ready to roll and submit my profile to be available for the next ‘auction’ which starts every Sunday each week and lasts for two weeks.&lt;/p&gt;
+
+&lt;h3 id=&quot;hired-roadmap&quot;&gt;Hired Roadmap&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Fill out your profile&lt;/li&gt;
+  &lt;li&gt;Get a call from a ‘Talent Advocate’ or Hired recruiter&lt;/li&gt;
+  &lt;li&gt;Fix up your profile&lt;/li&gt;
+  &lt;li&gt;Put it up for the next ‘auction’&lt;/li&gt;
+  &lt;li&gt;Wait for the ‘offers’ to roll in&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Now when Hired says candidates usually get 5-15 ‘offers’, they really just mean introductions but we knew that already right? In fact from my experience, the offered equity and salary and signing bonuses are still negotiable for the better or worse. These offers are just a way for companies to entice you so you can start talking. In fact Hired requires you to get back to each and every company that contacts you. You have the option of declining the offer outright, re-negotiating terms or clarifying job descriptions, or immediately set a phone interview right then and there. After the two weeks are over you’re free to continue communication with each of the contacted companies until you’re no longer considered or until you finally get your dream job.&lt;/p&gt;
+
+&lt;h2 id=&quot;things-i-liked&quot;&gt;Things I liked&lt;/h2&gt;
+
+&lt;h3 id=&quot;loads-of-responses&quot;&gt;Loads of responses&lt;/h3&gt;
+
+&lt;p&gt;The response rate is incredible. From my own personal searches, I’ve received less than 1/6th response per resume sent out. With Hired, I just create one profile and received 12 requests for interviews. That’s a 1200% return for 1 resume posted! If you’re looking just to see what’s out there, Hired will get you a solid returns on your time invested into the site.&lt;/p&gt;
+
+&lt;h3 id=&quot;very-concentrated-very-quick&quot;&gt;Very Concentrated, Very Quick&lt;/h3&gt;
+
+&lt;p&gt;I like how there’s a very defined start and end time on responses. It forces each company that’s gunning for your heart to get a fair start and lines up each company’s interview schedules together which allows you to have a more organized schedule. It also benefits you in that when multiple companies end up giving you job offers, you can use each offer as leverage to see which one loves you more.&lt;/p&gt;
+
+&lt;h2 id=&quot;things-i-dont-like&quot;&gt;Things I don’t like&lt;/h2&gt;
+
+&lt;h3 id=&quot;youre-still-going-through-the-initial-recruiting-hoops&quot;&gt;You’re still going through the initial recruiting hoops&lt;/h3&gt;
+
+&lt;p&gt;So this is what happens. Recruiters sit down Monday morning and browse Hired for the latest batch of candidates. They sift through and find some profiles where the skills and history seem to match the requirements of the job. They contact you to set up a call where they… have you… state your skills and history to see if you’re a good fit…&lt;/p&gt;
+
+&lt;p&gt;I don’t get it. The initial recruiting call seems highly unnecessary since a Hired profile gives way more information than a normal resume does. It also gives more information that a standard recruiting call will ever expose. I think this practice of screening the candidate is still done because internal company recruiting processes are slow to change and a concept like Hired which should make this step obsolete is too different from their traditional hiring process that they choose to leave this redundant step in.&lt;/p&gt;
+
+&lt;p&gt;I personally would rather talk directly to an engineer for the opening call but that was very rare.&lt;/p&gt;
+
+&lt;h3 id=&quot;talent-advocate-sets-up-your-one-liner-description&quot;&gt;Talent advocate sets up your one-liner description&lt;/h3&gt;
+
+&lt;p&gt;Your talent advocate will size you up with a one-liner description after your thirty minute introductory call. This description is the first thing recruiters will see when they see your name. I actually wanted to look for more Node.js and fullstack JavaScript opportunities, but my talent advocate boiled me down to ‘Frontend developer previously with Experian; led multiple teams and projects to success’. I didn’t realize until after the two weeks were over that this was how I was being advertised which kind of explained why I got so many offers for front-end lead positions even though this was something I wanted to shift away from.&lt;/p&gt;
+
+&lt;p&gt;It appears now that Hired encourages you to contact your Talent Advocate if you’re not happy with your description. I’d like to think my complaining about this made a difference haha..&lt;/p&gt;
+
+&lt;h3 id=&quot;most-of-the-positions-are-going-to-be-startups-from-sf&quot;&gt;Most of the positions are going to be startups from SF&lt;/h3&gt;
+
+&lt;p&gt;Home to all the hippest engineers, SF and Bay Area companies are begging for more talent. I originally wanted to look for positions all over the United States but my Advocate recommended I boil it down to three cities. I chose LA, SF, and Seattle. I got 1 response from LA, 1 response from Seattle, and 10 responses from SF. Out of those 12, 2 of those were large companies and the rest were Series A startups.&lt;/p&gt;
+
+&lt;p&gt;These kinds of results may change depending on the type of job you’re looking for but if you’re a front-end engineer or any web engineer, you’re going to be getting similar results.&lt;/p&gt;
+
+&lt;h2 id=&quot;all-in-all&quot;&gt;All in all..&lt;/h2&gt;
+
+&lt;p&gt;It’s a really good service. Its searching for jobs without actually putting in all the work of having to find them. Granted all the responses you’re going to get aren’t going to resonate with you and some companies that contact you sound like straight up scams but the quantity of offers definitely offset the few that aren’t quality.&lt;/p&gt;
+</description>
+        <pubDate>Sat, 11 Apr 2015 01:00:00 +0000</pubDate>
+        <link>https://jasonjl.me/jasonjl.github.io/https://jasonjl.me/jasonjl.github.io//hired_review/</link>
+        <guid isPermaLink="true">https://jasonjl.me/jasonjl.github.io/https://jasonjl.me/jasonjl.github.io//hired_review/</guid>
+        
+        
+        <category>review</category>
+        
+      </item>
+    
+      <item>
+        <title>Codewars, Leetcode, Hackerrank. Online Judges Reviews</title>
+        <description>&lt;p&gt;Sometimes the projects you work on just aren’t stimulating enough. Sometimes you need to fill your brain with as many programming problems as possible. Usually tackling a small sized project only requires a small set of challenges to solve while the rest of the time is spent tying the project together. When you need as many challenges to tackle in as short a time as possible you need online judges. This article is a review on the online judges, &lt;a href=&quot;http://www.codewars.com/&quot;&gt;Codewars&lt;/a&gt;, &lt;a href=&quot;https://leetcode.com/&quot;&gt;LeetCode&lt;/a&gt;, and &lt;a href=&quot;https://www.hackerrank.com/&quot;&gt;HackerRank&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;codewars&quot;&gt;Codewars&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://www.codewars.com/&quot;&gt;Codewars&lt;/a&gt; takes the concept of the ‘Code Kata’ and gamifies the exercises so programmers always have something to challenge themselves when they got a few minutes to spare. Challenges are usually short, ranging from minutes to a few hours. Most of the questions often have contexts associated with them so it always feels like you’re actually solving a potential real world problem rather using your tools as a programmer, even though the contexts are often fantastical in nature.&lt;/p&gt;
+
+&lt;h3 id=&quot;things-i-like&quot;&gt;Things I like&lt;/h3&gt;
+
+&lt;p&gt;There’s a clear progression that Codewars wants you to take. Challenges start from the fundamentals and rises slowly in difficulty so that you have a good basis of understanding before you move to the next level.&lt;/p&gt;
+
+&lt;p&gt;Solutions of all the other members are available to analyze after solving the problem. Finding out how other (more smarter) people solved the same exact problem allows you to gain insights into the gaps in your methodology. The solutions are bite sized so its easier to digest new programming features or new ways of organizing code that you’ve never considered before. I truly think that social programming is the way to get better at writing code and I think Codewars deserves a giant plus for this feature.&lt;/p&gt;
+
+&lt;h3 id=&quot;things-i-dont-like&quot;&gt;Things I don’t like&lt;/h3&gt;
+
+&lt;p&gt;The Java error messages are less than helpful. I’m not sure how they return exceptions when your code doesn’t compile, but often times the console is going to return an exception from the enclosing outer stack that executes the code meaning you don’t get any useful stack debugging information, you just know somethings wrong.&lt;/p&gt;
+
+&lt;p&gt;Each question has tags associated with them describing what methods of programming you’ll use to solve the problem. These tags often give a hint on what to do to solve the problem which is kind of a problem since people look at these tags as extra meta information to give them a lead. I often like to come into a problem blind and find out myself what to do in order to get to a solution.&lt;/p&gt;
+
+&lt;h3 id=&quot;overall&quot;&gt;Overall&lt;/h3&gt;
+
+&lt;p&gt;Overall I think it’s actually a really neat service. Like I said earlier, I’ve learned so much more about JavaScript than I ever would have if I were to just continue working on my own projects. I’m definitely going to use it again when I delve into Python.&lt;/p&gt;
+
+&lt;h2 id=&quot;leetcode-oj&quot;&gt;LeetCode OJ&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://leetcode.com/&quot;&gt;LeetCode OJ&lt;/a&gt; is all about the algorithms. There are no pretenses, you’re going to be solving very straightforward problems that have very defined lower bounds in terms of space and memory. These problems will often test cases on all edges of the spectrum and will only accept answers that meet the lowest bound limitation. Your preferred language is just a means to work around an algorithm. At the end of each problem, Leetcode ranks you up against your peers by how quickly your code executed.&lt;/p&gt;
+
+&lt;h3 id=&quot;things-i-like-1&quot;&gt;Things I like&lt;/h3&gt;
+
+&lt;p&gt;No muss no fuss, these questions ask you about algorithms and after enough exercises will hammer the common ways to solve them into your brain. I think this is a good second level after reading and solving the exercises to Crack the Coding Interview. There are tons more exercises here that touches on things that CTCI doesn’t which makes it a natural progression to the book.&lt;/p&gt;
+
+&lt;p&gt;The code editor is actually really good. Everything flows like a real professional code editor including quality of life improvements such as auto tab indentation, mass commenting, auto closing brackets, mass tab indentation, highlight bracketing, etc…&lt;/p&gt;
+
+&lt;p&gt;The questions are very direct. There are no fillers, no context. At first its a little ambiguous to know what values will be used to test your program, but after a while it becomes very obvious what kinds of edge case values Leetcode expects your program to process.&lt;/p&gt;
+
+&lt;h3 id=&quot;things-i-dont-like-1&quot;&gt;Things I don’t like&lt;/h3&gt;
+
+&lt;p&gt;Since the online judge only wants answers that are strictly the lowest bound in terms of space and runtime, it’ll often fail passing solutions that are not the most optimal. It will fail an acceptable solution of O(nlogn) if the lowest bound possible is O(n). Sometimes you think of the correct algorithm, but implement it in such a way that it still exceeds the time limit. It is ambiguous to know what exactly is the bit of code to optimize in order to pass the test.&lt;/p&gt;
+
+&lt;p&gt;The community seems more concerned with writing concise code rather than best practice code. Discussion solutions are often compressed to the point where its difficult to read.&lt;/p&gt;
+
+&lt;p&gt;I really wish they would allow us to see each user’s submitted code so we can see exactly what we need to do to get the most optimization out of our language of choice. I did not feel like I learned anything about runtime optimization since my code always landed in the middle in terms of speed compared to my peers.&lt;/p&gt;
+
+&lt;h3 id=&quot;overall-1&quot;&gt;Overall&lt;/h3&gt;
+
+&lt;p&gt;This site is great if you need some extra exercises to hone in on pure algorithm practice. I would not recommend it as a place to actually learn from 0% knowledge but more of a place if you’re looking for medium to advanced challenges. You have to be familiar with your language of choice as your language is just a tool you should be familiar with to solve a greater problem.&lt;/p&gt;
+
+&lt;h2 id=&quot;hackerrank&quot;&gt;HackerRank&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.hackerrank.com/&quot;&gt;HackerRank&lt;/a&gt; is site that focuses more on the competitive nature of programming. HackerRank encourages you to participate in its many ongoing week long challenges. They support a ton of languages cover a wide range of practice problems ranging from algorithms, functional programming, linux shell cmds, and even AI.&lt;/p&gt;
+
+&lt;h3 id=&quot;things-i-like-2&quot;&gt;Things I like&lt;/h3&gt;
+
+&lt;p&gt;Since each challenge requests you parse a text file, it actually gives you plenty of exercises in reading in a file, parsing it, and outputting it. I feel like this is something that’s overlooked by a lot of challenge sites so its nice to see a site that allows you to practice that skill.&lt;/p&gt;
+
+&lt;p&gt;Each challenge has very clearly defined variables. Sometimes it’s actually kind of annoying, but each challenge will let you know exactly how the text file will be formatted and exactly what it will be testing on.&lt;/p&gt;
+
+&lt;p&gt;There are a ton of active competitions going on at a time meaning you can always test your chops against other programmers.&lt;/p&gt;
+
+&lt;h3 id=&quot;things-i-dont-like-2&quot;&gt;Things I don’t like&lt;/h3&gt;
+
+&lt;p&gt;Its code editor is missing a lot of convenience features that the other code editors have. Sure it has code highlighting but other than that its very uncomfortable to use. The UI around the site is nice, but I feel like it has some work to do on its code editor.&lt;/p&gt;
+
+&lt;p&gt;Parsing a text file every time is kind of annoying. Some times you just want the values to be passed in as primitive data as if it would be used as a modular piece in a larger project. Since JavaScript doesn’t have a real file output stream (without node) it requests for you to use console.log() to output your answer, which is a small inconvenience.&lt;/p&gt;
+
+&lt;h3 id=&quot;overall-2&quot;&gt;Overall&lt;/h3&gt;
+
+&lt;p&gt;I’ve used this the least amount so I’m not yet decided on whether I like it or not. The challenges are appropriately challenging but the text editor is not very fun to use. Its less of a site to practice but more to compete. Some of you may view this as the same thing.&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusions&quot;&gt;Conclusions&lt;/h2&gt;
+
+&lt;p&gt;Just about doing any of these is a good natural progression in terms of interview preparation and to generally be a better programmer. All three of these sites and many more like it definitely can only help since you’ll be exposed to a wider range of problems you never even knew existed. Of course, nothing truly beats the experience of working on a truly challenging real project but when those are few and far in between, then these online judges got you covered.&lt;/p&gt;
+</description>
+        <pubDate>Mon, 30 Mar 2015 00:00:00 +0000</pubDate>
+        <link>https://jasonjl.me/jasonjl.github.io/https://jasonjl.me/jasonjl.github.io//online-judge/</link>
+        <guid isPermaLink="true">https://jasonjl.me/jasonjl.github.io/https://jasonjl.me/jasonjl.github.io//online-judge/</guid>
+        
+        <category>coding</category>
+        
+        <category>practice</category>
+        
+        <category>algorithms</category>
+        
+        <category>codewars</category>
+        
+        <category>leetcode</category>
+        
+        <category>hackerrank</category>
+        
+        
+        <category>programming</category>
+        
+      </item>
+    
+      <item>
+        <title>Things I Learned From Failing Technical Interviews</title>
+        <description>&lt;p&gt;I just had a long month of technical phone interviews from numerous companies that I got from the technical job hunting service &lt;a href=&quot;http://hired.com&quot;&gt;Hired&lt;/a&gt;. Its funny, you don’t truly learn until you’ve actually made mistakes in a scenario that actually matters. With that being said, I think I learned a ton of lessons from getting rejected from many technical interviews and I want to share my insights with you!&lt;/p&gt;
+
+&lt;h2 id=&quot;preface&quot;&gt;preface!&lt;/h2&gt;
+
+&lt;p&gt;I have tried to remain objective in my learnings but there may be hints of bitterness here and there on the account of, you know, failing these technical interviews.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-only-winning-move-is-not-to-play&quot;&gt;The only winning move is not to play&lt;/h2&gt;
+
+&lt;p&gt;Interviewing is a losing game. All applicants are losing, its just a matter of losing the least. From the time you say ‘Hello’ you’re already losing. Your interviewers are expecting you to finish a task in a certain amount of time and once finished will compare your time and performance to that of your peers. They are not looking for things that will impress them but rather for things that will reduce their opinion of you. There is no way to ‘win’ an interview, only a way to lose the least. Say too many things that rub the interviewer the wrong way and you’re out of the race.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-odds-are-stacked-against-you&quot;&gt;The odds are stacked against you&lt;/h2&gt;
+
+&lt;p&gt;A typical technical interview path usually involves five or more gatekeepers you have to pass. You usually have to impress each of the following people in order to advance to the next level&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;non technical Company Recruiter&lt;/li&gt;
+  &lt;li&gt;technical phone interviewer #1&lt;/li&gt;
+  &lt;li&gt;technical phone interviewer #2&lt;/li&gt;
+  &lt;li&gt;CTO/manager&lt;/li&gt;
+  &lt;li&gt;Take home assignment&lt;/li&gt;
+  &lt;li&gt;onsite interviewer #1&lt;/li&gt;
+  &lt;li&gt;onsite interviewer #2&lt;/li&gt;
+  &lt;li&gt;onsite interviewer #3&lt;/li&gt;
+  &lt;li&gt;onsite interviewer #4&lt;/li&gt;
+  &lt;li&gt;onsite interviewer #5&lt;/li&gt;
+  &lt;li&gt;onsite interviewer #6&lt;/li&gt;
+  &lt;li&gt;day two onsite interviewer #1&lt;/li&gt;
+  &lt;li&gt;day two onsite interviewer #2&lt;/li&gt;
+  &lt;li&gt;day two onsite interviewer #3&lt;/li&gt;
+  &lt;li&gt;day two onsite interviewer #4&lt;/li&gt;
+  &lt;li&gt;day two onsite interviewer #5&lt;/li&gt;
+  &lt;li&gt;day two onsite interviewer #6&lt;/li&gt;
+  &lt;li&gt;Congrats you got the job!&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;em&gt;The amount of interviewers has been expanded to indicate a nightmare interviewing scenario. Your interviews will probably not look like this, but is not outside the realm of impossibility&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Remember earlier when I said that technical interviews is a losing game? Imagine a scenario where you are actually a really good engineer (unlike me haha!), and you have a 99% chance of passing through each gatekeeper. This means that you ultimately have an 84% (.99^17) chance of passing through each gatekeeper and landing that job. The odds are good, but not guaranteed. Now imagine if you’re a good engineer but you’re no Linus Torvalds and you have a 95% chance of making it through each phase. That means you ultimately have a 41% (.95^17) chance of impressing everyone and getting the job of your dreams. If you’re not within the top echelons of programming you might as well start practicing burger flipping because the only thing you’ll be engineering is the perfect .99c cheeseburger at McDonalds. Okay, that was mean, but my point is, you can be very good at what you do and still be rejected because of an interview with a gatekeeper going very wrong, and that’s okay!&lt;/p&gt;
+
+&lt;h2 id=&quot;fail-fast-try-try-again&quot;&gt;Fail Fast. Try, Try Again&lt;/h2&gt;
+
+&lt;p&gt;Its okay to fail at these interviews. Failing a phone screen doesn’t say anything about your character or intelligence. Say you have a 40% chance of getting past all the gatekeepers and landing a job. The probability of you landing that job at the first company you interview at is 40%, 1 - P(successive failures). The probability of you landing that job after two seperate company interviews is at 64%. The probability of landing the job after three seperate company interviews is 79%! Okay lets say you’re a average engineer and you have an 80% chance of making it through each interview and there’s 8 interviews to get through. We first calculate the probability of you getting past each gatekeeper and landing the job (.80^8) 16%. Ouch, not good. You have a 84% chance at failing to get a job at a company with 8 gatekeepers. Now we figure out if you only apply to companies that all use 8 gatekeepers in their employee process then you will have a 16% (1 - .84^1) chance getting in on your first try 30% (1 - .84^2) chance on your second, 41% (1 - .84^3) on your third , 51% (1 - .84^4)on your fourth okay you get the picture. Apply more to different companies and the odds start turning in your favor. You will make it. The thing is, is that interviews are not all cut and dry like a math problem. There’s a lot of things you can’t control such as the amount of interview gatekeepers and your probability of passing through each interview. While we can’t ever get our acceptance probability to 100%, we can definitely do some things to improve those odds.&lt;/p&gt;
+
+&lt;h2 id=&quot;do-not-be-yourself&quot;&gt;Do not be yourself&lt;/h2&gt;
+
+&lt;p&gt;Its kind of psychopathic, but do not be yourself. Be prepared to take on a persona of the most attractice engineer that has ever graced this planet. Never willingly give away anything that might expose your humanity. Technical interviews are like a reverse &lt;a href=&quot;http://en.wikipedia.org/wiki/Turing_test&quot;&gt;Turing Test&lt;/a&gt;. Instead of tricking the user that you the are human, you have to trick the interviewer that you are in fact a robot. You do not make syntax errors, you do not need to consult apis, you do not need a calculator, you make informed decisions on every aspect of engineering. Working for a company is not an opportunity to research or make mistakes, companies don’t want to hear that, they don’t want to pay you for that. Its an opportunity for the company to buy you to offload work on the current team much like how they may buy an additional server for their load balancer. You are viewed as an additional core to their server cluster and you will act that way. You are not valued for your ability to learn quickly or your knowledge of all these cute esoteric language features. You are valued on how much raw computing you can do for the team. After you get the job feel free to be yourself and share all those cute little quirks about your favorite dead language, but until then, you must give off the persona that you are perfect.&lt;/p&gt;
+
+&lt;h2 id=&quot;do-not-panic&quot;&gt;Do not panic&lt;/h2&gt;
+
+&lt;p&gt;We are not perfect. Nobody is. We are flawed as human beings. We are not a compiler. We are not an interpreter. We are not a server core. We do not know every computer science principle, algorithm, strategy, pattern, data struct, language api, language feature. There is so much we don’t know, and that’s okay. If you don’t know something and a gatekeeper deems you unworthy, so what. Who cares, you failed, move on. Its almost a guarantee that you will be asked something you don’t know and even after an hour of thinking about it and problem solving around it you still won’t know. It happens. The important thing is to not panic. You don’t think well, or even think at all when you’re panicking. Stay calm, stay cool, don’t look at the clock, don’t freak out. You will get questions you don’t know the answer to, you will feel like an idiot after hours of interviews, you will realize your ignorance. Its cool, it happens, just make sure you’re the calmest idiot in the room. Interviewers interview tons of people that don’t know the answer to their question. They ultimately want to see if you can figure it out in less than an hour but do so by being calm and collected. Don’t give the gatekeeper more ammunition to not let you move on to the next level by appearing hysterical.&lt;/p&gt;
+
+&lt;h2 id=&quot;do-not-talk&quot;&gt;Do not talk&lt;/h2&gt;
+
+&lt;p&gt;Do not talk too much that is. Say you’re asked about a subject that you know truckloads about. Do not drone on and on and on hoping to impress your interviewer. They probably don’t care. Remember, they are only looking for things to dock points off of and talking too much is actually a negative. Give the general answer, then ask if you can go further in depth. Every single technical interview help book/guide recommends to keep talking during your interview because your interviewer doesn’t know if you’re thinking or if you’re just stuck. This doesn’t mean talk all the time. Its incredibly difficult to blurt out a stream of consciousness and think at the same time. Take the time to close the yap and think. Let your interviewer know you’re going to think for a little bit and actually do it.&lt;/p&gt;
+
+&lt;h2 id=&quot;and-lastly-culture-fit&quot;&gt;And Lastly, Culture Fit&lt;/h2&gt;
+
+&lt;p&gt;One of the most disparaging reads I’ve read was about an interviewer that was gunning for Google. If you haven’t read this blog, take a look at some of the &lt;a href=&quot;http://iwillgetthatjobatgoogle.tumblr.com/archive&quot;&gt;articles&lt;/a&gt;. This person is dedicated, has a goal, and a company in mind, seems pretty intelligent and very motivated. &lt;a href=&quot;http://iwillgetthatjobatgoogle.tumblr.com/post/19790649528/unfortunately&quot;&gt;Unfortunately&lt;/a&gt; about four months into the blog creation and after ~120 articles about programming and computer science concepts, he does not make it. Even after answering all the questions correctly he was not offered the position(granted, there is no way to validate this other than taking his word for it). Even if you are Steve Wozniak, Bill Gates, Linus Torvalds, Tim Berners-Lee, or Al Gore, sometimes they will reject you just because you didn’t gel with one of the gatekeepers. Maybe the gatekeeper was threatened by your intelligence, your smile, your dashing good looks, your charming voice, your chiseled chin, your flowing hair, whatever the case sometimes you get denied because you said, wrote, or did the wrong thing that may or may not be related to programming. It sucks, it happens, move on.&lt;/p&gt;
+
+&lt;p&gt;A way to get past this culture fit criteria is to be legitimately excited for the produce the company works on. Remind the interviewer before and after the interview about how excited you are about the product by asking questions about the product. How does it work, who builds it, who decides what goes in it? And if you aren’t actually interested in the product, then feign interest. ‘Wow creating A/B testing for ancient email web app to serve ads to a demographic that’s age 50+ sounds like the opportunity of a lifetime!’.&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;Be cool, remain positive, keep trying.&lt;/p&gt;
+</description>
+        <pubDate>Wed, 11 Mar 2015 01:00:00 +0000</pubDate>
+        <link>https://jasonjl.me/jasonjl.github.io/https://jasonjl.me/jasonjl.github.io//things-i-learned-from-failing-all-my-technical-phone-interviews/</link>
+        <guid isPermaLink="true">https://jasonjl.me/jasonjl.github.io/https://jasonjl.me/jasonjl.github.io//things-i-learned-from-failing-all-my-technical-phone-interviews/</guid>
+        
+        
+        <category>career,</category>
+        
+        <category>programming,</category>
+        
+        <category>interviews</category>
+        
+      </item>
+    
+      <item>
+        <title>JavaScript Inheritance</title>
+        <description>&lt;p&gt;As you may already know, Javascript has an interesting inheritance pattern called prototypal inheritance. You too can start using prototyping powers of Javascript with this one weird trick found by an Orange County mom. James Gosling creator of Java hates it!&lt;/p&gt;
+
+&lt;p&gt;Prototypal inheritance is similar to classical language’s concept of extending. It has some of the same concepts of subclassing such as inheriting parent fields, overriding, and creating new fields. Here’s a small example of how to subclass a JavaScript class.&lt;/p&gt;
+
+&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// Parent class&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Parent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;sayHello&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;Hello, I&apos;m &lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Child class&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Child&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;age&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;Parent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Call parent constructor&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;age&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;age&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Set up inheritance&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;Child&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;prototype&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Object&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;create&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Parent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;prototype&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;Child&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;prototype&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;constructor&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Child&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Override parent method&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;Child&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;prototype&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;sayHello&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;Hi, I&apos;m &lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt; and I&apos;m &lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;age&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt; years old&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Add new method&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;Child&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;prototype&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;sayAge&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;I am &lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;age&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt; years old&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This is the basic structure. Each function has a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;prototype&lt;/code&gt; property. This &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;prototype&lt;/code&gt; field is an object that is applied to all objects created from that function using the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;new&lt;/code&gt; keyword. Setting the prototype of the Child class to that of the Parent class will create a prototype chain which would then allow the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;instanceof&lt;/code&gt; feature to work. The Child class would also borrow any attributes it didn’t have that the Parent object would supply. Deleting overriden attributes in the Child class would revert back to use the assigned Parent’s attributes.&lt;/p&gt;
+
+&lt;p&gt;Prototypal inheritance in JavaScript is slightly more flexible than in a classical inheritance pattern due to the ability to extend Parent functionality without the Child knowing about it. Its not needed in a class signature but rather a simple assignment to Child’s prototype attribute. Its also possible to selectively choose which attributes to inherit from the parent. Not all public attributes need to be in the prototype object before assigning it to the Child.&lt;/p&gt;
+
+&lt;p&gt;Javascript inheritance is definitely not as straightforward as Java’s but there are ways to get the job done.&lt;/p&gt;
+</description>
+        <pubDate>Thu, 12 Feb 2015 01:00:00 +0000</pubDate>
+        <link>https://jasonjl.me/jasonjl.github.io/https://jasonjl.me/jasonjl.github.io//javascript-inheritance/</link>
+        <guid isPermaLink="true">https://jasonjl.me/jasonjl.github.io/https://jasonjl.me/jasonjl.github.io//javascript-inheritance/</guid>
+        
+        
+        <category>javascript,</category>
+        
+        <category>programming,</category>
+        
+        <category>inheritance</category>
+        
+      </item>
+    
+      <item>
+        <title>How Much Stuff Can You Fit in Memory?</title>
+        <description>&lt;p&gt;So you’re given a limit on the amount of random access memory your program can use, how much stuff (ints, chars, booleans, bytes) can you cache in there before having to store it in physical media?&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Exponent Form&lt;/th&gt;
+      &lt;th&gt;Exact Value&lt;/th&gt;
+      &lt;th&gt;Approx Value&lt;/th&gt;
+      &lt;th&gt;Bytes&lt;/th&gt;
+      &lt;th&gt;bits (Bytes * 8)&lt;/th&gt;
+      &lt;th&gt;ints (Bytes / 4)&lt;/th&gt;
+      &lt;th&gt;chars (Bytes / 2)&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;2^0&lt;/td&gt;
+      &lt;td&gt;1&lt;/td&gt;
+      &lt;td&gt;1B&lt;/td&gt;
+      &lt;td&gt;8b&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;2^1&lt;/td&gt;
+      &lt;td&gt;2&lt;/td&gt;
+      &lt;td&gt;2B&lt;/td&gt;
+      &lt;td&gt;16b&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt;1 char&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;2^2&lt;/td&gt;
+      &lt;td&gt;4&lt;/td&gt;
+      &lt;td&gt;4B&lt;/td&gt;
+      &lt;td&gt;32b&lt;/td&gt;
+      &lt;td&gt;1 int&lt;/td&gt;
+      &lt;td&gt;2 chars&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;2^10&lt;/td&gt;
+      &lt;td&gt;1024&lt;/td&gt;
+      &lt;td&gt;1 thousand&lt;/td&gt;
+      &lt;td&gt;1KB&lt;/td&gt;
+      &lt;td&gt;8Kb&lt;/td&gt;
+      &lt;td&gt;~250 ints&lt;/td&gt;
+      &lt;td&gt;~500 chars&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;2^16&lt;/td&gt;
+      &lt;td&gt;65,536&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt;64KB&lt;/td&gt;
+      &lt;td&gt;512Kb&lt;/td&gt;
+      &lt;td&gt;16K ints&lt;/td&gt;
+      &lt;td&gt;32K chars&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;2^20&lt;/td&gt;
+      &lt;td&gt;1,048,576&lt;/td&gt;
+      &lt;td&gt;1 million&lt;/td&gt;
+      &lt;td&gt;1MB&lt;/td&gt;
+      &lt;td&gt;8Mb&lt;/td&gt;
+      &lt;td&gt;250K ints&lt;/td&gt;
+      &lt;td&gt;500K chars&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;2^30&lt;/td&gt;
+      &lt;td&gt;1,073,741,824&lt;/td&gt;
+      &lt;td&gt;1 billion&lt;/td&gt;
+      &lt;td&gt;1GB&lt;/td&gt;
+      &lt;td&gt;8Gb&lt;/td&gt;
+      &lt;td&gt;250M ints&lt;/td&gt;
+      &lt;td&gt;500M chars&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;2^32&lt;/td&gt;
+      &lt;td&gt;4,294,967,296&lt;/td&gt;
+      &lt;td&gt;4 billion&lt;/td&gt;
+      &lt;td&gt;4GB&lt;/td&gt;
+      &lt;td&gt;32Gb&lt;/td&gt;
+      &lt;td&gt;1G ints&lt;/td&gt;
+      &lt;td&gt;2G chars&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;2^40&lt;/td&gt;
+      &lt;td&gt;1,099,511,627,776&lt;/td&gt;
+      &lt;td&gt;1 trillion&lt;/td&gt;
+      &lt;td&gt;1TB&lt;/td&gt;
+      &lt;td&gt;8Tb&lt;/td&gt;
+      &lt;td&gt;250G ints&lt;/td&gt;
+      &lt;td&gt;500G chars&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h2 id=&quot;in-case-if-you-forgot&quot;&gt;In case if you forgot…&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Data types are represented by bits&lt;/li&gt;
+  &lt;li&gt;8 bits make a byte&lt;/li&gt;
+  &lt;li&gt;1 byte (or 8 bits) make a boolean&lt;/li&gt;
+  &lt;li&gt;2 bytes (or 16 bits) make a char&lt;/li&gt;
+  &lt;li&gt;4 bytes (or 32 bits) make an int&lt;/li&gt;
+  &lt;li&gt;8 bytes (or 64 bits) make a long [this is not shown in the chart]&lt;/li&gt;
+  &lt;li&gt;There are a total of 2^16 (~65k) character representation in Java&lt;/li&gt;
+  &lt;li&gt;There are a total of 2^32 (~4 billion) int representation in Java&lt;/li&gt;
+  &lt;li&gt;Each character and integer can be represented through hex&lt;/li&gt;
+  &lt;li&gt;\u0000, \uFFFF represent characters where each character represents a byte&lt;/li&gt;
+  &lt;li&gt;0x00000000, 0xFFFFFFFF represent integers where each character represents a byte&lt;/li&gt;
+  &lt;li&gt;Each 2^(10*n) breaks another thousand barrier&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;So say you have N amount of bytes to work with. If we want to know how many ints we can fit in there, we take N/4 since each integer uses four bytes.&lt;/p&gt;
+
+&lt;p&gt;Say we want to fit all integers into an array in memory. How much memory to do we need? we take all the integers (2^32) then multiply it by 4 since each integer is represented by four bytes. We would need roughly 16GBytes of memory to put all representable integers into an array&lt;/p&gt;
+
+&lt;p&gt;The conversions are for the most part simple, it just requires careful calculation around big numbers.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;note: all primitive types are based on the Java language. Table is an extension of Gayle Laakmann Mcdowell’s Powers of 2 in &lt;a href=&quot;http://www.careercup.com/book&quot;&gt;Crack the Coding Interview 5th edition&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+</description>
+        <pubDate>Wed, 04 Feb 2015 01:00:00 +0000</pubDate>
+        <link>https://jasonjl.me/jasonjl.github.io/https://jasonjl.me/jasonjl.github.io//how-much-stuff-can-you-fit-in-memory/</link>
+        <guid isPermaLink="true">https://jasonjl.me/jasonjl.github.io/https://jasonjl.me/jasonjl.github.io//how-much-stuff-can-you-fit-in-memory/</guid>
+        
+        
+        <category>programming,</category>
+        
+        <category>memory,</category>
+        
+        <category>computer-science</category>
+        
+      </item>
+    
+      <item>
+        <title>6.82 Visualizer Postmortem</title>
+        <description>&lt;p&gt;&lt;a href=&quot;http://jasonjl.me/682Visualizer&quot;&gt;Website&lt;/a&gt; &lt;br /&gt;
+&lt;a href=&quot;https://github.com/lee-jason/682Visualizer&quot;&gt;Source code&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;6.82 Visualizer is a gold and experience data visualizer (grapher) for the game Dota 2. There was a controversial update to the game where the game would give the losing team drastic advantages so that they would be able to catch up to the leader. The changes are difficult to imagine due to the amount of variables so this program was created to show the data on how much the game had changed.&lt;/p&gt;
+
+&lt;p&gt;For those unfamiliar to the game of Dota, there are two teams of five that duke it out against each other to ultimately destroy their opponents base. Just like a real war, the way for a team to gain an advantage is to have more money, that’s essentially what Dota’s gold and experience is. Many members in the community were worried that the change to give the poorer team a boost to their economy would change their game for the worse. Many who were vocal about this had personal anecdotes but very few had the hard data. I sought to provide the community with the hard facts in an easy to view format of how the experience and gold were exactly affected so that we could see clearly just how much it altered the game.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-backend&quot;&gt;The Backend&lt;/h2&gt;
+
+&lt;p&gt;Backend? What backend? There actually is no backend to this site. The entire application is self-contained in the html and js file. The page is served through GitHub’s project pages much like this blog you’re reading.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-frontend&quot;&gt;The Frontend&lt;/h2&gt;
+
+&lt;p&gt;The front end was built using a charting library &lt;a href=&quot;http://www.chartjs.org/&quot;&gt;chart.js&lt;/a&gt; as well as &lt;a href=&quot;https://angularjs.org/&quot;&gt;angular.js&lt;/a&gt; for the data binding. In the angular file, I have one controller for the form that maintains all the adjustable data. I knew that angular would be a good fit for this project since it very easily binds changeable data to the view. I also created a ‘chart’ directive attribute tag. This chart directive contains code to initialize whatever element it was inserted into to become a chart. And finally I had one factory that contained all the formulas for calculating the data. I tried using as much as angular offered in intelligently splitting up the tasks of the site.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-good-the-bad&quot;&gt;The good, the bad&lt;/h2&gt;
+
+&lt;p&gt;This is actually the first site I made that was incredibly well received. Unlike my other sites, marketing this one was no problem. I posted it once on reddit/r/dota2 where it quickly rose through the ranks with nothing but positive praise. I felt very alive after receiving the first bits of feedback. I quickly continued to work after the initial release creating more graphs, more analysis, preset configurations, sharable configurations, layout changes (you can actually see the &lt;a href=&quot;https://github.com/lee-jason/682Visualizer/commits/gh-pages&quot;&gt;history here&lt;/a&gt;). I keep realizing that community feedback really drives me forward and motivates me to a degree that I can’t find anywhere else. Community figures were tweeting about my site, forums and fan pages in China, Germany and Russia were referring to my page, the page was being shared organically through Twitter and Facebook. It was actually quite amazing for me. I’m really proud of the fact that I was finally first to market in something. Usually most of my ideas are imitations or alterations on an already existing idea, but this time I got lucky.&lt;/p&gt;
+
+&lt;p&gt;That’s all well and good but of course there’s some bad. The bad is that the page is not optimized in a degree that I would be proud of. Granted, the application is very JavaScript heavy in the amount of calculation and redraws required from both the charting library and angular but playing with the sliders produces choppy animation. Optimizing that page to for its redraws to be at 60 frames per second was not my highest priority but it would be a good assignment to bury myself in (later). I’m also a little ashamed that I wasn’t able to produce a proper mobile/tablet view. According to Google Analytics, about 10-15% of hits were coming in from tablets which is expected. I anticipated a mobile design view would have taken too much effort for it to be worth it. I could only have imagined a site redesign with unique scripts to support a program with this many charts, knobs, and buttons.&lt;/p&gt;
+
+&lt;p&gt;Well there you have it. Although this site might not be useful to you random reader but it definitely should be useful to the Dota 2 enthusiast.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 27 Jan 2015 01:00:00 +0000</pubDate>
+        <link>https://jasonjl.me/jasonjl.github.io/https://jasonjl.me/jasonjl.github.io//6-dot-82-visualizer-postmortem/</link>
+        <guid isPermaLink="true">https://jasonjl.me/jasonjl.github.io/https://jasonjl.me/jasonjl.github.io//6-dot-82-visualizer-postmortem/</guid>
+        
+        
+        <category>programming,</category>
+        
+        <category>web-development,</category>
+        
+        <category>dota2,</category>
+        
+        <category>angular,</category>
+        
+        <category>javascript</category>
+        
+      </item>
+    
+  </channel>
+</rss>
