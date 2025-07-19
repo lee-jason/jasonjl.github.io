@@ -1,4 +1,9 @@
+include .env
+export
+
 dev:
+	bundle install
+	aws s3 sync ./assets s3://${AWS_S3_ASSETS_BUCKET} --acl public-read
 	bundle exec jekyll serve
 
 spellcheck s:

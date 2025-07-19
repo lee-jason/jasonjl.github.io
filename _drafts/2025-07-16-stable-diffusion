@@ -37,3 +37,22 @@ Scheduler strategy should be paired with the amount of training steps done for a
 -- Diffusion model trained on 1000 steps should pick a quadratic scheduler to jump massively in the beginning then fine tune at the end.
 
 
+- Stable diffusion video
+video is kind of similar but we start with a single frame, and extrapolate the next ~30 frames from the single frame.
+Each subsequent frame is stable diffused from static and made whole at the same time given the source frame
+Because the model is predicting what the next 30 frames look like after the given first frame in one bundle. This is how temporal and physics context is preserved (a ball bouncing will go up and down) because its been trained on that whole snippet of video.
+
+Each frame, can look back and forward and the previous / forward frames to also influence how it should behave (a ball falling down rather than up, should continue to fall down rather than switch direction)
+
+video diffusion also goes through the timestep process where a scheduler walks through timesteps to further clarify the video chunk for each step.
+
+-- U-net processing
+the stable diffusion process to create a random image for each frame
+
+-- Temporal attention process
+Adjustments to the generated in process frame to give temporal coherence to the scene (physics, [ball bouncing])
+For every frame x, given the neighbor frames of x-2, x-1, x+1, x+2 what should the frame x be interpolated as?
+For every frame.
+
+
+

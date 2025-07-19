@@ -11,7 +11,9 @@ github_username: lee-jason
 markdown: kramdown
 permalink: ":title/"
 highlighter: rouge
-plugins: [jekyll-paginate]
+plugins: 
+  - jekyll-paginate
+  - jekyll-dotenv
 
 # Pagination
 paginate: 20

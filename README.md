@@ -18,7 +18,17 @@ gem install jekyll jekyll-paginate
 ```
 
 Create posts in `_posts` prefixed with date
-Push to github repo, will auto deploy under gh-pages branch
+
+### Deploying assets
+
+
+
+## Deployment
+on `main` branch \
+`git push`
+
+Github will automatically deploy transpiled jekyll page to the `gh-pages` branch
+Note: Enable github actions on the repo.
 
 
 ## Conventions

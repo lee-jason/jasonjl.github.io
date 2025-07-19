@@ -52,7 +52,7 @@ layout: default
             <aside class="dates">{{ post.date | date: "%b %d" }}</aside>
             {{ post.title }}
             {% if post.image %}
-            <img src="{{ site.baseurl }}/assets/posts/{{ post.slug }}/{{ post.image }}" alt="{{ include.description }}" width="{{ include.image_width | default: "" }}"/>
+            <img src="{{ site.env.AWS_S3_ASSETS_HOST }}/posts/{{ post.slug }}/{{ post.image }}" alt="{{ include.description }}" width="{{ include.image_width | default: "" }}"/>
             {% endif %}
             <h2>{{ post.description }}</h2>
           </a>
