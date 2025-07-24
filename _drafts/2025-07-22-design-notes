@@ -1,0 +1,38 @@
+
+Design components
+- Client
+- DNS (geolocation based ip resolution)
+- Auth service (Oauth)
+- Load balancer (ALB) / 100-500krps
+-- When to use an ALB vs a NLB
+- Application Server / 1k rps
+-- Horizontally scaled in different regions
+- Web Server / 100k rps
+- Queues (Redis, RMQ, Kafka) 100k rps
+-- Dead letter queue
+- Async workers / 1krps
+- DB (Postgres) / 10-50k rps
+-- OLTP, OLAP, KV document, graph, rdbms, search documents, ...
+-- Single write, multi read. Sharded writes.
+-- strong consistency, eventual consistency, weak consistency
+-- Read replicas placed in different regions
+- caches (CDN)
+- NAT gateway (internal services making requests to outside internet)
+
+
+Answering Design
+- Functional Requirements
+- Users and stories
+- API
+- Data modeling
+- Services
+- 
+
+Answering OO
+- Function Requirements
+- Users and stories
+- Entities (state)
+- Entity relationship (classes, abstracts, interfaces)
+- Entity methods
+- Data flow
+- 
