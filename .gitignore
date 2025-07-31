@@ -3,3 +3,4 @@ _site/
 *.bak
 .jekyll-cache/
 .env
+.DS_Store

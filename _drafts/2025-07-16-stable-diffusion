@@ -47,12 +47,40 @@ Each frame, can look back and forward and the previous / forward frames to also 
 video diffusion also goes through the timestep process where a scheduler walks through timesteps to further clarify the video chunk for each step.
 
 -- U-net processing
-the stable diffusion process to create a random image for each frame
+the stable diffusion process to create a random image for each frame. It only gets created based off the first source image 
+conditioning. It has no understanding of its neighbors
+
 
 -- Temporal attention process
 Adjustments to the generated in process frame to give temporal coherence to the scene (physics, [ball bouncing])
 For every frame x, given the neighbor frames of x-2, x-1, x+1, x+2 what should the frame x be interpolated as?
 For every frame.
+
+
+-- How is movement encoded?
+A frame looks at its neighbors to see where it should be in terms of movement (physics)
+A frame is a stable diffused image of an average transformation of its neighbors.
+Temporal attention is trained on given a frame, how important is its neighbors in determining the content of the current frame
+The more important, the higher weight when used to transform the vector encoding
+A bouncing ball would weigh its immediate neighbor frames very high in calculating the current frame
+A frame cut would weigh its immediate neighbor much much less incalculating current frame.
+
+
+
+- LLMs text
+Large dimension vectors are created for tokens
+These map out their default relationships toward other words based off proximity.
+, LLMs have an 'Attention' layer which is an NxN table of all the tokens in a context and adjusted weights as to which words appear close to the next. They transform the original token's vector that had no context, with now applied context, and adjust the probability table of next token selection to be more closely relevant to that context.
+
+As the words fill out, all those additional words, keep adjusting the generated attention table such that the next word is most likely to match the context of the written response.
+
+-- Attention Model
+The attention layer is another trained model which needs to generate the Query, Key and Value vectors for a given word in a given context. It goes through a similar training program as a normal embedding (without deep context) with the goal to minimize prediction loss, missed predictions of a word in context.
+
+We can train multiple different attention models that start on different randomized starting points which can reach different dimension conclusions for the same corpus of data. These attention heads focusing on different aspects of language can be ran parallely when applied on top of the base vectors.
+
+LLMs that write responses would need to add each new token to its running context. This would mean the attention model table would need to update each of its values since the semantics of the context changed. This gets more expensive as the context increases n^2. There's solutions to amelirate this with rolling windows, or cached context. Trade off of speed vs accuracy.
+
 
 
 

@@ -1,0 +1,13 @@
+<table class="image">
+	<caption align="bottom" style="{{ include.style | default: "" }}">{{ include.description  }}</caption>
+{% else %}
+<table class="image nocaption">
+{% endif %}
+<tr><td><video muted="" autoplay="" loop="" width="550px" poster="https://s3.amazonaws.com/jasonjlblog/682visualizer.jpg">
+  <source src="https://s3.amazonaws.com/jasonjlblog/682visualizer.mp4" type="video/mp4">
+  <source src="https://s3.amazonaws.com/jasonjlblog/682visualizer.webm" type="video/webm">
+  <img src="https://s3.amazonaws.com/jasonjlblog/682visualizer.jpg">
+</video>
+
+<img src="{{ site.baseurl }}/assets/posts/{{ page.slug }}/{{ include.url  }}" alt="{{ include.description }}" width="{{ include.width | default: "" }}" style="{{ include.style }}" class="{{ include.class }}"/></td></tr>
+</table>
