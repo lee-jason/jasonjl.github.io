@@ -3,7 +3,7 @@ layout: post
 title:  "Logging Information on Browser Crashes"
 date:   2015-06-21 01:00:00
 description: "Logging client details on crashes"
-image: "awsnap.png"
+# image: "awsnap.png"
 categories: browsers, javascript, logging
 comments: true
 ---

@@ -1,3 +1,11 @@
+---
+layout: post
+title:  "Stable diffusion: Generating images from nothing"
+date:   2025-07-16 08:00:00
+description: "A light overview on how image generation through stable diffusion works"
+categories: ai
+---
+
 training
 - VAE encoding Variational Autoencoder (VAE)
 Converts an image into a 3d vector (64x64x4), a representation of an image.
