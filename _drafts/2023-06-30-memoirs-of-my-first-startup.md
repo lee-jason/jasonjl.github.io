@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "Life at my first startup"
+title:  "Memoirs of my first startup in Silicon Valley"
 date:   2023-03-01 08:00:00
-description: "Memoirs of my first startup in Silicon Valley"
+description: "A brief (long) recollection of how I got here and I learned"
 categories: work
 ---
 
@@ -19,7 +19,7 @@ Built my first web app on Java and Spring, a Slashdot clone that was running on 
 
 Started interviewing and despite the deliberate practice it was still tough. Rejections left and right. Once again taking massive hits to my confidence. 
 
-Alation eventually dropped into my interview queue. I never heard of them, something to do with data. I interviewed with resignation. I passed the phone interview. They flew me out. I 'passed' the onsite. They flew me out for a week trial. They liked my vibes and gave me an offer at the end of the week. They really needed a front-end developer and I guess I fit that bill somewhat perfectly; a guy that can make a site look pretty and has something to prove. Despite being a startup, the offer was double my previous salary, and despite being hungry, there was more knowledge to gain that I could ever want to chew off.
+Alation eventually dropped into my interview queue. I never heard of them, something to do with data. I interviewed with resignation. I passed the phone interview. They flew me out. I 'passed' the onsite. They flew me out for a week trial. They liked my vibes and gave me an offer at the end of the week. They really needed a front-end developer and I guess I fit that bill somewhat perfectly; a guy that can make a site look pretty and has something to prove. Despite being a startup, the offer was double my previous salary, and despite being hungry, there was more knowledge to gain that I could ever chew off. I joined my first startup, a series A company as employee #13.
 
 # 2014  (TODO: VALIDATE)
 The most striking thing as an outsider coming into working at a Silicon Valley company is the calibur of people you're surrounded with. No shade on my previous coworkers at Experian, but while I somewhat respected the work of some of my peers, I pretty much had incredible admiration for all of my peers at Alation. Each person brought a unique exceptional self and skills to the team. They were mostly all young or new to the engineering field but some how they've already gained all this understanding of how to develop 'robust' code. Not only that but they were exceptionally skilled at picking up new things.
@@ -38,7 +38,7 @@ The years went on and during that time, just generally learned how to conduct my
 I realized the company no longer needed me, maybe it even forgot I existed. I was coasting a bit on my tenure but I don't think I was building anything that was truly helping the bottom line. There was a final problem I was working on that I couldn't solve which was mostly a problem in team communication and collaboration. It was hard for the team to pick a direction and approach that balances technical implementation as well as product fit. I thought to take the lead by being more assertive in pushing what I saw as the best outcome but this lead to more resistance and the ideas were shot down over many meetings. Something I'm still trying to understand today is how to effectively push ideas and influence a larger team. Something I'm still trying to understand today is how to effectively push ideas and influence an individual really...
 
 
-# Learnings
+# TLDR Learnings
 - If your first jobs aren't doubling your learning or salary every year, then its time to leave
 - Nobody really knows what they're doing, just try your best given the conditions of today
 - Love your team, they will love you back
