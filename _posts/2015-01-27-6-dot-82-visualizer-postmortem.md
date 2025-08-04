@@ -3,6 +3,7 @@ layout: post
 title:  "6.82 Visualizer Postmortem"
 date:   2015-01-27 01:00:00
 description: "A postmortem analysis of building a gold and experience data visualizer for Dota 2's controversial 6.82 update"
+media: "682visualizer.mp4"
 categories: programming, web-development, dota2, angular, javascript
 comments: true
 ---

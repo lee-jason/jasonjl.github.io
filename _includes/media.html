@@ -6,7 +6,7 @@
   {% if image_formats contains file_extension %}
     <img src="{{ site.env.AWS_S3_ASSETS_PATH }}/posts/{{ include.page.slug }}/{{include.page.media}}" />
   {% elsif video_formats contains file_extension %}
-    <video>
+    <video autoplay muted playsinline loop>
       <source src="{{ site.env.AWS_S3_ASSETS_PATH }}/posts/{{ include.page.slug }}/{{include.page.media}}">
       Your browser does not support the video tag.
     </video>

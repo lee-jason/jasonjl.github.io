@@ -2,7 +2,7 @@
 layout: post
 title:  "Memoirs of my first startup in Silicon Valley"
 date:   2023-03-01 08:00:00
-description: "A brief (long) recollection of how I got here and I learned"
+description: "A brief (long) recollection of how I got here and what I learned"
 categories: work
 ---
 

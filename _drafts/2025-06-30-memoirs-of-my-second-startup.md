@@ -2,7 +2,7 @@
 layout: post
 title:  "Memoirs of my second startup in Remote Silicon Valley"
 date:   2025-06-01 08:00:00
-description: "A brief recollection of how I got here and I learned"
+description: "A brief recollection of how I got here and what I learned"
 categories: work
 ---
 
@@ -24,7 +24,7 @@ Shortly after one year, I became redundant. The company didn't have a need for a
 
 Working here transformed my understanding of work and motivation. There was about 3 months where I'd be on the laptop from 9AM to 11PM moving from task to task deploying at least 2 non-trivial feature prs and providing feedback for my team every day. Weekends are normal work hours from 10AM to 6PM. This is not an exaggeration. I'm incredulous myself to see this written down in ink but I have to iterate again, this is not an exaggeration. I felt possessed. I didn't feel fatigue, I didn't feel hunger. It was a fast acting loop of problem, solution, dopamine, problem, solution, dopamine. If I thought of something quick to implement late at night, I'd go for it. Problem, Solution, Dopamine. I wasn't motivated by the high of chasing the dopamine hit but rather by the chip on my shoulder. I still have something to prove. Given a new problem, can I solve it? If I seen the problem before, how fast can I solve it? How robust can I make it?
 
-I'm incredibly proud of the quality of the code base I left behind. The frameworks, the patterns, the components, I wish I could have taken with me. I gave a lot of love to the platform and it loved me back in return. 
+I'm incredibly proud of the high quality code base I left behind. The frameworks, the patterns, the components, I wish I could have taken with me. I gave a lot of love to the platform and it loved me back in return. It required me to be a dick sometimes but I hope my team understood why I demanded I was making these asks.
 
 At this point in my life I'm just on the cusp of taking on another risk. 
 
