@@ -19,28 +19,31 @@ The following example shows what happens when simply rendering a list in React w
 
 **JSX**
 ```jsx
-var SimpleList = React.createClass({
-  render: function() {
-    return (
-      <ul>
-        <li>{this.props.listItems}</li>
-      </ul>
-    );
-  }
-});
+  var IncorrectListRender = React.createClass({
+    render: function() {
+      return (
+        <ul>
+          <li>{this.props.list}</li>
+        </ul>
+      )
+    }
+  });
+  React.render(<IncorrectListRender list={[1,2,3,4,5]} />, document.getElementById('incorrect-list-render'));
 ```
 
 **Compiled to JavaScript**
 ```javascript
-var SimpleList = React.createClass({
-  render: function() {
-    return (
-      React.createElement("ul", null,
-        React.createElement("li", null, this.props.listItems)
+  var IncorrectListRender = React.createClass({displayName: "IncorrectListRender",
+    render: function() {
+      return (
+        React.createElement("ul", null,
+          React.createElement("li", null, this.props.list)
+        )
       )
-    );
-  }
-});
+    }
+  });
+  React.render(React.createElement(IncorrectListRender, {list: [1,2,3,4,5]}), document.getElementById('incorrect-list-render'));
+
 ```
 
 **Rendered Result**
@@ -52,36 +55,42 @@ You may also have tried to individually pick out elements in the array and plant
 
 **JSX**
 ```jsx
-var SimpleList = React.createClass({
-  render: function() {
-    return (
-      <ul>
-        <li>{this.props.listItems[0]}</li>
-        <li>{this.props.listItems[1]}</li>
-        <li>{this.props.listItems[2]}</li>
-        <li>{this.props.listItems[3]}</li>
-        <li>{this.props.listItems[4]}</li>
-      </ul>
-    );
-  }
-});
+  var InflexibleListRender = React.createClass({
+    render: function() {
+      return (
+        <ul>
+          <li>{this.props.list[0]}</li>
+          <li>{this.props.list[1]}</li>
+          <li>{this.props.list[2]}</li>
+          <li>{this.props.list[3]}</li>
+          <li>{this.props.list[4]}</li>
+        </ul>
+      )
+    }
+  });
+  React.render(<InflexibleListRender list={[1,2,3,4,5]} />, document.getElementById('inflexible-list-render1'));
+  React.render(<InflexibleListRender list={[1,2,3,4,5,6,7,8,9,10]} />, document.getElementById('inflexible-list-render2'));
+
 ```
 
 **Compiled to JavaScript**
 ```javascript
-var SimpleList = React.createClass({
-  render: function() {
-    return (
-      React.createElement("ul", null,
-        React.createElement("li", null, this.props.listItems[0]),
-        React.createElement("li", null, this.props.listItems[1]),
-        React.createElement("li", null, this.props.listItems[2]),
-        React.createElement("li", null, this.props.listItems[3]),
-        React.createElement("li", null, this.props.listItems[4])
+ var InflexibleListRender = React.createClass({displayName: "InflexibleListRender",
+    render: function() {
+      return (
+        React.createElement("ul", null,
+          React.createElement("li", null, this.props.list[0]),
+          React.createElement("li", null, this.props.list[1]),
+          React.createElement("li", null, this.props.list[2]),
+          React.createElement("li", null, this.props.list[3]),
+          React.createElement("li", null, this.props.list[4])
+        )
       )
-    );
-  }
-});
+    }
+  });
+  React.render(React.createElement(InflexibleListRender, {list: [1,2,3,4,5]}), document.getElementById('inflexible-list-render1'));
+  React.render(React.createElement(InflexibleListRender, {list: [1,2,3,4,5,6,7,8,9,10]}), document.getElementById('inflexible-list-render2'));
+
 ```
 
 **Rendered Result**
@@ -91,32 +100,38 @@ A good solution would be flexible to the amount of items in a list and would ren
 
 **JSX**
 ```jsx
-var SimpleList = React.createClass({
-  render: function() {
-    return (
-      <ul>
-        {this.props.listItems.map(function(listValue){
-          return <li>{listValue}</li>;
-        })}
-      </ul>
-    );
-  }
-});
+  var ProperListRender = React.createClass({
+    render: function() {
+      return (
+        <ul>
+          {this.props.list.map(function(listValue){
+            return <li>{listValue}</li>;
+          })}
+        </ul>
+      )
+    }
+  });
+  React.render(<ProperListRender list={[1,2,3,4,5]} />, document.getElementById('proper-list-render1'));
+  React.render(<ProperListRender list={[1,2,3,4,5,6,7,8,9,10]} />, document.getElementById('proper-list-render2'));
+
 ```
 
 **Compiled to JavaScript**
 ```javascript
-var SimpleList = React.createClass({
-  render: function() {
-    return (
-      React.createElement("ul", null,
-        this.props.listItems.map(function(listValue){
-          return React.createElement("li", null, listValue);
-        })
+  var ProperListRender = React.createClass({displayName: "ProperListRender",
+    render: function() {
+      return (
+        React.createElement("ul", null,
+          this.props.list.map(function(listValue){
+            return React.createElement("li", null, listValue);
+          })
+        )
       )
-    );
-  }
-});
+    }
+  });
+  React.render(React.createElement(ProperListRender, {list: [1,2,3,4,5]}), document.getElementById('proper-list-render1'));
+  React.render(React.createElement(ProperListRender, {list: [1,2,3,4,5,6,7,8,9,10]}), document.getElementById('proper-list-render2'));
+
 ```
 
 **Rendered Result**

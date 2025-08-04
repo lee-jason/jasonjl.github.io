@@ -31,7 +31,7 @@ Put assets in `assets/posts/blog-slug` \
 ## Deployment
 
 ### Github Action Vars
-define `AWS_S3_ASSETS_HOST` in action environment vars
+define `AWS_S3_ASSETS_PATH` in action environment vars
 
 on `main` branch \
 `git push`

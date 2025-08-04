@@ -26,7 +26,7 @@ jobs:
       - name: Create .env file
         run: |
           cat > .env << EOF
-          AWS_S3_ASSETS_HOST=${{ vars.AWS_S3_ASSETS_HOST }}
+          AWS_S3_ASSETS_PATH=${{ vars.AWS_S3_ASSETS_PATH }}
           EOF
       - name: Build & Push to GitHub Pages
         uses: lee-jason/jekyll4-deploy-gh-pages@master

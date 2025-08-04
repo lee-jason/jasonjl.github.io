@@ -12,33 +12,32 @@ As you may already know, Javascript has an interesting inheritance pattern calle
 Prototypal inheritance is similar to classical language's concept of extending. It has some of the same concepts of subclassing such as inheriting parent fields, overriding, and creating new fields. Here's a small example of how to subclass a JavaScript class.
 
 ```javascript
-// Parent class
-function Parent(name) {
-    this.name = name;
-    this.sayHello = function() {
-        return "Hello, I'm " + this.name;
-    };
-}
+    //Parent class
+    var Parent = function(){
+        this.name = "parent"
+        this.status = "adult";
+        this.species = "human";
+    }
 
-// Child class
-function Child(name, age) {
-    Parent.call(this, name); // Call parent constructor
-    this.age = age;
-}
+    //Child class
+    var Child = function(){
+        this.name = "child";
+        this.status = "infant";
+    }
 
-// Set up inheritance
-Child.prototype = Object.create(Parent.prototype);
-Child.prototype.constructor = Child;
+    //set Child's prototype to a new Parent object
+    Child.prototype = new Parent();
+    //re-set the Child's constructor to itself, since it was 
+    //overwritten in the previous statement
+    Child.prototype.constructor = Child;
 
-// Override parent method
-Child.prototype.sayHello = function() {
-    return "Hi, I'm " + this.name + " and I'm " + this.age + " years old";
-};
-
-// Add new method
-Child.prototype.sayAge = function() {
-    return "I am " + this.age + " years old";
-};
+    var child = new Child();
+    console.log(child.name) //"child"
+    console.log(child.status) //"infant"
+    console.log(child.species) //"human" taken from Parent.species
+    console.log(child instanceof Parent) //true
+    delete child.name //true removed Child's name
+    console.log(child.name) //"parent" taken from Parent.name
 ```
 
 This is the basic structure. Each function has a `prototype` property. This `prototype` field is an object that is applied to all objects created from that function using the `new` keyword. Setting the prototype of the Child class to that of the Parent class will create a prototype chain which would then allow the `instanceof` feature to work. The Child class would also borrow any attributes it didn't have that the Parent object would supply. Deleting overriden attributes in the Child class would revert back to use the assigned Parent's attributes.

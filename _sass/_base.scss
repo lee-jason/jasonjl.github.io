@@ -76,9 +76,9 @@ figcaption {
 /**
  * Lists
  */
-ul, ol {
-    margin-left: $spacing-unit;
-}
+// ul, ol {
+//     margin-left: $spacing-unit;
+// }
 
 article ul, article ol {
  margin-top: -7px;
@@ -92,20 +92,6 @@ li {
     > ol {
          margin-bottom: 0;
     }
-}
-
-li {
-    padding: 7px 0;
-    text-indent: -1em;
-}
-
-ul ul {
-  margin-top: 0;
-}
-
-ul ul li {
-  padding: 0;
-  padding-top: 6px;
 }
 
 article li::before {
@@ -144,6 +130,12 @@ em {
 
 strong {
     font-weight: 600;
+}
+
+sup {
+    font-size: $tiny-font-size;
+    vertical-align: super;
+
 }
 
 /**
@@ -672,4 +664,9 @@ article .MathJax_Display {
   content: "[notes]"
 }
 
-
+/**
+ * Utils
+ */
+.small {
+    font-size: $small-font-size;
+}
