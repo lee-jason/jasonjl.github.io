@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Engineer Archetypes"
-date: 2022-01-01 08:00:00
+date: 2023-01-01 08:00:00
 description: "The different types of engineers I've met"
 categories: work
 ---

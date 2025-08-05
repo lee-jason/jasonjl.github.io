@@ -1,12 +1,12 @@
 ---
 layout: post
-title:  "AI: The poison apple in software"
+title:  "AI: The Trojan Horse in software"
 date: 2024-08-01 08:00:00
-description: "Thoughts on the Trojan Horse of AI in software and our unwillingness to fight it"
+description: "AI in software and our unwillingness to fight it"
 categories: AI
 ---
 
-Forward: When I mention 'AI' in this article, I'm referencing the generative AI of today.
+Foreward: When I mention 'AI' in this article, I'm referencing the generative AI of today.
 
 First off, big props to the real ones, the researchers. Everyone else is just benefiting / suffering from the trickle down effects of their monumental efforts. I am still so blown away at how the idea of expanded Attention truly blew the Markov Chain to something that would never pass the Turing test to something that can brew real romantic feelings from the user. I'm still very curious to know if the original researchers anticipated the emergent effects of preceived 'intelligence' from their initial hypothesis or whether they thought that their Attention model was just going to incrementally advance text generation. 
 
