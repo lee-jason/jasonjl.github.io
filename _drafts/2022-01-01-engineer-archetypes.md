@@ -39,6 +39,9 @@ Probably very smart, otherwise would have gotten fired. Is usually helpful, but 
 ### The Complexity Demon
 Always will try to suggest a more complicated solution first. Is more interested in the challenge than addressing the customer's problem. Most likely has ulterior motives around career advancement.
 
+### The AI Evangelist
+Is very bullish on AI. Often vibe codes most of their PR. Also vibe reviews their PR.
+
 ### The DOGE fan
 Deleting / Rewriting code at all costs. Ignores context in the name of reducing lines of code or rewriting existing features to fit their model. Almost always introduces a critical regression and many smaller regressions.
 
