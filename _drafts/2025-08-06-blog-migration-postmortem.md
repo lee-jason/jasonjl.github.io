@@ -1,16 +1,16 @@
 ---
 layout: post
-title:  "Blog migration postortem"
+title:  "Blog migration postmortem"
 date:   2025-07-16 08:00:00
-description: "Highlights on the critical need for a fast deployment process"
+description: "What is took to migrate this Jekyll blog to.. Jekyll"
 categories: project, postmortem
 ---
 
-In 2015 I spun up a personal blog after I quit my first job. This was built off [Octopress](https://octopress.org/) and deployed on Github pages. Despite the compiled site existing on Github itself [lee-jason.github.io](https://github.com/lee-jason/lee-jason.github.io), the source itself existing on a laptop that is long gone. 
+In 2015 I spun up a personal blog after I quit my first job. This was built off [Octopress](https://octopress.org/) and deployed on Github pages. Despite the compiled site existing on Github itself [lee-jason.github.io](https://github.com/lee-jason/lee-jason.github.io), the source itself exists on a laptop that is long gone. 
 
-2025 I'm still alive and I'm once again in a similar situation. I suddenly found myself with more time and with that time wanted to write, unfortunately I didn't have the source code for my blog. I decided the only way forward is to migrate from compiled Jekyll to Jekyll 4.0.
+2025 I'm still alive and I'm once again in a similar situation. I suddenly found myself with more time and I wanted to write again, unfortunately I didn't have the source code for my blog. I decided the only way forward is to migrate from compiled Jekyll to Jekyll 4.0.
 
-Ten years have passed and Jekyll is now on version 4.0. As a chronic hackernews reader I stumble on a lot of blogs. I really liked the simplicity of [https://florian.github.io/](https://florian.github.io/). I forked his [repo](https://github.com/florian/florian.github.io) and built off that. Some minor changes later, I had working POC that ran on Jekyll 4. 
+Ten years have passed and Jekyll is now on version 4.0. As a chronic hackernews reader I stumble on a lot of blogs. I really liked the simplicity of [florian.github.io](https://florian.github.io/). I forked his [repo](https://github.com/florian/florian.github.io) and built off that. Some minor changes later, I had working POC that ran on Jekyll 4. 
 
 I thought for a minute on using an existing blogging platform like medium or notion, but one of my philosophies is to build as cheaply as possible and hosted blog platform often offer you all the bells and whistles of analytics and custom domains but often do so with a fee. I was unwilling to do so.
 

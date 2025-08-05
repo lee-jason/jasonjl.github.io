@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Releasing at a speed of code"
+title:  "Releasing at the speed of code"
 date:   2025-07-16 08:00:00
 description: "Highlights on the critical need for a fast deployment process"
 categories: advice
@@ -20,7 +20,7 @@ Common knowledge tells us that testing before deploying is a pillar of software 
 2. Its difficult to deploy/rollback your software.
 
 In a modern web based software engineering product we can assume that...
-1. Your software does not have safety implications
+1. Your software does not have safety implications (consider authorization)
 2. Its easy to deploy/rollback your software
 
 If the above are true, then why use even more precious time testing? Deploy and rollback quickly. Or Deploy and iterate quickly.
