@@ -201,6 +201,7 @@ code {
     border-radius: 3px;
     //background-color: #F5F5F5;
     //color: #c65e24;
+    text-wrap: auto;
 }
 
 code {
@@ -208,7 +209,7 @@ code {
     box-sizing: content-box;
     border-radius: 5px;
     //white-space: nowrap;
-    line-break: anywhere;
+    // line-break: anywhere;
 }
 
 pre code {

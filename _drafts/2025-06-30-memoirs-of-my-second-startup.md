@@ -3,7 +3,7 @@ layout: post
 title:  "Memoirs of my second startup in Remote Silicon Valley"
 date:   2025-06-01 08:00:00
 description: "A brief recollection of how I got here and what I learned"
-categories: work
+categories: work, about me
 ---
 
 At the end of my first startup, I was rolling out of bed each morning clocking in kind of a malaise. Days were usually spent running a meeting, aligning goals, working on a design, prototyping, reviewing, implementing... As I said in my previous memoir, I felt like I was forgotten. Work was predictable, comfortable, and I was enjoying the respect I had as a tenured employee and balance I had towards work and life. Despite the comfortable position I made for myself, I couldn't shake the idea that I should be doing something more challenging.

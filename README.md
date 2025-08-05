@@ -108,3 +108,13 @@ To list all citations, you want to capture them in a group and pass them to the 
 
 This typically only works well for citations with numeric identifiers.
 However, the system should be easy to extend for other types, too.
+
+### Kramdown Markdown Nuances
+
+#### Wrapping div undoes Markdown compilation
+Put `markdown=1` in the tag
+```
+<div class="custom" markdown="1">
+	# Hello world
+<div>
+```
