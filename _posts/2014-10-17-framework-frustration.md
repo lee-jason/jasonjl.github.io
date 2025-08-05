@@ -3,7 +3,6 @@ layout: post
 title:  "Framework Frustration"
 date:   2014-10-17 08:00:00
 description: "Let me preface this by saying that I understand why frameworks exists. They solve repeatable problems in application development in a team environment by maintaining consistent development standards with tried and tested techniques that stood the test of time against thousands of projects and developer input that's supposed to ultimately save the developer time."
-media: "framework-frustration.mp4"
 categories: frameworks, programming, development, opinion, learning, productivity
 comments: true
 ---

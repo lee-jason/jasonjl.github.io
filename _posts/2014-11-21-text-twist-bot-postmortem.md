@@ -3,7 +3,7 @@ layout: post
 title:  "Text Twist Bot"
 date:   2014-11-21 08:00:00
 description: "Text Twist Bot is a bot made to play the anagram solving game Text Twist. Once ran, the bot will auto detect the location of the window, parse the current letters on the board, and automatically input all anagrams that can be found from those six letters."
-media: "text-twist-bot.mp4"
+media: "texttwistbot.mp4"
 categories: java, bots, postmortem, project
 comments: true
 ---

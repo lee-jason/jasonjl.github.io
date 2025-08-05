@@ -3,7 +3,6 @@ layout: post
 title:  "Blog Inauguration"
 date:   2014-10-10 08:00:00
 description: "Hi, my name's Jason and all these other programming blogs told me that I should start writing. I've been reading alot about how programmers that write assist in the thinking and solidifying process."
-media: "blog-launch.mp4"
 categories: about me
 comments: true
 ---

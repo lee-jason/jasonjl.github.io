@@ -3,7 +3,6 @@ layout: post
 title:  "Javascript, Pass by Value or Pass by Reference?"
 date:   2014-10-15 08:00:00
 description: "This is something you don't have to question until you need to pass the contents of an object around or pass the same exact reference around. For me this knowledge became important during the development of Angular and Node applications where objects and primitives are passed around like a hot potato."
-media: "javascript-pass-by-reference.mp4"
 categories: javascript, programming, memory-management, pass-by-reference, pass-by-value, tutorial
 comments: true
 ---

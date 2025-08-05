@@ -3,7 +3,6 @@ layout: post
 title:  "Balancing Confidence, Arrogance, Ignorance, and Humility"
 date:   2014-11-18 08:00:00
 description: "Something I've picked up in my first professional job is that nobody appreciates humility. While being humble is a virtue, it's not one that's usually appreciated in the workplace."
-media: "workplace-confidence.mp4"
 categories: career, workplace, confidence, professional-development, advice
 comments: true
 ---

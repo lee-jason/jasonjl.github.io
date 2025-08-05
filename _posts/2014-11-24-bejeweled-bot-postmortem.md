@@ -3,7 +3,7 @@ layout: post
 title:  "Bejeweled Bot"
 date:   2014-11-24 08:00:00
 description: "Bejeweled Bot is a bot that automatically plays Bejeweled Blitz as fast as possible. Once executed, the bot will orient itself with the origin of the game board, determine the current gems on the grid, parse the possible matches, then move the appropriate gems in the game to create matches."
-media: "bejeweled-bot.mp4"
+media: "bejeweledbot.mp4"
 categories: bots, java, postmortem, project
 comments: true
 ---

@@ -391,6 +391,10 @@ pre {
 /*=========================================
 Post List
 =========================================== */
+.post-list video, .post-list img {
+    display: block;
+    max-width: 600px;
+}
 .post-list,#archive-list {
     margin-top: 30px;
 }
