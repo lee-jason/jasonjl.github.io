@@ -61,13 +61,7 @@ make s # as a shortcut
 To add an image from the image asset folder of the current post, with a given caption:
 
 ```
-{% include img.html url="x.png" description="caption" %}
-```
-
-Optionally, there's a `style` attribute for the caption and a `width` attribute for the image itself:
-
-```
-{% include img.html url="x.png" description="caption" style="margin-top:0" width="200px" %}
+{% include media.html post=post  %}
 ```
 
 ### Citations

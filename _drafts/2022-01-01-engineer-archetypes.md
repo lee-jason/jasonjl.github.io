@@ -16,7 +16,7 @@ The truth seeker desires nothing more than to pursue the truth. Makes good faith
 Reads W3C proposals. Knows the nuances of all of Postgres's locking levels. Loves and proselytizes Rust. Probably into cryptographic algorithms. If you ever wanted a deep dive in an area you just wanted a shallow introduction to, the Nerd is your guy. 
 
 ### The Doctor
-Has a PHD in Astrophysics. Why are they data plumbling web software... Similar to The Nerd, but more book smart and less knowledgeable about engineering topics specifically.
+Has a PHD in Astrophysics. Why are they data plumbling web software... Similar to The Nerd, but more book smart and less knowledgeable about engineering topics specifically. Still obviously very smart.
 
 ### The Principled Procedures Guy
 Creates processes that you better follow. Otherwise will get very upset at you. Do not ignore the procedures. Read the documentation first before consulting.
