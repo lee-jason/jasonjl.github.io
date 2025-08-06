@@ -18,7 +18,7 @@ Reads W3C proposals. Knows the nuances of all of Postgres's locking levels. Love
 ### The Doctor
 Has a PHD in Astrophysics. Why are they data plumbling web software... Similar to The Nerd, but more book smart and less knowledgeable about engineering topics specifically. Still obviously very smart.
 
-### The Principled Procedures Guy
+### The Bureaucrat
 Creates processes that you better follow. Otherwise will get very upset at you. Do not ignore the procedures. Read the documentation first before consulting.
 
 ### The Tourist
@@ -42,8 +42,11 @@ Always will try to suggest a more complicated solution first. Is more interested
 ### The AI Evangelist
 Is very bullish on AI. Often vibe codes most of their PR. Also vibe reviews their PR.
 
-### The DOGE fan
+### The DOGEler
 Deleting / Rewriting code at all costs. Ignores context in the name of reducing lines of code or rewriting existing features to fit their model. Almost always introduces a critical regression and many smaller regressions.
+
+### The Buffoon
+Very confident. Very wrong. Talks a lot. Says nothing.
 
 ### The Absentee
 The guy probably working two jobs. Isn't responsive for several days, then releases a batch of sloppy prs. Repeat.
