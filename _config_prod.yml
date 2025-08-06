@@ -1,2 +1,2 @@
-baseurl: "https://jasonjl.me/jasonjl.github.io" # the subpath of your site, e.g. /blog/
-url: "https://jasonjl.me/jasonjl.github.io" # the base hostname & protocol for your site
+baseurl: "https://jasonjl.me" # the subpath of your site, e.g. /blog/
+url: "https://jasonjl.me" # the base hostname & protocol for your site
