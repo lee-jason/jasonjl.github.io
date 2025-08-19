@@ -1,8 +1,4 @@
-{% if include.description %}
-<table class="image">
-	<caption align="bottom" style="{{ include.style | default: "" }}">{{ include.description  }}</caption>
-{% else %}
-<table class="image nocaption">
-{% endif %}
-<tr><td><img src="{{ site.env.AWS_ASSETS_HOST }}/posts/{{ page.slug }}/{{ include.url  }}" alt="{{ include.description }}" width="{{ include.width | default: "" }}" style="{{ include.style }}" class="{{ include.class }}"/></td></tr>
-</table>
+<figure>
+	<img src="{{ site.env.AWS_S3_ASSETS_PATH }}/posts/{{ include.page.slug }}/{{ include.name }}" width='{{ include.width | default: "" }}' />
+	<figcaption>{{ include.description }}</figcaption>
+</figure>
