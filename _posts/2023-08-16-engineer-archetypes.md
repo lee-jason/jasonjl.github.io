@@ -2,7 +2,7 @@
 layout: post
 title: "Engineer Archetypes"
 date: 2023-08-16 08:00:00
-description: "The different types of engineers I've met"
+description: "A fun look at the different kinds of engineers I've worked with"
 categories: work
 ---
 
