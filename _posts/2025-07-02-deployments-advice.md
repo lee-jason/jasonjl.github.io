@@ -1,21 +1,21 @@
 ---
 layout: post
 title:  "Releasing at the speed of code"
-date:   2025-07-16 08:00:00
-description: "Highlights on the critical need for a fast deployment process"
+date:   2025-07-02 08:00:00
+description: "Thoughts on the critical need for a frictionless deployment process"
 categories: advice
 ---
 
-Something I value more recently is easily deployable software. Most engineers are probably more interested in building robust and easily maintainable code but may be divorced from the idea of deploying their code as those systems or processes may already be set in their place of work. Easily deployable code means its much easier to take risks and create experiments which relieves paralysis in deciding when or how some bit of change should be released. If your company is still arguing about when to time a release or meeting some specific release window, you may want to evaluate whether your current release process is holding you back.
+Something I value more recently is easily deployable software. Most engineers are probably more interested in building robust and easily maintainable code but may be divorced from the idea of deploying their code as those systems or processes may already be set in their organization. Easily deployable code means its much easier to take risks and create experiments which relieves paralysis in deciding when or how some bit of change should be released. If your company is still arguing about when to time a release or meeting some specific release window, you may want to evaluate whether your current release process is holding you back.
 
 ## Deployments should be a zero clicks
-Any non trivial deployment needs to be automated. Manual processes are fine, but ultimately lead to more amortized time used during the deployment which introduces additional hesitancy to deploy. Time spent to automate the process further reduces friction around deployment leading to faster release cycles, less planning conversations, and more free cycles for the release engineer.
+Any non trivial deployment needs to be automated. Manual processes are fine, but ultimately lead to more wasted time amortized across all deployments which is a friction point around deployment. Time spent to automate the process further reduces friction around deployment leading to faster release cycles, less planning conversations, and more free cycles for everyone involved in the conversation.
 
 ## Failures should be accounted for
 Process driven deployments are tricky and are inherently stateful. A deployment can fail in any number of steps and at any point in the flow. The automated process should anticipate these. Deployments should catch and handle common breaking scenarios and rollback appropriately. This doesn't mean that the system should be able to support rolling back to any arbitrary version, but this really just means that if any part of the step is failing, stop at that specific step and reset that step to before the change. In the case of a simple data migration, this can mean running the migration in a transaction, or in the case of a front-end code deployment a matter of having a system to deploy the previous front-end version, then auto triggering that on when new front-end failures are detected.
 
-## No more tests or "F it, we'll do it live!"
-Common knowledge tells us that testing before deploying is a pillar of software development, I'd like to suggest and warn that some teams may be testing too much. The only valid reasons to have a prolonged testing cycle is when...
+## "Fuck it, we'll do it live!"
+Common knowledge tells us that testing before deploying is a pillar of software development, I'd like to suggest and warn that some teams may be testing too much or relying too much on manual testing. The only valid reasons to have a prolonged testing cycle is when...
 1. Your software has safety implications where failure costs lives
 2. Its difficult to deploy/rollback your software.
 
