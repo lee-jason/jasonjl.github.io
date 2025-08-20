@@ -2,7 +2,7 @@
 layout: post
 title:  "How I roast great coffee at home"
 date:   2025-06-21 08:00:00
-description: "A small guide on the tools that help me roast great coffee at home"
+description: "A small guide on the tools I use to roast coffee beans"
 image: "Analyze1.png"
 categories: coffee
 ---
