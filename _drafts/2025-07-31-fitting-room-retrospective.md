@@ -46,7 +46,7 @@ So the model uses the depth map as a foundation but really has no idea what the 
 From this
 {% include img.html page=page name="source_masked_image.png" %}
 With this face portrait
-{% include img.html page=page name="source_face_image1.png" %}
+{% include img.html page=page name="source_face_image1.jpg" width=300 %}
 To this
 {% include img.html page=page name="output.png" %}
 
