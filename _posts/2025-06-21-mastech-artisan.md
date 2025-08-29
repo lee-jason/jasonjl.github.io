@@ -3,7 +3,7 @@ layout: post
 title:  "How I roast great coffee at home"
 date:   2025-06-21 08:00:00
 description: "A small guide on the tools I use to roast coffee beans"
-image: "Analyze1.png"
+media: "roast_setup.jpg"
 categories: coffee
 ---
 
@@ -14,7 +14,6 @@ If you're already into brewing your own coffee, then learning how to roast your 
 ## Tools
 Here's what I use
 Links are provided for convenience. I'm not affiliated with any of the products.
-{% include img.html page=page name="roast_setup.jpg" %}
 - [FreshRoast SR800](https://www.amazon.com/dp/B07Z9Q3TLQ)
 - [Mastech MS6514](https://www.amazon.com/Mastech-MS6514-Thermometer-Temperature-Interface/dp/B00KXC8YNK)
 - [K Type Thermocouple](https://www.amazon.com/Thermocouple-Headprobe-Mini-Connector-Temperature/dp/B0BGXXGR1M)
@@ -53,3 +52,5 @@ Incredibly thorough and easily consumable resource to answer any question you ma
 Both very good examples of what proper procedure looks like what the nuanced decision making that goes into it
 
 Happy roasting
+
+{% include img.html page=page name="Analyze1.png" %}
