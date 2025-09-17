@@ -59,7 +59,6 @@ layout: default
           <a href="{{ post.url | prepend: site.baseurl }}">
             <aside class="dates">{{ post.date | date: "%b %d" }}</aside>
             {{ post.title }}
-            {% include media.html page=post %}
             <h2>{{ post.description }}</h2>
           </a>
         </li>

@@ -20,6 +20,7 @@ To this
 {% include img.html page=page name="output.png" %}
 Oh God.
 
+My first foray in leveraging Claude Code in understanding the capabilities of AI image generation.
 
 # How it works
 These are just off the shelf models from huggingface glued together to make something barely coherent. All images were generated on a M2 Macbook Pro which can explain some of the limitation on the total number of steps I can apply during image generation / refinement. 

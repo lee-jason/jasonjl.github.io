@@ -2,7 +2,7 @@
 layout: post
 title:  "Releasing at the speed of code"
 date:   2025-07-02 08:00:00
-description: "Thoughts on the critical need for a frictionless deployment process"
+description: "Why we shouldn't sleep on our deployment process"
 categories: advice
 ---
 
@@ -14,7 +14,7 @@ Any non trivial deployment needs to be automated. Manual processes are fine, but
 ## Failures should be accounted for
 Process driven deployments are tricky and are inherently stateful. A deployment can fail in any number of steps and at any point in the flow. The automated process should anticipate these. Deployments should catch and handle common breaking scenarios and rollback appropriately. This doesn't mean that the system should be able to support rolling back to any arbitrary version, but this really just means that if any part of the step is failing, stop at that specific step and reset that step to before the change. In the case of a simple data migration, this can mean running the migration in a transaction, or in the case of a front-end code deployment a matter of having a system to deploy the previous front-end version, then auto triggering that on when new front-end failures are detected.
 
-## "Fuck it, we'll do it live!"
+## "F--- it, we'll do it live!"
 Common knowledge tells us that testing before deploying is a pillar of software development, I'd like to suggest and warn that some teams may be testing too much or relying too much on manual testing. The only valid reasons to have a prolonged testing cycle is when...
 1. Your software has safety implications where failure costs lives
 2. Its difficult to deploy/rollback your software.

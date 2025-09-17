@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "AI: The Trojan Horse"
+title:  "AI: The Trojan Horse in Engineering"
 date: 2024-12-16 08:00:00
-description: "AI in software and our unwillingness to fight it"
+description: ""
 categories: AI
 ---
 
