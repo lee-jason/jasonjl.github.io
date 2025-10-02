@@ -1,3 +1,10 @@
+---
+layout: post
+title:  "AI is a loaded gun"
+date:   2025-09-30 08:00:00
+description: "A collection of retros of a bunch of mini projects"
+categories: ai, postmortem
+---
 Vibe coding is rude
 llm output is rude
 call out people who don't care
