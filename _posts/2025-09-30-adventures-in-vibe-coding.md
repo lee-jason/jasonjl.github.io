@@ -37,11 +37,11 @@ I hashed out these ideas with Claude and went through a glut of options from lan
 
 My first approach led to something like the following. FastAPI API Server deployed on EC2, Vite front-end deployed bundled and deployed to S3 served by CloudFront, On demand Postgres DB on Aurora, artifacts created in github actions. This was a fully fledged development and deployment environment and a basic product spun up in around a few days. 
 
-I felt very empowered to make large migrations and architecture refactors. Aurora pricing was larger than I initially imagined since I thought I'm only charged for requests. Turns out I'm charged for work units, which there is a minimum amount of work units needed to keep it running. I switched over to a very low speced RDS to see if this would help. It did but was still too high for essentially no requests per minute. I ultimately swapped over to Supabase RDS which is free, but shuts down after around seven days. All of this infra was managed through terraform.
+I felt very empowered to make large migrations and architecture refactors. Aurora pricing was larger than I initially imagined since I thought I'm only charged for requests. Turns out I'm charged for work units, which there is a minimum amount of work units needed to keep it running. I switched over to a very low speced RDS to see if this would help. It did but was still too high for essentially no requests per minute. I ultimately swapped over to Supabase Postgres which is free, but shuts down after around seven days. All of this infra is managed through terraform.
 
 {% include img.html page=page name="costs.png" width=500 %}
 
-I thought the cost of paying for EC2 for my API server was too expensive so I migrated from a EC2 server to AWS Apprunner since apprunner is a pay for requests system. I thought I would save a lot of money since my site receives like 0 requests per minute, but turns out Apprunner also needs to be kept alive, and is forcibly kept alive with a periodic health check ping to your api server. I accepted and ate the cost on this one.
+I thought the cost of paying for EC2 for my API server was too expensive so I migrated from a EC2 server to AWS Apprunner since Apprunner is a pay for requests system. I thought I would save a lot of the costs since my site receives like 0 requests per minute, but turns out Apprunner also needs to be kept alive, and is forcibly kept alive with a periodic health check ping to your api server. I accepted and ate the cost on this one.
 
 # personalstorage
 {% include img.html page=page name="personalcloud.png" %}
@@ -56,9 +56,9 @@ Here's what I wanted out of personalstorage
 3. Can push and retrieve from other machines
 4. Easy to use
 
-I had Claude requisition a simple cold storage s3 bucket that I can sync to and pull from, alongwith a handful of make commands to make it dead simple. 
+I had Claude requisition a simple glacier storage s3 bucket that I can sync to and pull from, along with a handful of make commands to make it dead simple. 
 
-Cold storage needs to restore files before pulling which does take time so pulling files does require ~24 hour turnaround time which makes things less convenient.
+Glacier storage needs to restore files before pulling which does take time so pulling files does require ~24 hour turnaround time which makes things less convenient.
 The great thing though is that 100GB in cold storage is $1.20 a year. Since I'm storing around ~10GB I expect my bill to be $0.12 a year.
 
 # personalvpn
@@ -83,12 +83,14 @@ I was interested in seeing how big companies create interfaces across their serv
 Here's what I wanted out of protobuf-playground
 1. One client, One server, client interacts with server through protobuf
 
-That's pretty much it. This was a discovery project to understand how services communicate with each other. What I discovered is that it seems like protobufs give you too much flexibility in how teams manage their built proto files. It seems like the general consensus is for the owner to host the proto files for the client to find and build the proto files to build the modules for their language. It seems like there's no expectation that the client is on the same version as the server. 
+That's pretty much it. This was a discovery project to understand how services communicate with each other. What I discovered is that it seems like protobufs give you too much flexibility in how teams manage their built proto files. It seems like the general consensus is for the owner to host the proto files for the client to find and build the proto files to build the modules for their language. It seems like there's no expectation that that the client keeps up to date with the latest server version, but no enforceable way to do so. Servers are expected to make their service backwards compatible. There's many solutions, free and paid, as to where to host the proto files.
 
 I never got this to successfully run and frankly I didn't care to get a running POC since I think I answered my original question about protobufs.
 
 # codebreaker
 {% include img.html page=page name="codebreaker.png" %}
+
+[Source code](https://github.com/lee-jason/kube-playground)
 
 This was pretty much an exercise in learning about Kubernetes and Kafka. I wanted to create a toy application that would have a producer publishing events and a variable amount of consumers to consume events. 
 
@@ -98,7 +100,7 @@ Here's what I wanted out of codebreaker
 3. Queue progress observable through dashboard
 4. Consumers auto scaled
 
-I was initially imagining that the computationally expensive task would be to crack a hashed message generated by a producer, but being able to control how long each of these would take was hard to manage so I just settled on just receiving a simple message then sleeping for a controled amount of time. Producers would create messages in variable rates and periodically spike the message queue to keep things interesting for the auto balancer.
+I was initially imagining that the computationally expensive task would be to crack a hashed message generated by a producer, but being able to control how long each of these would take was hard to control so I just settled on just receiving a simple message then sleeping for a controled amount of time. Producers would create messages in variable rates and periodically spike the message queue to keep things interesting for the auto balancer.
 
 Claude handled creating the kubernetes configuration that ran off minikube pretty flawlessly. I took a little bit of time to understand how Kafka is setup such that multiple consumers can consume (multiple partitions on topic) and set the amount of consumers to scale from 1 to 10. 
 
