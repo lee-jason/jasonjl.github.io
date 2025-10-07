@@ -22,3 +22,6 @@ paginate_path: "blog/page/:num/"
 # Minification
 sass:
   style: compressed
+
+include:
+  - _pages
