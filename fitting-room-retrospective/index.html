@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width initial-scale=1">
+
+  <title>FittingRoom Postmortem</title>
+  <meta name="description" content="Source code ">
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://jasonjl.me/css/style.css">
+  <link rel="canonical" href="https://jasonjl.mehttps://jasonjl.me/fitting-room-retrospective/">
+  <link rel="alternate" type="application/atom+xml" title="Jason Lee" href="https://jasonjl.mehttps://jasonjl.me/feed.xml" />
+  <!-- Basic favicon -->
+  <link rel="icon" type="image/x-icon" href="https://jasonjl.me/assets/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://jasonjl.me/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://jasonjl.me/assets/favicon/favicon-16x16.png">
+
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="https://jasonjl.me/assets/favicon/apple-touch-icon.png">
+
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZYPVTW1ZCS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-ZYPVTW1ZCS');
+</script>
+
+</head>
+
+  <body>
+    <div class="wrapper">
+      <div class="page-content">
+        <div class="post">
+  <h2>Jason J Lee</h2>
+  <header class="post-header">
+    <a href=" https://jasonjl.me " class="home-link">← Home</a>
+    <h1 class="post-title">FittingRoom Postmortem</h1>
+    <p class="post-meta">August 20, 2025</p>
+    
+  </header>
+  <div>
+
+
+  </div>
+
+  <article class="post-content">
+    <p><a href="https://github.com/lee-jason/stable-diffusion-playground">Source code</a></p>
+
+<p>Trying on new clothes takes too much time and effort. You have to go to the store, find the clothes you like, try them on in the fitting room and probably put it back. If you’re a misshapen human like me, it takes even more time to find something that looks nice. This is more of a problem if you shop online for clothes. Now you don’t even get a chance to try it on before you buy it which leads to more guesswork and most likely shipping waste.</p>
+
+<p>Now with FittingRoom, you can digitally try on clothes saving you all this time and effort in trying it on yourself!</p>
+
+<p>From this</p>
+<figure>
+	<img src="https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/fitting-room-retrospective/source.avif" width="" style="margin: auto" />
+	<figcaption></figcaption>
+</figure>
+
+<p>Wearing this</p>
+<figure>
+	<img src="https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/fitting-room-retrospective/inspo.avif" width="" style="margin: auto" />
+	<figcaption></figcaption>
+</figure>
+
+<p>To this</p>
+<figure>
+	<img src="https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/fitting-room-retrospective/output.png" width="" style="margin: auto" />
+	<figcaption></figcaption>
+</figure>
+
+<p>Oh God.</p>
+
+<p>My first foray in leveraging Claude Code in understanding the capabilities of AI image generation.</p>
+
+<h1 id="how-it-works">How it works</h1>
+<p>These are just off the shelf models from huggingface glued together to make something barely coherent. All images were generated on a M2 Macbook Pro which can explain some of the limitation on the total number of steps I can apply during image generation / refinement.</p>
+
+<p>The script takes 3 core inputs</p>
+<ol>
+  <li>Source image - This is you in your normal clothes</li>
+  <li>Inspo image - This is the clothing or design you want to wear</li>
+  <li>Face image - This is your face portrait. We’ll talk about why we need this one.</li>
+</ol>
+
+<p>Originally I stumbled on a model called <a href="https://github.com/lllyasviel/ControlNet">ControlNet</a>. ControlNet allows for finer control over the generated image given some properties of the image (outlines, depth map, color maps, …). Without ControlNet, there would be no foundation for what the generated image would look like and would produce wildly varying results with no semblance of looking like the original.</p>
+
+<p>ControlNet provides a <a href="https://github.com/lllyasviel/ControlNet?tab=readme-ov-file#controlnet-with-depth">depth pre-processor</a>. I thought this would be a good foundation for building an inspired image while maintaining the original pose.</p>
+
+<p>From this</p>
+<figure>
+	<img src="https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/fitting-room-retrospective/depth_map.png" width="" style="margin: auto" />
+	<figcaption></figcaption>
+</figure>
+
+<p>To this</p>
+<figure>
+	<img src="https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/fitting-room-retrospective/temp_source_image.png" width="" style="margin: auto" />
+	<figcaption></figcaption>
+</figure>
+
+<p>Wait, that blurry looking face looks nothing like the original model.</p>
+
+<p>So the model uses the depth map as a foundation but really has no idea what the face should look like. Fortunately another tool, <a href="https://github.com/tencent-ailab/IP-Adapter">IPAdapter</a> provides a feature that given an image mask, it’ll fill in the lost details (<a href="https://github.com/tencent-ailab/IP-Adapter/blob/main/ip_adapter_demo.ipynb">demo</a>). We can use this mask to blank out the incorrect face and replace it back with some form of the original face. We use a very rudimentary face recognition library and create a simple box mask around the detected face of the generated image. Then we ask IPAdapter to fill that in.</p>
+
+<p>From this</p>
+<figure>
+	<img src="https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/fitting-room-retrospective/source_masked_image.png" width="" style="margin: auto" />
+	<figcaption></figcaption>
+</figure>
+
+<p>With this face portrait</p>
+<figure>
+	<img src="https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/fitting-room-retrospective/source_face_image1.jpg" width="300" style="margin: auto" />
+	<figcaption></figcaption>
+</figure>
+
+<p>To this</p>
+<figure>
+	<img src="https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/fitting-room-retrospective/output.png" width="" style="margin: auto" />
+	<figcaption></figcaption>
+</figure>
+
+<p>Jesus…</p>
+
+<p>In the above example, I picked a random headshot but imagine if the headshot is the same as the original model in the source image.</p>
+
+<h1 id="things-to-try-out">Things to try out</h1>
+<p>So these images were generated using a smaller Stable Diffusion 1.5 with when we could have used the much larger Stable Diffusion XL model. The XL models from my experience generate much more sensible and higher quality images at the cost of time and memory. I wasn’t able to successfully generate a fitting room picture using the highest quality model locally due to memory constraints. I also set the amount of steps to around 80. Setting it any higher would mean I would be waiting more than 5 minutes to generate a single picture. I did notice in testing that a higher amount of steps would produce a higher quality image at the expense of me context switching by walking away from the laptop waiting for the process to complete.</p>
+
+<p>And of course the face masking could be more accurate. I really just wanted to run a POC and was fine with the square mask placed over where the face detector was, but more accurate shaping of the face mask would have of course produced a higher quality result.</p>
+
+<h1 id="so-does-it-work">So does it work?</h1>
+<p>I think it can work. I’m going to guess that with a higher fidelity model we can get it to look incredibly uncanny. Face swapped portraits have existed and those can look imperceptively real. I’m certain that using a higher quality model can achieve the same result.</p>
+
+  </article>
+
+  
+  <hr>
+
+  <div class="related">
+    <h2>Other Posts</h2>
+    
+      <li><a href="/adventures-in-vibe-coding/" title="Adventures in Vibe Coding">Adventures in Vibe Coding
+       &nbsp; <span class="post-meta">September 30, 2025</span></a>
+    
+      <li><a href="/blog-migration-postmortem/" title="Blog migration postmortem">Blog migration postmortem
+       &nbsp; <span class="post-meta">July 16, 2025</span></a>
+    
+      <li><a href="/deployments-advice/" title="Releasing at the speed of code">Releasing at the speed of code
+       &nbsp; <span class="post-meta">July 02, 2025</span></a>
+    
+  </div>
+  
+  <div class="comments">
+    <div id="disqus_thread"></div>
+<script>
+    /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /*
+    var disqus_config = function () {
+    this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://jihoon222.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+  </div>
+</div>
+
+<script>
+var anchorForId = function (id) {
+  var anchor = document.createElement("a");
+  anchor.className = "header-link";
+  anchor.href      = "#" + id;
+  anchor.innerHTML = "<i class=\"fas fa-link\"></i>";
+  return anchor;
+};
+
+var linkifyAnchors = function (level, containingElement) {
+  var headers = containingElement.getElementsByTagName("h" + level);
+  for (var h = 0; h < headers.length; h++) {
+    var header = headers[h];
+
+    if (typeof header.id !== "undefined" && header.id !== "") {
+      header.appendChild(anchorForId(header.id));
+    }
+  }
+};
+
+document.onreadystatechange = function () {
+  if (this.readyState === "complete") {
+    linkifyAnchors(3, document.body);
+    linkifyAnchors(4, document.body);
+    linkifyAnchors(5, document.body);
+    linkifyAnchors(6, document.body);
+  }
+};
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

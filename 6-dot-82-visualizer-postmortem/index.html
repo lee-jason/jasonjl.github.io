@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width initial-scale=1">
+
+  <title>6.82 Visualizer Postmortem</title>
+  <meta name="description" content="Website  Source code ">
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://jasonjl.me/css/style.css">
+  <link rel="canonical" href="https://jasonjl.mehttps://jasonjl.me/6-dot-82-visualizer-postmortem/">
+  <link rel="alternate" type="application/atom+xml" title="Jason Lee" href="https://jasonjl.mehttps://jasonjl.me/feed.xml" />
+  <!-- Basic favicon -->
+  <link rel="icon" type="image/x-icon" href="https://jasonjl.me/assets/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://jasonjl.me/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://jasonjl.me/assets/favicon/favicon-16x16.png">
+
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="https://jasonjl.me/assets/favicon/apple-touch-icon.png">
+
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZYPVTW1ZCS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-ZYPVTW1ZCS');
+</script>
+
+</head>
+
+  <body>
+    <div class="wrapper">
+      <div class="page-content">
+        <div class="post">
+  <h2>Jason J Lee</h2>
+  <header class="post-header">
+    <a href=" https://jasonjl.me " class="home-link">← Home</a>
+    <h1 class="post-title">6.82 Visualizer Postmortem</h1>
+    <p class="post-meta">January 27, 2015</p>
+    
+  
+  
+  
+  
+  
+    <video autoplay muted playsinline loop>
+      <source src="https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/6-dot-82-visualizer-postmortem/682visualizer.mp4">
+      Your browser does not support the video tag.
+    </video>
+  
+
+  </header>
+  <div>
+
+
+  </div>
+
+  <article class="post-content">
+    <p><a href="http://jasonjl.me/682Visualizer">Website</a> <br />
+<a href="https://github.com/lee-jason/682Visualizer">Source code</a></p>
+
+<p>6.82 Visualizer is a gold and experience data visualizer (grapher) for the game Dota 2. There was a controversial update to the game where the game would give the losing team drastic advantages so that they would be able to catch up to the leader. The changes are difficult to imagine due to the amount of variables so this program was created to show the data on how much the game had changed.</p>
+
+<p>For those unfamiliar to the game of Dota, there are two teams of five that duke it out against each other to ultimately destroy their opponents base. Just like a real war, the way for a team to gain an advantage is to have more money, that’s essentially what Dota’s gold and experience is. Many members in the community were worried that the change to give the poorer team a boost to their economy would change their game for the worse. Many who were vocal about this had personal anecdotes but very few had the hard data. I sought to provide the community with the hard facts in an easy to view format of how the experience and gold were exactly affected so that we could see clearly just how much it altered the game.</p>
+
+<h2 id="the-backend">The Backend</h2>
+
+<p>Backend? What backend? There actually is no backend to this site. The entire application is self-contained in the html and js file. The page is served through GitHub’s project pages much like this blog you’re reading.</p>
+
+<h2 id="the-frontend">The Frontend</h2>
+
+<p>The front end was built using a charting library <a href="http://www.chartjs.org/">chart.js</a> as well as <a href="https://angularjs.org/">angular.js</a> for the data binding. In the angular file, I have one controller for the form that maintains all the adjustable data. I knew that angular would be a good fit for this project since it very easily binds changeable data to the view. I also created a ‘chart’ directive attribute tag. This chart directive contains code to initialize whatever element it was inserted into to become a chart. And finally I had one factory that contained all the formulas for calculating the data. I tried using as much as angular offered in intelligently splitting up the tasks of the site.</p>
+
+<h2 id="the-good-the-bad">The good, the bad</h2>
+
+<p>This is actually the first site I made that was incredibly well received. Unlike my other sites, marketing this one was no problem. I posted it once on reddit/r/dota2 where it quickly rose through the ranks with nothing but positive praise. I felt very alive after receiving the first bits of feedback. I quickly continued to work after the initial release creating more graphs, more analysis, preset configurations, sharable configurations, layout changes (you can actually see the <a href="https://github.com/lee-jason/682Visualizer/commits/gh-pages">history here</a>). I keep realizing that community feedback really drives me forward and motivates me to a degree that I can’t find anywhere else. Community figures were tweeting about my site, forums and fan pages in China, Germany and Russia were referring to my page, the page was being shared organically through Twitter and Facebook. It was actually quite amazing for me. I’m really proud of the fact that I was finally first to market in something. Usually most of my ideas are imitations or alterations on an already existing idea, but this time I got lucky.</p>
+
+<p>That’s all well and good but of course there’s some bad. The bad is that the page is not optimized in a degree that I would be proud of. Granted, the application is very JavaScript heavy in the amount of calculation and redraws required from both the charting library and angular but playing with the sliders produces choppy animation. Optimizing that page to for its redraws to be at 60 frames per second was not my highest priority but it would be a good assignment to bury myself in (later). I’m also a little ashamed that I wasn’t able to produce a proper mobile/tablet view. According to Google Analytics, about 10-15% of hits were coming in from tablets which is expected. I anticipated a mobile design view would have taken too much effort for it to be worth it. I could only have imagined a site redesign with unique scripts to support a program with this many charts, knobs, and buttons.</p>
+
+<p>Well there you have it. Although this site might not be useful to you random reader but it definitely should be useful to the Dota 2 enthusiast.</p>
+
+  </article>
+
+  
+  <hr>
+
+  <div class="related">
+    <h2>Other Posts</h2>
+    
+      <li><a href="/adventures-in-vibe-coding/" title="Adventures in Vibe Coding">Adventures in Vibe Coding
+       &nbsp; <span class="post-meta">September 30, 2025</span></a>
+    
+      <li><a href="/fitting-room-retrospective/" title="FittingRoom Postmortem">FittingRoom Postmortem
+       &nbsp; <span class="post-meta">August 20, 2025</span></a>
+    
+      <li><a href="/blog-migration-postmortem/" title="Blog migration postmortem">Blog migration postmortem
+       &nbsp; <span class="post-meta">July 16, 2025</span></a>
+    
+  </div>
+  
+  <div class="comments">
+    <div id="disqus_thread"></div>
+<script>
+    /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /*
+    var disqus_config = function () {
+    this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://jihoon222.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+  </div>
+</div>
+
+<script>
+var anchorForId = function (id) {
+  var anchor = document.createElement("a");
+  anchor.className = "header-link";
+  anchor.href      = "#" + id;
+  anchor.innerHTML = "<i class=\"fas fa-link\"></i>";
+  return anchor;
+};
+
+var linkifyAnchors = function (level, containingElement) {
+  var headers = containingElement.getElementsByTagName("h" + level);
+  for (var h = 0; h < headers.length; h++) {
+    var header = headers[h];
+
+    if (typeof header.id !== "undefined" && header.id !== "") {
+      header.appendChild(anchorForId(header.id));
+    }
+  }
+};
+
+document.onreadystatechange = function () {
+  if (this.readyState === "complete") {
+    linkifyAnchors(3, document.body);
+    linkifyAnchors(4, document.body);
+    linkifyAnchors(5, document.body);
+    linkifyAnchors(6, document.body);
+  }
+};
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

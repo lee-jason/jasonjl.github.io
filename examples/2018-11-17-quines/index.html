@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width initial-scale=1">
+
+  <title>Quines</title>
+  <meta name="description" content="">
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://jasonjl.me/css/style.css">
+  <link rel="canonical" href="https://jasonjl.mehttps://jasonjl.me/examples/2018-11-17-quines/">
+  <link rel="alternate" type="application/atom+xml" title="Jason Lee" href="https://jasonjl.mehttps://jasonjl.me/feed.xml" />
+  <!-- Basic favicon -->
+  <link rel="icon" type="image/x-icon" href="https://jasonjl.me/assets/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://jasonjl.me/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://jasonjl.me/assets/favicon/favicon-16x16.png">
+
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="https://jasonjl.me/assets/favicon/apple-touch-icon.png">
+
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZYPVTW1ZCS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-ZYPVTW1ZCS');
+</script>
+
+</head>
+
+  <body>
+    <div class="wrapper">
+      <div class="page-content">
+        <div class="post">
+  <h2>Jason J Lee</h2>
+  <header class="post-header">
+    <a href=" https://jasonjl.me " class="home-link">← Home</a>
+    <h1 class="post-title">Quines</h1>
+    <p class="post-meta">November 17, 2018</p>
+    
+  </header>
+  <div>
+
+
+  </div>
+
+  <article class="post-content">
+    <p>Quines are programs that when executed produce a copy of their own source code.
+Writing quines is a neat little programming exercise and turns out to be more difficult than one would think at first.</p>
+
+<p><strong>Disclaimer</strong>: If you never attempted to write your own quine, you should <em>definitely</em> stop reading this article.
+Come back when you managed to get your own quine working or at least spent a good amount of time in trying to do so.
+Quines are interesting in that the solution looks fairly trivial even though it can be very hard to come up with it on your own.</p>
+
+<p>Originally, quines were proposed by Douglas Hofstadter in <em>Gödel, Escher, Bach</em> <a href="#citation-1" id="ref-1" class="ref-link">[1]</a>
+.
+Ken Thompson’s Turing Award lecture <em>Reflecting on Trusting Trust</em> <a href="#citation-2" id="ref-2" class="ref-link">[2]</a>
+ also begins with a description of them:</p>
+
+<blockquote>
+  <p>”In college, before video games, we would amuse ourselves by posing programming exercises. One of the favorites was to write the shortest self-reproducing program. Since this is an exercise divorced from reality, the usual vehicle was FORTRAN. Actually, FORTRAN was the language of choice for the same reason that three-legged races are popular.“ – Ken Thompson</p>
+</blockquote>
+
+<p>We will get back to that speech later on.</p>
+
+<h3 id="rules">Rules</h3>
+
+<p>The rules are fairly straightforward.
+The program, when compiled and executed, needs to output its own source code.
+It must do so without using IO to read its own source code file.
+In other words, a shell program such as this one would not be allowed:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cat </span>script.sh
+</code></pre></div></div>
+
+<p>For the sake of keeping the challenge interesting, an empty program is also disallowed.
+Technically, it outputs its own source code, the empty string, but that would be a boring solution.</p>
+
+<h3 id="a-first-attempt">A first attempt</h3>
+
+<p>How hard could trying to output the source code be?
+Can we not simply print it?</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">print</span><span class="p">(</span><span class="sh">'</span><span class="s">print(</span><span class="sh">"</span><span class="s">x</span><span class="sh">"</span><span class="s">)</span><span class="sh">'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>It quickly becomes evident that this approach will not work.
+We are missing the outer <code class="language-plaintext highlighter-rouge">print</code> and adding more <code class="language-plaintext highlighter-rouge">print</code> statements to the string will not change that.</p>
+
+<h3 id="ruby-preliminaries">Ruby preliminaries</h3>
+
+<p>In the remaining blog post, I am going to use Ruby since its syntax makes it a little bit more elegant to write a quine.
+Still, the resulting code is fairly similar to Python.</p>
+
+<p>Ruby has <a href="https://en.wikipedia.org/wiki/Here_document">heredocs</a>, which allow us to store strings without needing to worry about escaping quotes.
+It turns out that this is extremely useful for what we want to do.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">s</span> <span class="o">=</span> <span class="o">&lt;&lt;-</span><span class="no">STR</span><span class="sh">
+Everything until STR on its own line is part of the string.
+We do not need to escape " or '
+</span><span class="no">STR</span>
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">puts</code> function is similar to <code class="language-plaintext highlighter-rouge">print</code> in Python.
+Adding several arguments means every argument is printed on its own line:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">puts</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The result is equivalent to <code class="language-plaintext highlighter-rouge">print(1); print(2); print(3)</code> in Python:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1
+2
+3
+</code></pre></div></div>
+
+<h3 id="data-and-code">Data and code</h3>
+
+<p>The solution to writing a quine is to divide the program into <em>data</em> and <em>code</em> parts.
+In the data section, we store the code section as a string <code class="language-plaintext highlighter-rouge">s</code>.
+The subsequent code section is responsible for reproducing the entire program.
+It does this by printing <code class="language-plaintext highlighter-rouge">s</code> twice:</p>
+
+<ol>
+  <li>The first time, we print <code class="language-plaintext highlighter-rouge">s</code> but surround it with strings to print code for storing it in a variable <code class="language-plaintext highlighter-rouge">s</code>. This reproduces the data section</li>
+  <li>The second time, we just print <code class="language-plaintext highlighter-rouge">s</code>. Since <code class="language-plaintext highlighter-rouge">s</code> contains the code section itself, this perfectly reproduces it</li>
+</ol>
+
+<p>Since we printed both the data and the code sections, we managed to reproduce the entire program.
+In Ruby, this might look something like this:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">s</span> <span class="o">=</span> <span class="o">&lt;&lt;-</span><span class="no">STR</span><span class="sh">
+puts("s = &lt;&lt;-STR", s, "STR", s)
+</span><span class="no">STR</span>
+<span class="nb">puts</span><span class="p">(</span><span class="s2">"s = &lt;&lt;-STR"</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="s2">"STR"</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The first three arguments to <code class="language-plaintext highlighter-rouge">puts</code> print the data section, while the remaining one takes care of the code section.
+We can confirm that it works by running the program and piping its output back to Ruby, to run it again:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>ruby quine.rb | ruby
+</code></pre></div></div>
+
+<p>As expected, this outputs our program again, as would piping it to Ruby another time.
+Success!</p>
+
+<p>The original goal was to write the shortest possible quine.
+But since this just reduces down to <a href="https://en.wikipedia.org/wiki/Code_golf">code golfing</a>, it is not part of this blog post.</p>
+
+<h3 id="digression-a-python-equivalent">Digression: A Python equivalent</h3>
+
+<p>The equivalent in Python is not too different:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">s</span> <span class="o">=</span> <span class="sh">'</span><span class="s">print(</span><span class="sh">"</span><span class="s">s = </span><span class="sh">"</span><span class="s">, repr(s)); print(s)</span><span class="sh">'</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">s =</span><span class="sh">"</span><span class="p">,</span> <span class="nf">repr</span><span class="p">(</span><span class="n">s</span><span class="p">));</span> <span class="nf">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">repr</code> returns the representation of a string.
+For example, <code class="language-plaintext highlighter-rouge">repr("a")</code> would return <code class="language-plaintext highlighter-rouge">'"a"'</code>.
+This also allows us to circumvent the problem of escaping strings.
+However, it is a bit less elegant since we need to make the assumption that <code class="language-plaintext highlighter-rouge">repr</code> is going to surround the input with <code class="language-plaintext highlighter-rouge">'</code>, rather than <code class="language-plaintext highlighter-rouge">"</code>.</p>
+
+<p>Again, we can confirm that this works:</p>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>python3 quine.py | python3
+</code></pre></div></div>
+
+<p>Of course, handling the escaping logic ourselves, or adding new lines to make the program more readable, would also be possible.
+It would just increase the complexity of the script a little bit.</p>
+
+<h3 id="programs-that-produce-self-producing-programs">Programs that produce self-producing programs</h3>
+
+<p>Storing the actual code twice, once as a string in the data section and then as code, is not too elegant.
+A cooler idea is to write a program that outputs a quine.
+To do so, we create a new file <code class="language-plaintext highlighter-rouge">quine_producer.rb</code>.
+In the data section, we use IO to read the second line of its own file, which corresponds to the code section:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">s</span> <span class="o">=</span> <span class="no">IO</span><span class="p">.</span><span class="nf">readlines</span><span class="p">(</span><span class="s2">"quine_producer.rb"</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+<span class="nb">puts</span><span class="p">(</span><span class="s1">'s = &lt;&lt;-STR'</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="s1">'STR'</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>This program uses IO and does not output its own program, so it cannot be a quine.
+However, its output is a program, equal to <code class="language-plaintext highlighter-rouge">quine.rb</code>, which does not use IO and produces its own source code:</p>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>ruby quine_producer.rb | ruby | ruby
+</code></pre></div></div>
+
+<p>At this point, we could actually add more code to the program, while still keeping it a quine.
+By reading everything after the first line, we can add anything we want to.</p>
+
+<h3 id="we-need-to-go-deeper">We need to go deeper</h3>
+
+<p>The <a href="https://github.com/mame/quine-relay">quine relay</a> takes this idea to the extreme.
+Instead of just printing its own source code, the program is a Ruby script that outputs a Rust program which outputs a Scala program and so on, until at some point the original Ruby code is reproduced.
+Again, if you have not attempted to implement something like this, I would recommend taking some time to do so before reading on.</p>
+
+<figure>
+	<img src="https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts//" width="" style="margin: auto" />
+	<figcaption>A visualization of the quine chain</figcaption>
+</figure>
+
+<p>Conceptually, the quine relay is actually not a huge step above of what we already implemented.
+Let’s try to create a minimal version based on what we already have.
+We will write a Python script that outputs a Ruby program which should reproduce our original program.
+To get by without escaping quotes, we will start from the Python version.
+This allows us to fully use Ruby’s heredoc.</p>
+
+<p>The Ruby program here can actually be rather simple.
+It just needs to print its input, which is the original Python script.
+Adding more languages to this chain (or rather circle) would be trivial, we just need to wrap a lot of <code class="language-plaintext highlighter-rouge">print</code> statements.</p>
+
+<p>The Python script does most of the work:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">s</span> <span class="o">=</span> <span class="sh">'</span><span class="s">print(</span><span class="sh">"</span><span class="s">puts &lt;&lt;-STR</span><span class="sh">"</span><span class="s">); print(</span><span class="sh">"</span><span class="s">s =</span><span class="sh">"</span><span class="s">, repr(s)); print(s); print(</span><span class="sh">"</span><span class="s">STR</span><span class="sh">"</span><span class="s">)</span><span class="sh">'</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">puts &lt;&lt;-STR</span><span class="sh">"</span><span class="p">);</span> <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">s =</span><span class="sh">"</span><span class="p">,</span> <span class="nf">repr</span><span class="p">(</span><span class="n">s</span><span class="p">));</span> <span class="nf">print</span><span class="p">(</span><span class="n">s</span><span class="p">);</span> <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">STR</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The code is not getting more readable at this point, but we really just wrapped the code section with <code class="language-plaintext highlighter-rouge">print</code> statements for Ruby’s <code class="language-plaintext highlighter-rouge">puts</code> and heredoc.
+Running the script yields a Ruby program which outputs our original Python script.
+We can keep going in that circle:</p>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>python3 quine-relay.py | ruby | python3 | ruby | python3
+</code></pre></div></div>
+
+<p>The remaining part of scaling this up to more languages is handling the escaping of quotes.
+The above code only works because the heredoc waits for a line that solely contains <code class="language-plaintext highlighter-rouge">STR</code>.
+Adding more languages without heredocs would require logic for escaping.</p>
+
+<h3 id="reflections-on-trusting-trust">Reflections on Trusting Trust</h3>
+
+<p>Ken Thompson’s Turing Award speech <a href="#citation-2" id="ref-2" class="ref-link">[2]</a>
+ begins by introducing quines.
+It then goes on to show another interesting case of self-reproducing programs, in the area of compilers.</p>
+
+<p>Many languages have compilers that were written in the language itself.
+C used to be a popular example of this.
+To compile C, people used to use a compiler written in C.
+Java, Go, Rust and Haskell are some languages where this is still true to this day.
+I still find it amazing that this works, even though I first learned about it years ago.</p>
+
+<p>To be able to pull this off, we need to <a href="https://en.wikipedia.org/wiki/Bootstrapping_%28compilers%29">bootstrap</a>.
+The very first compiler we use has to be written in a different language.
+Once it is functional, the compiler can be reimplemented in the language itself and is built using the original compiler.
+From then on, the new compiler can be used.</p>
+
+<p>Now, let’s suppose someone wanted to add malicious code to the compiler.
+Whenever it is used to compile <code class="language-plaintext highlighter-rouge">login</code>, it should add a backdoor.
+Such code in the compiler would quickly be found and removed.</p>
+
+<p>However, an attacker could also implement another check to see if the compiler itself is getting compiled.
+If so, the malicious code with both checks is added.
+Otherwise, if neither the compiler nor <code class="language-plaintext highlighter-rouge">login</code> are getting compiled, nothing is added.
+If the attacker is able to replace the system compiler, they could then remove anything malicious from the compiler source code.
+However, whenever someone is compiling something new, the backdoors could get added.</p>
+
+<p>Thompson calls this a <em>learning</em> program.
+We <em>teach</em> it once to add the malicious code.
+After recompiling it, the program knows how to add the code and keeps on reproducing it.</p>
+
+<p>It would be impossible to get rid of the malicious code since it is reproduced every time the compiler gets recompiled.
+A <a href="https://www.quora.com/What-is-a-coders-worst-nightmare/answer/Mick-Stute">post on Quora</a> describes this exact attack.
+The only way not to have the backdoor would be to use a different compiler.
+The fact that this is possible leads to further questions: What tools and systems can we really trust? Since we always built on top of something existing, it is impossible to be fully certain that no malicious, self-reproducing code is added anywhere.</p>
+
+<h3 id="references">References</h3>
+
+<ol class="references-list">
+	
+	<li><span id="citation-1">Hofstadter, Douglas R. "Gödel, Escher, Bach." New York: Vintage Books, 1980.
+		
+		
+		
+		<a href="#ref-1" class="ref-backlink"></a>
+		
+	</span>
+</li>
+
+	<li><span id="citation-2">Thompson, Ken. "Reflections on trusting trust." Communications of the ACM 27.8 (1984): 761-763.
+		 <a href="https://www.cs.colorado.edu/~jrblack/class/csci6268/s14/p761-thompson.pdf" class="pdf-link"></a> 
+		 <a href="https://github.com/florian/reading-notes/blob/master/papers/012_Reflections_on_Trusting_Trust.md" class="notes-link"></a> 
+		
+		<a href="#ref-2" class="ref-backlink"></a>
+		
+	</span>
+</li>
+
+
+</ol>
+
+<script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
+
+<script>
+var alreadySeenRefs = {};
+
+document.querySelectorAll(".ref-link").forEach(function (a) {
+  var id = a.getAttribute("id");
+  var citationPath = "#" + id.replace("ref", "citation");
+
+  tippy(a, {
+  	  content: document.querySelector(citationPath).textContent, placement: "bottom",
+  	  arrow: true
+  })
+
+  if (id in alreadySeenRefs) return;
+
+  var p = a.closest("p");
+  var currentId = p.getAttribute("id");
+
+  if (currentId == null) {
+    p.setAttribute("id", id)
+  } else {
+    document.querySelector(citationPath + " a.ref-backlink").setAttribute("href", "#" + currentId)
+  }
+
+  alreadySeenRefs[id] = true;
+  a.removeAttribute("id")
+})
+</script>
+
+
+  </article>
+
+  
+  <div class="comments">
+    <div id="disqus_thread"></div>
+<script>
+    /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /*
+    var disqus_config = function () {
+    this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://jihoon222.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+  </div>
+</div>
+
+<script>
+var anchorForId = function (id) {
+  var anchor = document.createElement("a");
+  anchor.className = "header-link";
+  anchor.href      = "#" + id;
+  anchor.innerHTML = "<i class=\"fas fa-link\"></i>";
+  return anchor;
+};
+
+var linkifyAnchors = function (level, containingElement) {
+  var headers = containingElement.getElementsByTagName("h" + level);
+  for (var h = 0; h < headers.length; h++) {
+    var header = headers[h];
+
+    if (typeof header.id !== "undefined" && header.id !== "") {
+      header.appendChild(anchorForId(header.id));
+    }
+  }
+};
+
+document.onreadystatechange = function () {
+  if (this.readyState === "complete") {
+    linkifyAnchors(3, document.body);
+    linkifyAnchors(4, document.body);
+    linkifyAnchors(5, document.body);
+    linkifyAnchors(6, document.body);
+  }
+};
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

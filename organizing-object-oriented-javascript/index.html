@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width initial-scale=1">
+
+  <title>Organizing Object Oriented Javascript</title>
+  <meta name="description" content="Object oriented Javascript isn’t really a new concept. For years people have been trying to make JavaScript more familiar towards object oriented programmers by perverting its naturally prototypica...">
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://jasonjl.me/css/style.css">
+  <link rel="canonical" href="https://jasonjl.mehttps://jasonjl.me/organizing-object-oriented-javascript/">
+  <link rel="alternate" type="application/atom+xml" title="Jason Lee" href="https://jasonjl.mehttps://jasonjl.me/feed.xml" />
+  <!-- Basic favicon -->
+  <link rel="icon" type="image/x-icon" href="https://jasonjl.me/assets/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://jasonjl.me/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://jasonjl.me/assets/favicon/favicon-16x16.png">
+
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="https://jasonjl.me/assets/favicon/apple-touch-icon.png">
+
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZYPVTW1ZCS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-ZYPVTW1ZCS');
+</script>
+
+</head>
+
+  <body>
+    <div class="wrapper">
+      <div class="page-content">
+        <div class="post">
+  <h2>Jason J Lee</h2>
+  <header class="post-header">
+    <a href=" https://jasonjl.me " class="home-link">← Home</a>
+    <h1 class="post-title">Organizing Object Oriented Javascript</h1>
+    <p class="post-meta">December 10, 2014</p>
+    
+  </header>
+  <div>
+
+
+  </div>
+
+  <article class="post-content">
+    <p>Object oriented Javascript isn’t really a new concept. For years people have been trying to make JavaScript more familiar towards object oriented programmers by perverting its naturally prototypical architecture towards something more classical. There are many guides on how to create classes with private and public members and inheritance but there aren’t as many guides on how to organize these into an actual usable and familiar project structure. I think the primary problem in why developers have so many varying ways of organizing their Javascript code is in that the language was never really meant to be built to such huge degrees. Large scale Javascript projects are popping up with the rise in popularity of NodeJS and large-scale front end frameworks that try to organize the usual mess that comes from hacking together a ‘native’ application experience on the web. The need for organized module JS is becoming increasingly important which is why I think I’ve found a pretty decent solution from the wide amount of options out there.</p>
+
+<p>JavaScript can simulate classes, but how do you organize them in files? Native Java can support a single class in a single file as well as any additional subclasses within that file. Different classes are brought together in Java by specifying its dependencies at the beginning of each file with the ‘import’ keyword. Unfortunately at this current state there is no largely supported ‘import’ feature for JavaScript which brings JavaScript developers out of the woodwork to make up functionality for it. <a href="http://requirejs.org/">RequireJS</a> seems to be a pretty good module loader that emulates the functionality of an import. This means that it’s no longer necessary to rely on properly ordering your dependencies in <code class="language-plaintext highlighter-rouge">&lt;script&gt;</code> tags in your html, but rather declare dependencies directly in the JavaScript files themselves. This also means that you can just insert the script tag for just the RequireJS file in the html. This file will be the entry point of the program and simulates the <code class="language-plaintext highlighter-rouge">public static void main(String args[])</code> function for Java. Imports is a pretty awesome feature that JavaScript was missing in creating clean modular object oriented JavaScript.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c1">//the equivalent of import Class1; import Class2;</span>
+    <span class="nf">require</span><span class="p">([</span><span class="dl">"</span><span class="s2">./class1</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">./class2</span><span class="dl">"</span><span class="p">],</span> <span class="kd">function</span><span class="p">(</span><span class="nx">Class1</span><span class="p">,</span> <span class="nx">Class2</span><span class="p">){</span>
+        <span class="kd">var</span> <span class="nx">class1</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Class1</span><span class="p">();</span>
+        <span class="kd">var</span> <span class="nx">class2</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Class2</span><span class="p">();</span>
+    <span class="p">});</span>
+</code></pre></div></div>
+
+<p>Okay so now we have a way to ‘import’ js files together and specify dependencies, now we need to see what exactly we expose in these files. JavaScript has ways of hiding information from outside classes but RequireJS also has the option to choose which paramters/functions to expose to the outside world. I’ve been taking a look at the <a href="https://github.com/adobe/brackets">Brackets</a> source code and the approach that they take is to expose public methods and properties through RequireJS’s export object. This works as a method of information hiding but I think the problem with this is that instead of using JavaScripts construct of information hiding by using scoped variables in functions, the decision to create public or private variables/methods is left up to whether the human behind the code wants to expose it. It also changes the traditional view of JavaScript classes meaning someone who is already familiar with JavaScript will have to re-familiarize with how a RequireJS project is set up since methods and variables don’t have to be encapsulated within a class function. Then again there is always a learning curve when an unfamiliar framework or library is used in a project.</p>
+
+<p>RequireJS gives us a lot of options in what to show and what to hide. Traditionally RequireJS allows us to return a single object. This can be a primitive, or a JSON object, an object with properties, or a function. The method that Brackets took is through exposing several properties and objects defined in each JavaScript file through the ‘exports’ object. This method works as you can see from the <a href="https://github.com/adobe/brackets">Brackets source code</a> but it assumes that the methods exposed through this object is from a singleton object. Further internal classes can be made for each singleton object and exposed through RequireJS <code class="language-plaintext highlighter-rouge">export</code> object. A good file to look at for an example would be the <a href="https://github.com/adobe/brackets/blob/master/src/command/Menus.js">Menus.js</a>. Checkout the exports at the bottom of the page, it exposes some of the variables and functions defined earlier but also ignores others keeping those private. As a naming convention they prefix these private attributes with an ‘_’. The export also exposes inner classes. These classes are created in a more traditional object oriented JavaScript fashion as in through a function. Check out its <a href="http://brackets.io/docs/current/modules/command/Menus.html">api page</a> to get a better idea of the variables, functions, and classes each file exposes.</p>
+
+<p>I know there’s many ways to organize a JavaScript project but I don’t agree with Bracket’s implementation entirely. I think the way that Brackets exports the file as an already created singleton object is something that’s not entirely familiar with people coming in from Java/C# backgrounds. While JavaScript is really good about creating singleton objects, it’d be more familiar for Java programmers to only expose the constructor function for each file. Each JavaScript class would then be created in the traditional <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Introduction_to_Object-Oriented_JavaScript">Javascript fashion</a> and methods would be <a href="http://javascript.crockford.com/private.html">public or private</a> based off the standard JavaScript way made possible through function scoping and closure. I think this method of project organization would be more simpler due to people not having to adjust their ideas on what they traditionally know about object oriented JavaScript from Java/C# while also practicing a separation of code.</p>
+
+<p>Here’s a pretty contrived example of what I’m talking about.</p>
+
+<p><a href="https://github.com/lee-jason/BlogExamples/tree/master/RequireJSExample">source code</a></p>
+
+<p>So in this program I’m modeling a Car object that takes in a Person object as a driver. These are split into separate JavaScript files. The index.html file has a reference to the require.js file which calls main.js as the program starter. The main.js is where a Car and Person object will be created to model a car with a driver. RequireJS allows us to require Car and Person as a dependency where it is passed into the main program as function parameters. Both car.js and person.js simply return JavaScript class functions where users are free to create objects from. This is the closest setup I can imagine that simulates a classical object oriented program structure.</p>
+
+<p>Here’s the content if you’re too lazy to click on the source link</p>
+
+<p><strong>main.js</strong></p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">HTML</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;&lt;</span><span class="sr">/head</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
+            <span class="o">&lt;</span><span class="nx">h1</span><span class="o">&gt;</span><span class="nx">RequireJS</span> <span class="nx">Module</span> <span class="nx">Example</span><span class="o">&lt;</span><span class="sr">/h1</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="nx">script</span> <span class="nx">data</span><span class="o">-</span><span class="nx">main</span><span class="o">=</span><span class="dl">"</span><span class="s2">js/main</span><span class="dl">"</span> <span class="nx">src</span><span class="o">=</span><span class="dl">"</span><span class="s2">js/require.js</span><span class="dl">"</span><span class="o">&gt;&lt;</span><span class="sr">/script</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="sr">/body</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="sr">/html</span><span class="err">&gt;
+</span></code></pre></div></div>
+
+<p>Note that main.js imports Car and Person and simulates a person entering a car and going.</p>
+
+<p><strong>car.js</strong></p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nf">require</span><span class="p">([</span><span class="dl">"</span><span class="s2">./car</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">./person</span><span class="dl">"</span><span class="p">],</span> <span class="kd">function</span><span class="p">(</span><span class="nx">Car</span><span class="p">,</span> <span class="nx">Person</span><span class="p">){</span>
+        <span class="kd">var</span> <span class="nx">civic</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Car</span><span class="p">(</span><span class="dl">"</span><span class="s2">sedan</span><span class="dl">"</span><span class="p">);</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">car type: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">civic</span><span class="p">.</span><span class="nx">type</span><span class="p">);</span>
+
+        <span class="kd">var</span> <span class="nx">person</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Person</span><span class="p">(</span><span class="dl">"</span><span class="s2">Jason</span><span class="dl">"</span><span class="p">);</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">person name: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">person</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span>
+
+        <span class="nx">civic</span><span class="p">.</span><span class="nf">go</span><span class="p">();</span> <span class="c1">//"no response"</span>
+        <span class="nx">civic</span><span class="p">.</span><span class="nf">loadDriver</span><span class="p">(</span><span class="nx">person</span><span class="p">);</span>
+        <span class="nx">civic</span><span class="p">.</span><span class="nf">go</span><span class="p">();</span> <span class="c1">//"no response"</span>
+        <span class="nx">civic</span><span class="p">.</span><span class="nf">start</span><span class="p">();</span>
+        <span class="nx">civic</span><span class="p">.</span><span class="nf">go</span><span class="p">();</span> <span class="c1">//"vroom"</span>
+        <span class="nx">civic</span><span class="p">.</span><span class="nf">exitDriver</span><span class="p">();</span>
+        <span class="nx">civic</span><span class="p">.</span><span class="nf">go</span><span class="p">();</span> <span class="c1">//"no response"</span>
+    <span class="p">});</span>
+</code></pre></div></div>
+
+<p>Note that properties ‘on’ and ‘driver’ are arbitrarily private as an example to showcase that both privileged methods as well as prototyped methods work when imported into main.js</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nf">define</span><span class="p">([</span><span class="dl">'</span><span class="s1">./person</span><span class="dl">'</span><span class="p">],</span> <span class="kd">function</span><span class="p">(</span><span class="nx">Person</span><span class="p">){</span>
+        <span class="kd">function</span> <span class="nf">Car</span><span class="p">(</span><span class="nx">type</span><span class="p">){</span>
+            <span class="kd">var</span> <span class="nx">on</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+            <span class="kd">var</span> <span class="nx">driver</span><span class="p">;</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">type</span> <span class="o">=</span> <span class="nx">type</span><span class="p">;</span>
+
+            <span class="k">this</span><span class="p">.</span><span class="nx">start</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span>
+                <span class="nx">on</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">stop</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span>
+                <span class="nx">on</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">isOn</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span>
+                <span class="k">return</span> <span class="nx">on</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">loadDriver</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">person</span><span class="p">){</span>
+                <span class="k">if</span><span class="p">(</span><span class="nx">person</span> <span class="k">instanceof</span> <span class="nx">Person</span><span class="p">){</span>
+                    <span class="nx">driver</span> <span class="o">=</span> <span class="nx">person</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="k">else</span><span class="p">{</span>
+                    <span class="nx">driver</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">hasDriver</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span>
+                <span class="k">return</span> <span class="o">!!</span><span class="nx">driver</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="nx">Car</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">go</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span>
+            <span class="k">if</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nf">isOn</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nf">hasDriver</span><span class="p">()){</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">vroom</span><span class="dl">"</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">else</span><span class="p">{</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">no response</span><span class="dl">"</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="nx">Car</span><span class="p">;</span>
+    <span class="p">});</span>
+</code></pre></div></div>
+
+<p><strong>person.js</strong></p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nf">define</span><span class="p">([],</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="kd">var</span> <span class="nx">Person</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">){</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="nx">name</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="nx">Person</span><span class="p">;</span>
+    <span class="p">});</span>
+</code></pre></div></div>
+
+  </article>
+
+  
+  <hr>
+
+  <div class="related">
+    <h2>Other Posts</h2>
+    
+      <li><a href="/adventures-in-vibe-coding/" title="Adventures in Vibe Coding">Adventures in Vibe Coding
+       &nbsp; <span class="post-meta">September 30, 2025</span></a>
+    
+      <li><a href="/fitting-room-retrospective/" title="FittingRoom Postmortem">FittingRoom Postmortem
+       &nbsp; <span class="post-meta">August 20, 2025</span></a>
+    
+      <li><a href="/blog-migration-postmortem/" title="Blog migration postmortem">Blog migration postmortem
+       &nbsp; <span class="post-meta">July 16, 2025</span></a>
+    
+  </div>
+  
+  <div class="comments">
+    <div id="disqus_thread"></div>
+<script>
+    /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /*
+    var disqus_config = function () {
+    this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://jihoon222.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+  </div>
+</div>
+
+<script>
+var anchorForId = function (id) {
+  var anchor = document.createElement("a");
+  anchor.className = "header-link";
+  anchor.href      = "#" + id;
+  anchor.innerHTML = "<i class=\"fas fa-link\"></i>";
+  return anchor;
+};
+
+var linkifyAnchors = function (level, containingElement) {
+  var headers = containingElement.getElementsByTagName("h" + level);
+  for (var h = 0; h < headers.length; h++) {
+    var header = headers[h];
+
+    if (typeof header.id !== "undefined" && header.id !== "") {
+      header.appendChild(anchorForId(header.id));
+    }
+  }
+};
+
+document.onreadystatechange = function () {
+  if (this.readyState === "complete") {
+    linkifyAnchors(3, document.body);
+    linkifyAnchors(4, document.body);
+    linkifyAnchors(5, document.body);
+    linkifyAnchors(6, document.body);
+  }
+};
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

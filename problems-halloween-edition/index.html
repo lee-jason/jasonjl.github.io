@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width initial-scale=1">
+
+  <title>Problems: Halloween Edition</title>
+  <meta name="description" content="Problems: Halloween Edition ">
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://jasonjl.me/css/style.css">
+  <link rel="canonical" href="https://jasonjl.mehttps://jasonjl.me/problems-halloween-edition/">
+  <link rel="alternate" type="application/atom+xml" title="Jason Lee" href="https://jasonjl.mehttps://jasonjl.me/feed.xml" />
+  <!-- Basic favicon -->
+  <link rel="icon" type="image/x-icon" href="https://jasonjl.me/assets/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://jasonjl.me/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://jasonjl.me/assets/favicon/favicon-16x16.png">
+
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="https://jasonjl.me/assets/favicon/apple-touch-icon.png">
+
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZYPVTW1ZCS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-ZYPVTW1ZCS');
+</script>
+
+</head>
+
+  <body>
+    <div class="wrapper">
+      <div class="page-content">
+        <div class="post">
+  <h2>Jason J Lee</h2>
+  <header class="post-header">
+    <a href=" https://jasonjl.me " class="home-link">← Home</a>
+    <h1 class="post-title">Problems: Halloween Edition</h1>
+    <p class="post-meta">October 31, 2014</p>
+    
+  
+  
+  
+  
+  
+    <img src="https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/problems-halloween-edition/halloween_graph.png" />
+  
+
+  </header>
+  <div>
+
+
+  </div>
+
+  <article class="post-content">
+    <h1 id="problems-halloween-edition">Problems: Halloween Edition</h1>
+
+<p><strong>Problem:</strong> You’re a kid, and tonight’s the greatest night a kid could have next to Christmas. Halloween night is coming soon and you’re prepping your bags for the trick or treating. The problem is, is that your parents are tired and are only willing to walk a certain number of feet before they call it a night. Given a map detailing the amount of feet between each house and the amount of candy given per house, how do you maximize the amount of candy gained before having to return back home?</p>
+
+<p>Of course, graphing optimization problems. Isn’t this what every kid is thinking on Halloween? I know it was definitely keeping me up last night, even though I don’t trick or treat anymore. This is slightly different from the <a href="http://en.wikipedia.org/wiki/Travelling_salesman_problem">traveling salesman problem</a> in that each location now has a weight, and now the salesman doesn’t need to travel to every location. I guess its a variant of the traveling salesman problem if the salesman’s car had n amount of miles of fuel and the each location had variable amounts of money to be made and he needs to return home by the end of the trip. In this problem, we can assume that the graph is undirected and your house is accessible through a loop. To save some computation time, this algorithm does not cross over visited nodes. Paths will not have intersections.</p>
+
+<h2 id="proposed-solution">Proposed Solution</h2>
+
+<p>So after starting to really think about this problem at 6am and it now being 11am, the problem is not as easy as I thought. I’ve given it some thought and this is what I propose. In order to get the true most optimal path a ton of paths have to be evaluated. A backtrack algorithm would be used to trace down paths starting from the house node going all the way down until it reaches the house node again. This algorithm would be pretty terrible due to there being O(!N) paths but since backtracking is being used we can save ourselves from checking dead-end paths sooner.</p>
+
+<h2 id="a-solution">A Solution</h2>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nc">Class</span> <span class="nc">Node</span><span class="o">{</span>
+        <span class="c1">//Node class contains...</span>
+        <span class="kt">int</span> <span class="n">candyValue</span>
+        <span class="nc">NodesNPaths</span><span class="o">[]</span> <span class="n">connectingNodes</span><span class="o">;</span>
+        <span class="kt">int</span> <span class="n">totalCandyValue</span>
+        <span class="kt">int</span> <span class="n">totalSteps</span>
+        <span class="nc">Node</span> <span class="n">prevNode</span>
+        <span class="kt">boolean</span> <span class="n">visited</span>
+    <span class="o">}</span>
+
+    <span class="c1">//bestPath modifies rootNode to have history of </span>
+    <span class="nc">Node</span> <span class="nf">bestPath</span><span class="o">(</span><span class="nc">Node</span> <span class="n">rootNode</span><span class="o">,</span> <span class="nc">Node</span> <span class="n">currNode</span><span class="o">,</span> <span class="kt">int</span> <span class="n">pathLength</span><span class="o">,</span> <span class="nc">Node</span> <span class="n">prevNode</span><span class="o">,</span> <span class="kt">int</span> <span class="n">stepQuota</span><span class="o">,</span> <span class="kt">boolean</span> <span class="n">initial</span><span class="o">){</span>
+        <span class="c1">//route is a failure when totalsteps is over the stepquota,</span>
+        <span class="c1">//when the node has already been visited AND its not the root node</span>
+        <span class="c1">//its fine to go back to the root node to update its values if its under the step quota and its already been visited.</span>
+        <span class="k">if</span><span class="o">(</span><span class="n">currNode</span><span class="o">.</span><span class="na">totalSteps</span> <span class="o">&gt;</span> <span class="n">stepQuota</span> <span class="o">||</span> <span class="n">currNode</span><span class="o">.</span><span class="na">visited</span> <span class="o">&amp;&amp;</span> <span class="n">currNode</span> <span class="o">!=</span> <span class="n">rootNode</span><span class="o">){</span>
+            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="o">}</span>
+
+        <span class="c1">//replace tally of path of most candy</span>
+        <span class="n">currNode</span><span class="o">.</span><span class="na">totalCandyValue</span> <span class="o">=</span> <span class="n">currNode</span><span class="o">.</span><span class="na">candyValue</span> <span class="o">+</span> <span class="n">prevNode</span><span class="o">.</span><span class="na">totalCandyValue</span><span class="o">;</span>
+        <span class="n">currNode</span><span class="o">.</span><span class="na">totalSteps</span> <span class="o">+=</span> <span class="n">pathLength</span> <span class="o">+</span> <span class="n">prevNode</span><span class="o">.</span><span class="na">totalSteps</span><span class="o">;</span>
+        <span class="n">currNode</span><span class="o">.</span><span class="na">prevNode</span> <span class="o">=</span> <span class="n">prevNode</span><span class="o">;</span>
+        <span class="n">currNode</span><span class="o">.</span><span class="na">visited</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+
+        <span class="k">for</span><span class="o">(</span><span class="nc">Node</span> <span class="n">connectingNode</span> <span class="o">:</span> <span class="n">currNode</span><span class="o">.</span><span class="na">connectingNodes</span><span class="o">){</span>
+            <span class="nc">Node</span> <span class="n">nextNode</span> <span class="o">=</span> <span class="n">bestPath</span><span class="o">(</span><span class="n">rootNode</span><span class="o">,</span> <span class="n">connectingNode</span><span class="o">.</span><span class="na">node</span><span class="o">,</span> <span class="n">connectingNode</span><span class="o">.</span><span class="na">pathLength</span><span class="o">,</span> <span class="nc">Node</span><span class="o">.</span><span class="na">currNode</span><span class="o">,</span> <span class="n">stepQuota</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+            <span class="k">if</span><span class="o">(</span><span class="n">nextNode</span> <span class="o">==</span> <span class="kc">null</span><span class="o">){</span>
+                <span class="c1">//reset node status, so next branch can access this point again</span>
+                <span class="n">currNode</span><span class="o">.</span><span class="na">visited</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+                <span class="k">return</span> <span class="kc">null</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+</code></pre></div></div>
+
+<p>The algorithm above will update the rootNode with the history where we can traverse through and eventually find the best path. So in plain english here’s what’s going on. The method above will recursively dig into the graph in a depth first search. the function will break when it discovers that the path its on exceeds the amount of allotted steps or if the node has been visited and is NOT the root node. This not distinction exists because revisiting the home node is necessary in order to complete the looping path and update the home node’s history and current tally. Each traversed node keeps track of the previous node that it came from as well as a running tally of how many steps it took to get there as well as the amount of candy gained. The function is then called recursively on each of the visited node’s connected paths and the cycle repeats until no more paths exist. I’m not a mathmagician but this algorithm should have a worst case scenario of O(!N + N) where N is number of nodes.</p>
+
+<p>I thought of another addition that allows a path to end earlier before having to dig several nodes deep to reach the step limit. There could be a pre-processing stage where we figure out the shortest path to home from each node. At each node we check to see if our available steps is more than the steps required to go back home. If it is, then the path is a bust and the algorithm can move on to the next path. This time-saving measure over the course of !N calculations could potentially reduce a lot of number crunching even though the algorithm is would still be of factorial time.</p>
+
+<p>This algorithm is pretty terrible and I’m surprised to see that I wasn’t able to find much information on a scenario similar to this. Either I’m using the wrong search terms or people just never were curious about finding optimal paths when both the nodes and edges have weights which I highly doubt.</p>
+
+<p>I would absolutely love to read if anybody else has any insight into these kinds of problems.</p>
+
+  </article>
+
+  
+  <hr>
+
+  <div class="related">
+    <h2>Other Posts</h2>
+    
+      <li><a href="/adventures-in-vibe-coding/" title="Adventures in Vibe Coding">Adventures in Vibe Coding
+       &nbsp; <span class="post-meta">September 30, 2025</span></a>
+    
+      <li><a href="/fitting-room-retrospective/" title="FittingRoom Postmortem">FittingRoom Postmortem
+       &nbsp; <span class="post-meta">August 20, 2025</span></a>
+    
+      <li><a href="/blog-migration-postmortem/" title="Blog migration postmortem">Blog migration postmortem
+       &nbsp; <span class="post-meta">July 16, 2025</span></a>
+    
+  </div>
+  
+  <div class="comments">
+    <div id="disqus_thread"></div>
+<script>
+    /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /*
+    var disqus_config = function () {
+    this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://jihoon222.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+  </div>
+</div>
+
+<script>
+var anchorForId = function (id) {
+  var anchor = document.createElement("a");
+  anchor.className = "header-link";
+  anchor.href      = "#" + id;
+  anchor.innerHTML = "<i class=\"fas fa-link\"></i>";
+  return anchor;
+};
+
+var linkifyAnchors = function (level, containingElement) {
+  var headers = containingElement.getElementsByTagName("h" + level);
+  for (var h = 0; h < headers.length; h++) {
+    var header = headers[h];
+
+    if (typeof header.id !== "undefined" && header.id !== "") {
+      header.appendChild(anchorForId(header.id));
+    }
+  }
+};
+
+document.onreadystatechange = function () {
+  if (this.readyState === "complete") {
+    linkifyAnchors(3, document.body);
+    linkifyAnchors(4, document.body);
+    linkifyAnchors(5, document.body);
+    linkifyAnchors(6, document.body);
+  }
+};
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

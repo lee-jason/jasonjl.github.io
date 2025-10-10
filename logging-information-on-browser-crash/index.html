@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width initial-scale=1">
+
+  <title>Logging Information on Browser Crashes</title>
+  <meta name="description" content="Every now and then your web application does something so wild and unpredictable that it crashes the browser that you’re running it on. In order to create a better product for our users, we would n...">
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://jasonjl.me/css/style.css">
+  <link rel="canonical" href="https://jasonjl.mehttps://jasonjl.me/logging-information-on-browser-crash/">
+  <link rel="alternate" type="application/atom+xml" title="Jason Lee" href="https://jasonjl.mehttps://jasonjl.me/feed.xml" />
+  <!-- Basic favicon -->
+  <link rel="icon" type="image/x-icon" href="https://jasonjl.me/assets/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://jasonjl.me/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://jasonjl.me/assets/favicon/favicon-16x16.png">
+
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="https://jasonjl.me/assets/favicon/apple-touch-icon.png">
+
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZYPVTW1ZCS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-ZYPVTW1ZCS');
+</script>
+
+</head>
+
+  <body>
+    <div class="wrapper">
+      <div class="page-content">
+        <div class="post">
+  <h2>Jason J Lee</h2>
+  <header class="post-header">
+    <a href=" https://jasonjl.me " class="home-link">← Home</a>
+    <h1 class="post-title">Logging Information on Browser Crashes</h1>
+    <p class="post-meta">June 21, 2015</p>
+    
+  
+  
+  
+  
+  
+    <img src="https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/logging-information-on-browser-crash/awsnap.png" />
+  
+
+  </header>
+  <div>
+
+
+  </div>
+
+  <article class="post-content">
+    <p>Every now and then your web application does something so wild and unpredictable that it crashes the browser that you’re running it on. In order to create a better product for our users, we would need to log pertinent information every time our app crashes. Unfortunately there is no way to send a crash log before or during the crash due to the unpredictable nature of the crash and the browser’s web environment no longer working. The best thing to do is to send the logs after the crash. This post will go through a technique to detect when the user’s previous session has crashed so that we can perform the relevant logging actions.</p>
+
+<h2 id="preface">Preface</h2>
+
+<p>Currently I’ve only been able to support this technique on Google’s Chrome and Mozilla’s Firefox browser. This technique takes advantage of these two browser’s support for restorable sessionStorage. The <a href="https://wiki.whatwg.org/wiki/FAQ#What_is_the_WHATWG.3F">WHATWG</a> HTML spec currently describes sessionStorage to delete itself once the browser context ends but also makes a note that browsing contexts can continue to persist even after the browser is closed. This is useful if the browser chooses to save the session to reload it after the user closes the browser window or if the browser window crashes.</p>
+
+<p><a href="https://html.spec.whatwg.org/multipage/webstorage.html#the-sessionstorage-attribute">WHATWG spec on sessionStorage</a></p>
+
+<h2 id="simulating-the-crash">Simulating the Crash</h2>
+
+<p>First, we’ll have to find out ways to simulate crashes on our browsers. Fortunately for our sake, its pretty easy to do for both Mozilla and Chrome.</p>
+
+<h3 id="crashing-on-chrome">Crashing on Chrome</h3>
+
+<ul>
+  <li>Go to the page you want to crash</li>
+  <li>Paste this into your url ‘chrome://crash’</li>
+  <li>Press Enter</li>
+</ul>
+
+<p>That was pretty easy. This brings up Chrome’s ‘Aw Snap!’ error page which simulates as if an irrecoverable error actually happened on the previous site you were on.</p>
+
+<h3 id="crashing-on-firefox">Crashing on Firefox</h3>
+
+<ul>
+  <li>Go to the page you want to crash</li>
+  <li>Open your Task Manager on Windows or Activity Monitor on OSX</li>
+  <li>Find your firefox process and end the process or force quit it</li>
+</ul>
+
+<p>Force stopping the processes trigger’s Firefox’s crash conditions and emulates a real crash scenario. Firefox should ask you to restore your previous tabs along with your previous session as well.</p>
+
+<h3 id="go-ahead-try-it">Go ahead, try it!</h3>
+
+<p>Now that we know how to crash this page, go ahead and try it! When you come back there should be an alert letting you know that you came back from a crash and at what time</p>
+
+<h2 id="acting-on-the-crash">Acting on the Crash</h2>
+
+<p>Now that we know how to crash the browsers we just need to place the code in.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Check if we're coming back from a crash</span>
+<span class="k">if </span><span class="p">(</span><span class="nx">sessionStorage</span><span class="p">.</span><span class="nf">getItem</span><span class="p">(</span><span class="dl">'</span><span class="s1">good_exit</span><span class="dl">'</span><span class="p">)</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">pending</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// We're coming back from a crash</span>
+    <span class="nf">alert</span><span class="p">(</span><span class="dl">'</span><span class="s1">You came back from a crash at </span><span class="dl">'</span> <span class="o">+</span> <span class="k">new</span> <span class="nc">Date</span><span class="p">());</span>
+    <span class="c1">// Do your crash logging here</span>
+    <span class="c1">// You can access any sessionStorage data from the crashed session</span>
+<span class="p">}</span>
+
+<span class="c1">// Set the good_exit flag to pending when the page loads</span>
+<span class="nx">sessionStorage</span><span class="p">.</span><span class="nf">setItem</span><span class="p">(</span><span class="dl">'</span><span class="s1">good_exit</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">pending</span><span class="dl">'</span><span class="p">);</span>
+
+<span class="c1">// Set up listeners for successful exits</span>
+<span class="nb">window</span><span class="p">.</span><span class="nf">addEventListener</span><span class="p">(</span><span class="dl">'</span><span class="s1">beforeunload</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">sessionStorage</span><span class="p">.</span><span class="nf">setItem</span><span class="p">(</span><span class="dl">'</span><span class="s1">good_exit</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">true</span><span class="dl">'</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<p>The code above is checking if the user successfully closes, refreshes, or browses to another page by applying a <code class="language-plaintext highlighter-rouge">good_exit = true</code> flag in our sessionStorage. When the user successfully loads the page, the ‘good_exit’ flag will be set to ‘pending’ as we’re not sure if the user will successfully exit from this session. If the user unsuccessfully closes, refreshes, or browsers to another page and manages to crash the browser, the ‘good_exit’ flag will not be changed to ‘true’ and will stay as ‘pending. Everytime the user loads the page we check whether they’re coming back from a crash. If they are, then we apply our crashalytics code.</p>
+
+<h2 id="things-to-do-after-a-crash">Things to do after a crash</h2>
+
+<p>Remember that your sessionStorage is saved and recovered so anything that your user was doing before the crash can be recovered. This means you can store the last visited url, the time that they visited your site, any actions they have taken on the page, anything that you can store in sessionStorage can be recovered.</p>
+
+<p>Say for instance the last thing the user was doing before the crash was typing a very long response in a text box. You can save the contents of the text box every few seconds into sessionStorage so that you can reload it once the user comes back from the crash. Or if you just want some analytics on the last actions the user took you can create a sessionStorage item to log and trace the actions taken by the user by listening to clicks and key inputs on your document. When the visitor returns you can post that information back to your server so you have something to go on when trying to fix your buggy site. Or when a user comes back to your page you can directly ask them to submit a bug report about what they were doing before they crashed. Many native desktop programs already do something like this and now you too can bring this feature to your buggy web application!</p>
+
+<h2 id="caveats">Caveats</h2>
+
+<p>An already listed caveat is this may or may not currently work for Internet Explorer or Safari. I wasn’t able to reliable crash those browsers to test whether they bring back sessions after crashes. Another caveat is that since sessionStorage content isn’t shared between tabs, users will have to refresh or reload the same tab with the same sessionStorage in order for the crash logging code to execute. If users open a new tab to connect after a crash then there will be no record of there being a crash. It will act as if you started a new browser session. As you can see this method isn’t 100% reliable, but it does give options to cover some of your user base.</p>
+
+<p><em>tested on Chrome version 43.0.2357.81 and Firefox 38.0.5 on June 21, 2015</em></p>
+
+  </article>
+
+  
+  <hr>
+
+  <div class="related">
+    <h2>Other Posts</h2>
+    
+      <li><a href="/adventures-in-vibe-coding/" title="Adventures in Vibe Coding">Adventures in Vibe Coding
+       &nbsp; <span class="post-meta">September 30, 2025</span></a>
+    
+      <li><a href="/fitting-room-retrospective/" title="FittingRoom Postmortem">FittingRoom Postmortem
+       &nbsp; <span class="post-meta">August 20, 2025</span></a>
+    
+      <li><a href="/blog-migration-postmortem/" title="Blog migration postmortem">Blog migration postmortem
+       &nbsp; <span class="post-meta">July 16, 2025</span></a>
+    
+  </div>
+  
+  <div class="comments">
+    <div id="disqus_thread"></div>
+<script>
+    /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /*
+    var disqus_config = function () {
+    this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://jihoon222.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+  </div>
+</div>
+
+<script>
+var anchorForId = function (id) {
+  var anchor = document.createElement("a");
+  anchor.className = "header-link";
+  anchor.href      = "#" + id;
+  anchor.innerHTML = "<i class=\"fas fa-link\"></i>";
+  return anchor;
+};
+
+var linkifyAnchors = function (level, containingElement) {
+  var headers = containingElement.getElementsByTagName("h" + level);
+  for (var h = 0; h < headers.length; h++) {
+    var header = headers[h];
+
+    if (typeof header.id !== "undefined" && header.id !== "") {
+      header.appendChild(anchorForId(header.id));
+    }
+  }
+};
+
+document.onreadystatechange = function () {
+  if (this.readyState === "complete") {
+    linkifyAnchors(3, document.body);
+    linkifyAnchors(4, document.body);
+    linkifyAnchors(5, document.body);
+    linkifyAnchors(6, document.body);
+  }
+};
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

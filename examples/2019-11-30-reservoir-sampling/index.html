@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width initial-scale=1">
+
+  <title>Reservoir Sampling</title>
+  <meta name="description" content="">
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://jasonjl.me/css/style.css">
+  <link rel="canonical" href="https://jasonjl.mehttps://jasonjl.me/examples/2019-11-30-reservoir-sampling/">
+  <link rel="alternate" type="application/atom+xml" title="Jason Lee" href="https://jasonjl.mehttps://jasonjl.me/feed.xml" />
+  <!-- Basic favicon -->
+  <link rel="icon" type="image/x-icon" href="https://jasonjl.me/assets/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://jasonjl.me/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://jasonjl.me/assets/favicon/favicon-16x16.png">
+
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="https://jasonjl.me/assets/favicon/apple-touch-icon.png">
+
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZYPVTW1ZCS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-ZYPVTW1ZCS');
+</script>
+
+</head>
+
+  <body>
+    <div class="wrapper">
+      <div class="page-content">
+        <div class="post">
+  <h2>Jason J Lee</h2>
+  <header class="post-header">
+    <a href=" https://jasonjl.me " class="home-link">← Home</a>
+    <h1 class="post-title">Reservoir Sampling</h1>
+    <p class="post-meta">November 30, 2019</p>
+    
+  </header>
+  <div>
+
+
+  </div>
+
+  <article class="post-content">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<p>One of my favorite algorithms is part of a group of techniques with the name <em>reservoir sampling</em>.
+I like how the algorithm is neither complex nor requires fancy math but still very elegantly solves its problem.
+Incidentally, it also happens to be the solution to a popular interview question.</p>
+
+<p>The problem goes like this: Given a stream of elements, we want to sample \(k\) random ones, without replacement and by using uniform probabilities.
+The total number of elements in the stream is unknown.
+At any point, someone could stop the stream, and we have to return <em>k</em> random elements.
+This blog post goes over a naive solution first, followed by one that actually scales, and then finally the algorithm that I find so elegant.</p>
+
+<h3 id="naive-approach">Naive Approach</h3>
+
+<p>If we do not know how to solve the problem, we could try to reduce it to one that we do know how to solve.
+To this end, we could store all elements of the stream in an array.
+The problem then reduces down to sampling \(k\) <a href="https://en.wikipedia.org/wiki/Fisher–Yates_shuffle">random indices</a>, whose respective elements are returned.</p>
+
+<p>Clearly, this method does not scale.
+The stream might contain billions of elements and we do not want to, and often cannot, keep all of them in memory.
+Furthermore, we essentially solve the problem in two distinct steps.
+First we build up an array of all elements, then we try to select random ones.
+This does not seem like a natural solution to such a streaming problem.</p>
+
+<h3 id="random-tags">Random Tags</h3>
+
+<h4 id="sorting">Sorting</h4>
+
+<p>Still, let’s keep going with this idea for a moment.
+If we are already storing all elements of the stream, we could just as well sort them randomly.
+To do this, we assign a <em>random tag</em> to each element, a random number between 0 and 1.
+We then sort by the random tag and keep the \(k\) smallest items.</p>
+
+<p>Of course, this does not scale any better.
+It also does not improve on the space requirement at all.
+We essentially still duplicate the stream to be able to sort it.</p>
+
+<h4 id="reservoir">Reservoir</h4>
+
+<p>However, there is an obvious bottleneck to the solution above.
+We are sorting the entire stream, even though we in fact only care about \(k\) elements.
+In a lot of cases, \(k\) will be much smaller than the total number of elements in the stream, so we are performing a lot of unnecessary work.</p>
+
+<p>To improve on this, let’s think about the case of \(k = 1\).
+If we only care about one random element, then we should only keep track of the element with the smallest tag.
+The other elements can be discarded as we iterate over the stream.</p>
+
+<p>For arbitrary \(k\), we should keep track of a <em>reservoir</em> of the \(k\) elements with the smallest tags.
+Naively, we can do this by comparing the random tag of the current element to the random tags of elements in the reservoir.
+If necessary, the element with the largest tag is then replaced.</p>
+
+<h4 id="heaps">Heaps</h4>
+
+<p>This works, but at this stage the problem calls for using a <a href="https://en.wikipedia.org/wiki/Heap_(data_structure)">heap</a> for better complexity.
+Heaps exactly solve the problem of keeping track of the \(k\) smallest elements in an efficient way.
+This solution is much better: We do not need any additional space, and when we process a new element, we at most have \(\mathcal{O}(\log k)\) work to perform.</p>
+
+<p>An additional advantage of the new solution is that we have a valid sample available after each step of the stream.
+This makes it possible to use the sampling technique in applications where the stream might continue indefinitely.
+For example, think of a web server that receives requests and should at any point be able to provide a sample of those requests.
+As users send more data to the server, the sample changes.
+Still, at any point the server is able to provide such a sample, without keeping track of every request ever sent.</p>
+
+<h3 id="adapting-probabilities">Adapting Probabilities</h3>
+
+<p>The solution we arrived at is nice, but we can do even better.
+It is possible to bring the logarithmic factor down to a constant one.
+We now discard the idea of random tags but still make use of a reservoir of \(k\) elements.</p>
+
+<p>Instead of structuring the reservoir in a certain way, e.g. by using a heap, we are going to use an array.
+As we process the stream, we replace items in the reservoir with a certain probability.
+This probability is adapted as we keep on iterating over the stream <a href="#citation-1" id="ref-1" class="ref-link">[1]</a>
+.</p>
+
+<p>Let’s again start with the base case of \(k = 1\).
+The final algorithm for sampling this element works as follows:</p>
+
+<ul>
+  <li>Store the first element as the reservoir element</li>
+  <li>For the \(i\)-th element, make it the reservoir element with a probability of \(1 / i \)</li>
+</ul>
+
+<p>This is the algorithm that I find so elegant.
+It is incredibly simple, has perfect complexity, and yet the way it works seems to be a bit magical.
+If we think about some examples, adapting the probabilities like this seems to just work out.
+For example, we would process a stream with three elements as follows:</p>
+
+<ol>
+  <li>Store the first element</li>
+  <li>Store the second element with a probability of \(1 / 2\). Now both elements have equal probabilities of being in the reservoir</li>
+  <li>Store the third element with a probability of \(1 / 3\). The previous two elements also have a final probability of \((1 / 2) * (2 / 3) = 1 / 3\) to be chosen</li>
+</ol>
+
+<p>The following visualization shows this.
+Circles represent the elements in the stream.</p>
+
+<figure>
+	<img src="https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts//" width="" style="margin: auto" />
+	<figcaption>A visualization of the adapting probabilities algorithm</figcaption>
+</figure>
+
+<h4 id="proof">Proof</h4>
+
+<p>It turns out that by induction this works for any number of elements.</p>
+
+<p><strong>Base case</strong>: The algorithm trivially works for \(n = 1\).</p>
+
+<p><strong>Induction assumption</strong>: For a stream with \(n\) elements, all elements are chosen with the same final probability \(1/n\).</p>
+
+<p><strong>Inductive step</strong>: \(n \rightarrow n + 1\). We want to show that for a stream of \(n + 1\) elements, all items still have the same probability of \(1 / (n + 1)\) to be sampled.</p>
+
+<p>The algorithm tells us to choose the next element of the stream with a probability of \(1 / (n + 1)\).
+All other elements can be the current reservoir element with a probability of \(1 / n\) by the induction assumption.</p>
+
+<p>The current reservoir element has a probability of \(1 - 1 / (n + 1) = n / (n + 1)\) to stay.
+This means all previous elements have a final probability of \((1 / n) * (n / (n + 1)) = 1 / (n + 1)\) to be the reservoir element after this step.
+Thus, all elements still have the same probability of being selected as the reservoir element.</p>
+
+<h4 id="sampling-k-elements">Sampling \(k\) Elements</h4>
+
+<p>If we want to sample \(k\) random elements using this technique, we need to adapt the algorithm slightly.
+We again keep a reservoir of \(k\) elements.
+This reservoir is initialized to contain the first \(k\) elements of the stream.</p>
+
+<p>When processing the \(i\)-th element for \(i &gt; k\), we add it to the reservoir with a probability of \(k / i\).
+If we add it, we do that by replacing a random element of the reservoir.
+In other words, in that case each element of the reservoir has a probability of \(1 / k\) to be replaced.
+The value of \(k / i\) is derived from the fact that this is the probability that any given element is sampled from a uniform distribution if we want to select \(k\) items.</p>
+
+<p>Full algorithm:</p>
+<ul>
+  <li>Store the first \(k\) elements as the reservoir elements</li>
+  <li>For the \(i\)-th element, add it to the reservoir with a probability of \(k / i\). This is done by replacing a randomly selected element in the reservoir</li>
+</ul>
+
+<p>The proof of the algorithm again works out by induction.
+Since the arithmetics get a bit more finicky for the case of \(k \neq 1\), I have put the full proof into the <a href="#appendix">appendix</a>.</p>
+
+<h3 id="applications">Applications</h3>
+
+<h4 id="sampling-from-streams">Sampling From Streams</h4>
+
+<p>Generally speaking, reservoir sampling is useful whenever we sample from a stream and do not know how many elements to expect.
+In programming, this translates into sampling from any iterable.</p>
+
+<p>Operations in <a href="https://spark.apache.org">Spark</a> are a nice example to illustrate this on:
+Let’s say we apply a filter to a stream of data and then sample from the result.
+A naive solution is to first run the filter, then count the number of elements, and finally use that result to sample.</p>
+
+<p>However, if we use reservoir sampling, the query optimizer can compress all of this into one step.
+As an item is processed, the filter function is first applied, and if necessary it is afterwards decided if the element should be kept in a reservoir.</p>
+
+<p>If the elements are read from disk and then directly sampled, one could even optimize the deserialization process.
+Only elements that reservoir sampling selects would need to be deserialized.
+Reservoir sampling is a natural fit for both these applications since we do not know how many elements the streams will contain.</p>
+
+<h4 id="database-query-planning">Database Query Planning</h4>
+
+<p>Database engines plan how to execute queries.
+To do this, the query is optimized and several different execution strategies are considered.
+To decide on one, we can run simulations by executing them on subsets of the data <a href="#citation-2" id="ref-2" class="ref-link">[2]</a>
+.</p>
+
+<p>Reservoir sampling can be used to sample such a subset.
+Depending on how the data is read, we might not know beforehand how much data there is in total.
+Furthermore, reservoir sampling makes it possible to easily add the sampling process to only specific parts of the query.</p>
+
+<h3 id="summary">Summary</h3>
+
+<p>Reservoir sampling allows us to sample elements from a stream, without knowing how many elements to expect.
+The final solution is extremely simple, yet elegant.
+It does not require fancy data structures or complex math but just an intuitive way of adapting probabilities.
+Proofing that it works also seems like a good example for learning about induction.</p>
+
+<p>The solution of adapting probabilities is optimal for the problem as described here.
+However, there are various extensions for different use cases.
+The random tag algorithm can be extended to make it possible to sample from weighted distributions.
+Additionally, if the iterable interface allows skipping a certain number of items, the algorithm of adapting probabilities can be improved further.
+The final complexity then depends on how many elements we want to sample, rather than just on how many elements the stream has.</p>
+
+<h3 id="references">References</h3>
+
+<ol class="references-list">
+	
+	<li><span id="citation-1">Vitter, J. S. (1985). Random sampling with a reservoir. ACM Transactions on Mathematical Software (TOMS), 11(1), 37-57.
+		 <a href="https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.138.784&amp;rep=rep1&amp;type=pdf" class="pdf-link"></a> 
+		
+		
+		<a href="#ref-1" class="ref-backlink"></a>
+		
+	</span>
+</li>
+
+	<li><span id="citation-2">Cormode, G. (2017). What is Data Sketching, and Why Should I Care?. Communications of the ACM (CACM), 60(9), 48-55.
+		 <a href="https://pdfs.semanticscholar.org/548a/1a53896474c314ea33b9c1f96ecec8ed3b10.pdf" class="pdf-link"></a> 
+		 <a href="https://github.com/florian/reading-notes/blob/master/papers/016_What_is_Data_Sketching_and_Why_Should_I_Care.md" class="notes-link"></a> 
+		
+		<a href="#ref-2" class="ref-backlink"></a>
+		
+	</span>
+</li>
+
+
+</ol>
+
+<script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
+
+<script>
+var alreadySeenRefs = {};
+
+document.querySelectorAll(".ref-link").forEach(function (a) {
+  var id = a.getAttribute("id");
+  var citationPath = "#" + id.replace("ref", "citation");
+
+  tippy(a, {
+  	  content: document.querySelector(citationPath).textContent, placement: "bottom",
+  	  arrow: true
+  })
+
+  if (id in alreadySeenRefs) return;
+
+  var p = a.closest("p");
+  var currentId = p.getAttribute("id");
+
+  if (currentId == null) {
+    p.setAttribute("id", id)
+  } else {
+    document.querySelector(citationPath + " a.ref-backlink").setAttribute("href", "#" + currentId)
+  }
+
+  alreadySeenRefs[id] = true;
+  a.removeAttribute("id")
+})
+</script>
+
+<hr />
+
+<h3 id="appendix">Appendix</h3>
+
+<h4 id="proof-for-sampling-k-elements">Proof for sampling \(k\) elements</h4>
+
+<p><strong>Base case</strong>: The algorithm trivially works for \(n = k\).</p>
+
+<p><strong>Induction assumption</strong>: For a stream with \(n\) elements, and for \(k \le n\), all elements are chosen with the same final probability \(k/n\).</p>
+
+<p><strong>Inductive step</strong>: \(n \rightarrow n + 1\)</p>
+
+<p>Equivalently to before, the algorithm tells us to choose the next element of the stream with a probability of \(k / (n + 1)\).
+All other elements can be the current reservoir element with a probability of \(k / n\) by the induction assumption.</p>
+
+<p>To compute the probability of an element being kept in the reservoir, we need to consider two cases:</p>
+
+<ol>
+  <li>The current element of the stream is not added to the reservoir at all: \(1 - (k / (n + 1)) = (n + 1 - k) / (n + 1)\)</li>
+  <li>(a) It is added but (b) does not replace the element in the reservoir we are considering
+    <ol>
+      <li>(a): \(k / (n + 1)\)</li>
+      <li>(b): \(1 - (1 / k) = (k - 1) / k\)</li>
+      <li>Joint probability: \((k / (n + 1)) * ((k - 1) / k) = (k - 1) / (n + 1)\) This is the result of multiplying (a) and (b)</li>
+    </ol>
+  </li>
+</ol>
+
+<p>We need to add these two cases since they are fully disjoint:
+\[
+(n + 1 - k) / (n + 1) + (k - 1) / (n + 1) = n / (n + 1)
+\]</p>
+
+<p>This is the probability of an element staying in the reservoir.
+Finally, each previous element had a chance of \(k / n\) to be in the reservoir to begin with.
+The prior steps were independent of the current one, so we have to multiply the two probabilities:
+\[
+(n / (n + 1)) * (k / n) = k / (n + 1)
+\]</p>
+
+<p>And this is exactly where we wanted to arrive at.
+All elements still have the same final probability of ending up in the reservoir.</p>
+
+  </article>
+
+  
+  <div class="comments">
+    <div id="disqus_thread"></div>
+<script>
+    /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /*
+    var disqus_config = function () {
+    this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://jihoon222.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+  </div>
+</div>
+
+<script>
+var anchorForId = function (id) {
+  var anchor = document.createElement("a");
+  anchor.className = "header-link";
+  anchor.href      = "#" + id;
+  anchor.innerHTML = "<i class=\"fas fa-link\"></i>";
+  return anchor;
+};
+
+var linkifyAnchors = function (level, containingElement) {
+  var headers = containingElement.getElementsByTagName("h" + level);
+  for (var h = 0; h < headers.length; h++) {
+    var header = headers[h];
+
+    if (typeof header.id !== "undefined" && header.id !== "") {
+      header.appendChild(anchorForId(header.id));
+    }
+  }
+};
+
+document.onreadystatechange = function () {
+  if (this.readyState === "complete") {
+    linkifyAnchors(3, document.body);
+    linkifyAnchors(4, document.body);
+    linkifyAnchors(5, document.body);
+    linkifyAnchors(6, document.body);
+  }
+};
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

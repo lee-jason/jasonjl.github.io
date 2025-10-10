@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width initial-scale=1">
+
+  <title>Working on Federated Learning</title>
+  <meta name="description" content="">
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://jasonjl.me/css/style.css">
+  <link rel="canonical" href="https://jasonjl.mehttps://jasonjl.me/examples/2022-05-29-federated-learning-work/">
+  <link rel="alternate" type="application/atom+xml" title="Jason Lee" href="https://jasonjl.mehttps://jasonjl.me/feed.xml" />
+  <!-- Basic favicon -->
+  <link rel="icon" type="image/x-icon" href="https://jasonjl.me/assets/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://jasonjl.me/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://jasonjl.me/assets/favicon/favicon-16x16.png">
+
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="https://jasonjl.me/assets/favicon/apple-touch-icon.png">
+
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZYPVTW1ZCS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-ZYPVTW1ZCS');
+</script>
+
+</head>
+
+  <body>
+    <div class="wrapper">
+      <div class="page-content">
+        <div class="post">
+  <h2>Jason J Lee</h2>
+  <header class="post-header">
+    <a href=" https://jasonjl.me " class="home-link">← Home</a>
+    <h1 class="post-title">Working on Federated Learning</h1>
+    <p class="post-meta">May 29, 2022</p>
+    
+  </header>
+  <div>
+
+
+  </div>
+
+  <article class="post-content">
+    <p>Much has been written about how <a href="https://jasonjl.me/">federated learning</a> (FL) can enable training much better models and help build more intelligent systems.
+This essay instead discusses a more personal aspect: Why working on FL as an individual is interesting, meaningful and fun.</p>
+
+<p>You can either take this as an advertisement for why one should work one FL, or as a personal reflection on why I am still passionate about it after working in the space for a few years.</p>
+
+<h3 id="fast-and-strong-feedback-loops">Fast and strong feedback loops</h3>
+
+<p>One thing that initially drew me to coding was the tight feedback loop:
+After coding something up, you can immediately try it out and see whether it behaves as you wanted.
+If it does not compile or work as expected, you get back to the code and iterate on it.
+At least that is how it works for the kind of stuff people code after getting started with programming.</p>
+
+<p>Compared to other fields where it is fairly difficult or time-consuming to check whether you are on the right path – think of math proofs or physical experiments – this made coding a ton more fun to me.
+Fast iteration makes it easier to get into a state of flow, and allows you to try things out much more quickly.</p>
+
+<p>Machine learning in the traditional way has no such feedback loop.
+It is not uncommon for people to spend many weeks or months on a model before it ever gets tested out on real users.
+Possibly much of that work was not fruitful after all, and, considering the quality of offline evaluation sets, you often have no good way of knowing beforehand.</p>
+
+<p>FL enables fast iteration in a very natural way:
+Training happens on-device, so it is trivial to also evaluate on-device at the same time.
+During all of that, training also matches the inference distribution much more closely.</p>
+
+<p>All of this means that you can directly understand much better whether the thing you are training is useful.
+Instead of doing work for months and hoping that the model does not break in a later live experiment, you can see live during training how well the model is really doing on actual users.</p>
+
+<p>The only caveat here is that FL has a larger upfront cost.
+One has to build up the federated learning system before training can begin.
+But in my opinion this is well worth the later advantage of having a powerful feedback loop.</p>
+
+<h3 id="interesting-technical-challenges">Interesting technical challenges</h3>
+
+<p>FL has a ton of interesting technical challenges:
+You are trying to train something intelligent in a distributed system of millions of devices, where much of the code is run on end devices that you exercise little control over.</p>
+
+<p>This leads to all sorts of interesting challenges and a huge variety of work one can do.
+From pure machine learning work to distributed systems aspects, cryptography to writing on-device code (e.g. Android), there are a ton of interesting challenges to tackle.
+The breadth of FL papers being published also shows this.</p>
+
+<h3 id="understanding-user-behavior-not-tweaking-data">Understanding user behavior, not tweaking data</h3>
+
+<p>People sometimes mock that machine learning work mostly comes down to playing with data.
+That is certainly the case for much of traditional machine learning.
+For example, for server-side training of models that eventually run on-device, one often only has access to unrepresentative proxy data.
+Tweaking this proxy data to make it more similar to inference data is incredibly common.
+This is necessary to make sure the model will work well during inference.</p>
+
+<p>This often happens without a fast feedback loop, making it slow to check whether the tweaks one performed really helped.
+This is thus not only rather frustrating work, but also hard to get right.</p>
+
+<p>In FL, this is not really the case.
+You are already training on user interactions that closely align with inference, so there is no need to do manual data tweaking work.</p>
+
+<p>That does not mean that there is no work related to the data at all.
+There is work in accessing the right kind of signals, removing noisy data and inferring the right kind of labels.
+However, all of this is a much more natural way of approaching the problem.
+It all comes down to understanding what happens on-device, not to tweaking data based on some high-level intuition.</p>
+
+<h3 id="privacy">Privacy</h3>
+
+<p>Privacy is a major motivation for FL and why many people are drawn to it.
+The whole concept of FL is geared towards data minimization and keeping users’ data private.
+It feels good to work on such a thing, in a world where privacy has been an afterthought for way too long.</p>
+
+<p>Looking at the work that people are currently doing in FL, there is also a ton of interesting privacy-related work.
+This ranges from advances in differential privacy to cryptographic aggregation algorithms or model auditing techniques.
+All of these are super interesting to learn about, while really advancing privacy.</p>
+
+<p>Furthermore, any work that makes it easier to use FL further advances the state of privacy, even if it is not directly privacy-related.
+This is purely because it gets us closer to a world where FL can be a default option over traditional data collection.</p>
+
+<h3 id="it-is-futuristic">It is futuristic</h3>
+
+<p>One of my initial reactions after hearing about FL was that it sounds futuristic.
+A network of millions of devices is jointly training something intelligent.
+This also opens up the potential of training large and distributed models.</p>
+
+<p>Nearly 5 years later, I still feel the same way.
+It is incredible that something like this exists, already works so well, and is something I get to play with.</p>
+
+<h3 id="it-is-the-right-time">It is the right time</h3>
+
+<p>There is a quote I really like to consider when picking what to work on:</p>
+
+<blockquote>
+  <p>“The thing that differentiates scientists is purely an artistic ability to discern what is a good idea, what is a beautiful idea, what is worth spending time on, and most importantly, what is a problem that is sufficiently interesting, yet sufficiently difficult, that it hasn’t yet been solved, but the time for solving it has come now.”</p>
+
+  <p>– Savas Dimopoulos</p>
+</blockquote>
+
+<p>FL as a field seems to fit this perfectly.
+Its time has only come recently, because of advances in machine learning and distributed systems, because phones have become powerful enough, and because internet connections have massively improved in many parts of the world.
+All of these together have allowed FL to become possible.</p>
+
+<p>In the past few years, FL as a field has now become established and many aspects of it have been explored, leading to it working better and better.
+However, there are still a ton of challenges left to solve and many places where people are just starting to make use of FL.</p>
+
+<p>This makes me incredibly excited about FL and its future.</p>
+
+<hr />
+
+<h3 id="acknowledgements">Acknowledgements</h3>
+
+<p>I would like to thank Karan Singhal, Sean Augenstein and Kuba Weimann for reading drafts of this post and providing lots of great feedback.</p>
+
+  </article>
+
+  
+  <div class="comments">
+    <div id="disqus_thread"></div>
+<script>
+    /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /*
+    var disqus_config = function () {
+    this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://jihoon222.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+  </div>
+</div>
+
+<script>
+var anchorForId = function (id) {
+  var anchor = document.createElement("a");
+  anchor.className = "header-link";
+  anchor.href      = "#" + id;
+  anchor.innerHTML = "<i class=\"fas fa-link\"></i>";
+  return anchor;
+};
+
+var linkifyAnchors = function (level, containingElement) {
+  var headers = containingElement.getElementsByTagName("h" + level);
+  for (var h = 0; h < headers.length; h++) {
+    var header = headers[h];
+
+    if (typeof header.id !== "undefined" && header.id !== "") {
+      header.appendChild(anchorForId(header.id));
+    }
+  }
+};
+
+document.onreadystatechange = function () {
+  if (this.readyState === "complete") {
+    linkifyAnchors(3, document.body);
+    linkifyAnchors(4, document.body);
+    linkifyAnchors(5, document.body);
+    linkifyAnchors(6, document.body);
+  }
+};
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

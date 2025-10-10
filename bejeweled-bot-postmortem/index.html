@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width initial-scale=1">
+
+  <title>Bejeweled Bot</title>
+  <meta name="description" content="Source code Source game ">
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://jasonjl.me/css/style.css">
+  <link rel="canonical" href="https://jasonjl.mehttps://jasonjl.me/bejeweled-bot-postmortem/">
+  <link rel="alternate" type="application/atom+xml" title="Jason Lee" href="https://jasonjl.mehttps://jasonjl.me/feed.xml" />
+  <!-- Basic favicon -->
+  <link rel="icon" type="image/x-icon" href="https://jasonjl.me/assets/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://jasonjl.me/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://jasonjl.me/assets/favicon/favicon-16x16.png">
+
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="https://jasonjl.me/assets/favicon/apple-touch-icon.png">
+
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZYPVTW1ZCS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-ZYPVTW1ZCS');
+</script>
+
+</head>
+
+  <body>
+    <div class="wrapper">
+      <div class="page-content">
+        <div class="post">
+  <h2>Jason J Lee</h2>
+  <header class="post-header">
+    <a href=" https://jasonjl.me " class="home-link">← Home</a>
+    <h1 class="post-title">Bejeweled Bot</h1>
+    <p class="post-meta">November 24, 2014</p>
+    
+  
+  
+  
+  
+  
+    <video autoplay muted playsinline loop>
+      <source src="https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/bejeweled-bot-postmortem/bejeweledbot.mp4">
+      Your browser does not support the video tag.
+    </video>
+  
+
+  </header>
+  <div>
+
+
+  </div>
+
+  <article class="post-content">
+    <p><a href="https://github.com/lee-jason/BejeweledBot">Source code</a>
+<a href="https://apps.facebook.com/bejeweledblitz/?fb_source=search&amp;ref=br_tf">Source game</a></p>
+
+<p>Bejeweled Bot is a bot that automatically plays Bejeweled Blitz as fast as possible. Once executed, the bot will orient itself with the origin of the game board, determine the current gems on the grid, parse the possible matches, then move the appropriate gems in the game to create matches. I forked the repository from <a href="https://github.com/kklemm91/BejeweledBot">kklemm91</a> and improved on code organization, naming, and execution efficiency.</p>
+
+<h2 id="execution">Execution</h2>
+
+<p>Upon initial execution, the bot looks for two identifying pixels indicating the upper left origin of the bejeweled grid. Once found we can then determine the location of all the jewels on the grid. Each jewel is a set pixel width and height apart from each other which makes it easy to sequentially check each pixel color that’s at the center of each jewel. Each jewel color is given an identifying enumerable int and placed into a 2d int array. This array is then parsed index by index to find any potential matches. If a match is found, the program immediately takes action and matches the jewels in the game and then continues looking for more matches.</p>
+
+<p>While gaining a score of 500,000 is considered to be the most impressive feat, the bejeweled bot regularly is able to score greater than a million consistently without assistance.</p>
+
+<h2 id="issues">Issues</h2>
+
+<p>Unfortunately, there are moments where the program may stall or softlock. Bejeweled doesn’t use any fancy dynamic filters meaning that checking the same pixel location of the same type of jewel will produce the same result every time. The only exclusion to this rule would be when the jewel is dynamic such as the lightning jewel or the hypercube which is animated to spin producing inconsistent results. These inconsistent results mean that the matcher may miss these matches due to the pixel not being caught and parsed. Multiplier jewels are consistent but not all of them have been documented due to the tedious nature of the work. This means that matches involving multiplier jewels may be missed due to the program not knowing that the multiplier pixel is that of a matching color. This is easily fixable but tedious due to having to play enough bejeweled matches to find the randomized multiplier jewel color. This means that the bot does have tendencies where it stalls due to not being able to detect a match on the board, requiring human intervention so that it can move forward. This form of pixel detection is also dependent on PopCap not changing the art of the game, otherwise the bot will no longer be able to determine the matches.</p>
+
+<p>Instances where the game freezes may also softlock the computer’s mouse due to the game attempting to match a jewel indefinitely. Exercise caution if executing this on a slow machine.</p>
+
+<h2 id="improvements">Improvements</h2>
+
+<p>While <a href="https://github.com/kklemm91/BejeweledBot">kklemm91’s</a> initial program was a good start I wanted to see if I could make it better. When executed, the initial base program would make all the matches visible in the screen, then wait roughly half a second before making the next set of matches. This was good but I wanted the bot to be inhumanly fast.</p>
+
+<p>In this base program, there was a line that would make the current thread sleep for around a quarter of a second. I noticed that modifying this to be shorter or removing it entirely didn’t make the matches happen any faster. I was wondering what the hold up was in the program so I created a rudimentary profiler where I would log out start and end timings into each important method (I’m pretty sure there’s better ways to profile Java methods). I noticed that most methods ran almost instantaneously but the problem method that was running slowly was the match finder. It wasn’t the act of finding matches that was slow itself, but the fact that it was recapturing a snapshot of the board for each pixel that it checks. This is completely unnecessary and the program was changed to take an initial snapshot, determine all pixel colors from this snapshot, then find matches, based off that board, repeat. This act was like removing the handicap from an olympic sprinter in a children’s fun run. The bot went zooming and was matching at an insane pace.</p>
+
+<p>Another improvement involved the search for the origin point of the board. There was an issue where the program would inconsistently determine the correct origin point. Sometimes it would find it correctly, other times it would offset the origin a few columns to the right, skewing the vision of the bot. Initially the bot determined the location of the origin of the board by detecting whether the pixel was one of the jewel colors. Once found, it then checked to see if several of its neighbors were also has jewel pixel colors. This for some reason produced inconsistent results in determining the origin of the game board and to be honest its absolutely confusing as to why it would do this. I was unable to find the root of the problem so I created a new origin determining method that checks for a sequence of pixels. It’s the same concept as the original implementation but when it’s based off the color of the gems itself, it appears to produce inconsistent results.</p>
+
+<p>An improvement in color matching that would remove our dependency on PopCap not changing its colors would be to use average color detection. Instead of identifying colors based off pixels, we could use an average of the color that falls within the bounds of a block in a grid. This means that the colors don’t have to be pixel perfect so if PopCap decides one day to update the art but keep the same color of the jewels, it’ll most likely continue to keep working. This improvement seems a bit overkill though and is not necessary at the time due to the nature of the project. If I had a bigger budget though I’d gladly like to implement a basic color detector. I’d imagine the performance would take a hit but it would be interesting to see the program dynamically decide similar looking colors.</p>
+
+<p>Well there you have it. Thanks to <a href="https://github.com/kklemm91">kklemm91</a> for showing me the awesome Java Robot class and building out the base of the program.</p>
+
+  </article>
+
+  
+  <hr>
+
+  <div class="related">
+    <h2>Other Posts</h2>
+    
+      <li><a href="/adventures-in-vibe-coding/" title="Adventures in Vibe Coding">Adventures in Vibe Coding
+       &nbsp; <span class="post-meta">September 30, 2025</span></a>
+    
+      <li><a href="/fitting-room-retrospective/" title="FittingRoom Postmortem">FittingRoom Postmortem
+       &nbsp; <span class="post-meta">August 20, 2025</span></a>
+    
+      <li><a href="/blog-migration-postmortem/" title="Blog migration postmortem">Blog migration postmortem
+       &nbsp; <span class="post-meta">July 16, 2025</span></a>
+    
+  </div>
+  
+  <div class="comments">
+    <div id="disqus_thread"></div>
+<script>
+    /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /*
+    var disqus_config = function () {
+    this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://jihoon222.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+  </div>
+</div>
+
+<script>
+var anchorForId = function (id) {
+  var anchor = document.createElement("a");
+  anchor.className = "header-link";
+  anchor.href      = "#" + id;
+  anchor.innerHTML = "<i class=\"fas fa-link\"></i>";
+  return anchor;
+};
+
+var linkifyAnchors = function (level, containingElement) {
+  var headers = containingElement.getElementsByTagName("h" + level);
+  for (var h = 0; h < headers.length; h++) {
+    var header = headers[h];
+
+    if (typeof header.id !== "undefined" && header.id !== "") {
+      header.appendChild(anchorForId(header.id));
+    }
+  }
+};
+
+document.onreadystatechange = function () {
+  if (this.readyState === "complete") {
+    linkifyAnchors(3, document.body);
+    linkifyAnchors(4, document.body);
+    linkifyAnchors(5, document.body);
+    linkifyAnchors(6, document.body);
+  }
+};
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

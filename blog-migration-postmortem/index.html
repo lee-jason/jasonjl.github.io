@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width initial-scale=1">
+
+  <title>Blog migration postmortem</title>
+  <meta name="description" content="In 2015 I spun up a personal blog after I quit my first job. This was built off Octopress and deployed on Github pages. Despite the compiled site existing on Github itself lee-jason.github.io, the ...">
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://jasonjl.me/css/style.css">
+  <link rel="canonical" href="https://jasonjl.mehttps://jasonjl.me/blog-migration-postmortem/">
+  <link rel="alternate" type="application/atom+xml" title="Jason Lee" href="https://jasonjl.mehttps://jasonjl.me/feed.xml" />
+  <!-- Basic favicon -->
+  <link rel="icon" type="image/x-icon" href="https://jasonjl.me/assets/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://jasonjl.me/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://jasonjl.me/assets/favicon/favicon-16x16.png">
+
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="https://jasonjl.me/assets/favicon/apple-touch-icon.png">
+
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZYPVTW1ZCS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-ZYPVTW1ZCS');
+</script>
+
+</head>
+
+  <body>
+    <div class="wrapper">
+      <div class="page-content">
+        <div class="post">
+  <h2>Jason J Lee</h2>
+  <header class="post-header">
+    <a href=" https://jasonjl.me " class="home-link">← Home</a>
+    <h1 class="post-title">Blog migration postmortem</h1>
+    <p class="post-meta">July 16, 2025</p>
+    
+  </header>
+  <div>
+
+
+  </div>
+
+  <article class="post-content">
+    <p>In 2015 I spun up a personal blog after I quit my first job. This was built off <a href="https://octopress.org/">Octopress</a> and deployed on Github pages. Despite the compiled site existing on Github itself <a href="https://github.com/lee-jason/lee-jason.github.io">lee-jason.github.io</a>, the source itself exists on a laptop that is long gone.</p>
+
+<p>2025 I’m still alive and I’m once again in a similar situation. I suddenly found myself with more time and I wanted to write again, unfortunately I didn’t have the source code for my blog. I decided the only way forward is to migrate from compiled Jekyll to Jekyll 4.0.</p>
+
+<p>Ten years have passed and Jekyll is now on version 4.0. As a chronic hackernews reader I stumble on a lot of blogs. I really liked the simplicity of <a href="https://florian.github.io/">florian.github.io</a>. I forked his <a href="https://github.com/florian/florian.github.io">repo</a> and built off that. Some minor changes later, I had working POC that ran on Jekyll 4.</p>
+
+<p>I thought for a minute on using an existing blogging platform like Medium or Notion, but one of my philosophies is to build as cheaply as possible and hosted blog platform often offer you all the bells and whistles of analytics and custom domains but often do so with a fee. I was unwilling to do so.</p>
+
+<p>I now needed to configure deployment. Josh Larsen had a great <a href="https://github.com/joshlarsen/jekyll4-deploy-gh-pages">Github Action</a> script to deploy custom Jekyll builds and deploy the compiled code to the <code class="language-plaintext highlighter-rouge">gh-pages</code> branch. I forked that and added the option to have multiple Jekyll configs be passed in the build step. This allowed me to have a production specific config to load resources pointing in the right production area. This allows development to have different config values to load media content on a different path as well as generate link output using a different hostname.</p>
+
+<p>I noticed my media assets were also all sitting in a single bucket. I re-organized this to follow Jekyll’s recommendation where media assets are namespaced by their specific blog’s slug. There’s also a simple sync-to-s3 command that makes it easy to sync new resources in the assets folder. I then added Cloudfront caching in front of the media assets, but then wondered what the point was when the hits to my blog are so few and far in between it would probably take longer to load the cached content in each leaf node.</p>
+
+<p>And finally, the data migration itself, parsing the compiled content and generating clean markdown from it. This is a little bit manaual but in the age of LLM AI anything is possible. I pretty much just ask Claude page by page to convert the contents into Markdown. It does a stellar job but has trouble reading the embedded code sections which seems to be because something about the code rendering seems to have some JS post processing which the Claude web browser has problems reading.</p>
+
+<h1 id="improvements">Improvements</h1>
+
+<p>The tagging feature is gone! Although Jekyll supports indexing posts by tags, this theme from Florian does not support it yet. I’ll need to reimplement this but I don’t think many people use it so I’m not too pressured to implement it any time soon.</p>
+
+<h1 id="learnings">Learnings</h1>
+
+<p>After realizing that my past-self did present-self a disservice by leaving only the compiled content, I promised future-self that I would never do him that dirty again. From here on out, I promise to write great documentation and simplify processes such that future-self in 2035 can easily pick up this repo on his M10 chip Macbook Pro++ and deploy a new blog article in minutes.</p>
+
+  </article>
+
+  
+  <hr>
+
+  <div class="related">
+    <h2>Other Posts</h2>
+    
+      <li><a href="/adventures-in-vibe-coding/" title="Adventures in Vibe Coding">Adventures in Vibe Coding
+       &nbsp; <span class="post-meta">September 30, 2025</span></a>
+    
+      <li><a href="/fitting-room-retrospective/" title="FittingRoom Postmortem">FittingRoom Postmortem
+       &nbsp; <span class="post-meta">August 20, 2025</span></a>
+    
+      <li><a href="/deployments-advice/" title="Releasing at the speed of code">Releasing at the speed of code
+       &nbsp; <span class="post-meta">July 02, 2025</span></a>
+    
+  </div>
+  
+  <div class="comments">
+    <div id="disqus_thread"></div>
+<script>
+    /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /*
+    var disqus_config = function () {
+    this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://jihoon222.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+  </div>
+</div>
+
+<script>
+var anchorForId = function (id) {
+  var anchor = document.createElement("a");
+  anchor.className = "header-link";
+  anchor.href      = "#" + id;
+  anchor.innerHTML = "<i class=\"fas fa-link\"></i>";
+  return anchor;
+};
+
+var linkifyAnchors = function (level, containingElement) {
+  var headers = containingElement.getElementsByTagName("h" + level);
+  for (var h = 0; h < headers.length; h++) {
+    var header = headers[h];
+
+    if (typeof header.id !== "undefined" && header.id !== "") {
+      header.appendChild(anchorForId(header.id));
+    }
+  }
+};
+
+document.onreadystatechange = function () {
+  if (this.readyState === "complete") {
+    linkifyAnchors(3, document.body);
+    linkifyAnchors(4, document.body);
+    linkifyAnchors(5, document.body);
+    linkifyAnchors(6, document.body);
+  }
+};
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

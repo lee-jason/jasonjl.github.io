@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width initial-scale=1">
+
+  <title>Regular Expressions</title>
+  <meta name="description" content="Regular expressions are hard. There’s a lot to them that vary between different regular expression engines. They’re often considered to be an afterthought when it comes to a programmer’s tools due ...">
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://jasonjl.me/css/style.css">
+  <link rel="canonical" href="https://jasonjl.mehttps://jasonjl.me/regular-expressions/">
+  <link rel="alternate" type="application/atom+xml" title="Jason Lee" href="https://jasonjl.mehttps://jasonjl.me/feed.xml" />
+  <!-- Basic favicon -->
+  <link rel="icon" type="image/x-icon" href="https://jasonjl.me/assets/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://jasonjl.me/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://jasonjl.me/assets/favicon/favicon-16x16.png">
+
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="https://jasonjl.me/assets/favicon/apple-touch-icon.png">
+
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZYPVTW1ZCS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-ZYPVTW1ZCS');
+</script>
+
+</head>
+
+  <body>
+    <div class="wrapper">
+      <div class="page-content">
+        <div class="post">
+  <h2>Jason J Lee</h2>
+  <header class="post-header">
+    <a href=" https://jasonjl.me " class="home-link">← Home</a>
+    <h1 class="post-title">Regular Expressions</h1>
+    <p class="post-meta">November 17, 2014</p>
+    
+  
+  
+  
+  
+  
+    <img src="https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/regular-expressions/regularexpression_crossword.png" />
+  
+
+  </header>
+  <div>
+
+
+  </div>
+
+  <article class="post-content">
+    <p>Regular expressions are hard. There’s a lot to them that vary between different regular expression engines. They’re often considered to be an afterthought when it comes to a programmer’s tools due to the relative infrequency at which they’re used. Whenever they are actually needed, the programmer most likely only reads the minimum amount required that will fulfill the parsing problem at hand. Regular expressions are super cryptic to read and even more so when writing them in Java. While I don’t necessarily enjoy working with regular expressions, I highly respect those who are comfortable enough to take on any sort of parsing problem. This post is an attempt for me to solidify some of the basic and advanced things I’ve been picking up with regular expressions recently.</p>
+
+<h2 id="greedy-will-grab-more-lazy-will-grab-less">Greedy will grab more, lazy will grab less</h2>
+
+<p>When people keep mentioning use greedy vs lazy quantifiers they’re talking about the <code class="language-plaintext highlighter-rouge">?</code> <code class="language-plaintext highlighter-rouge">+</code> <code class="language-plaintext highlighter-rouge">*</code> symbols. The default quantifiers will use greedy matching, meaning, they will try to match as many of the quantified character before it continues trying to find matches with the rest of the expression. Appending a <code class="language-plaintext highlighter-rouge">?</code> to any quantifier will cause the regular expression engine to become ‘lazy’ and only match the as little as possible before it finds a complete match. While having a lazy engine may sound like a bad thing sometimes you just don’t want your engine working so hard and going overboard with its matches. Say you’re making a chat client and you want to intercept colon delimited messages so that you can eventually replace those with emoticons.</p>
+
+<figure>
+  <figcaption>capturing delimited messages </figcaption>
+
+  <div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      <span class="kd">var</span> <span class="nx">msg</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">hello world :smile: :happy:</span><span class="dl">"</span><span class="p">;</span>
+      <span class="c1">//greedily match any group of characters between two colons</span>
+      <span class="kd">var</span> <span class="nx">emoteRegExpGreedy</span> <span class="o">=</span> <span class="sr">/:.*:/g</span><span class="p">;</span>
+      <span class="nx">msg</span><span class="p">.</span><span class="nf">match</span><span class="p">(</span><span class="nx">emoteRegExpGreedy</span><span class="p">);</span> <span class="c1">//returns [":smile: :happy:"]</span>
+
+      <span class="c1">//lazily match any group of characters between two colons</span>
+      <span class="kd">var</span> <span class="nx">emoteRegExpLazy</span> <span class="o">=</span> <span class="sr">/:.*</span><span class="se">?</span><span class="sr">:/g</span><span class="p">;</span>
+      <span class="nx">msg</span><span class="p">.</span><span class="nf">match</span><span class="p">(</span><span class="nx">emoteRegExpLazy</span><span class="p">);</span> <span class="c1">//returns [":smile:", ":happy:"]</span>
+</code></pre></div>  </div>
+</figure>
+
+<p>note how the greedy regexp returns a single value consisting of both the :smile: and :happy: combined into a single match, while the lazy regexp properly returns two values splitting up the smile and happy. The greedy <code class="language-plaintext highlighter-rouge">.</code> character matcher kept going until the final <code class="language-plaintext highlighter-rouge">:</code> was found at the end of the string, while the lazy <code class="language-plaintext highlighter-rouge">.?</code> character matcher was content with ending the first match and the first sight of the <code class="language-plaintext highlighter-rouge">:</code> after “smile” and started a new match when it found the first <code class="language-plaintext highlighter-rouge">:</code> for “happy”.</p>
+
+<h2 id="using-matched-content-in-replaces-with-groupings">Using matched content in replaces with groupings</h2>
+
+<p>This is something that so easy but not entirely apparent when initially learning about regular expressions (at least not for me). Surrounding an expression with parenthesis will create a grouping. Groupings are designated in the order that they are written in the expression. Groupings can be designated with <code class="language-plaintext highlighter-rouge">( )</code>. A complicated pattern can be written at the start of the expression and reused as a grouping reference later in the expression. Lets say that we want to catch whenever a user writes duplicate words in the chat box because we’re nice and we want to catch users making silly mistakes.</p>
+
+<figure>
+  <figcaption>catching duplicate words</figcaption>
+
+  <div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="kd">var</span> <span class="nx">msg</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">hello hello, how are doing doing? I'm feeling good good</span><span class="dl">"</span><span class="p">;</span>
+    <span class="c1">//greedily match a full word followed by one or many whitespaces followed by the same exact word.</span>
+    <span class="kd">var</span> <span class="nx">doubleWordRegExp</span> <span class="o">=</span> <span class="sr">/</span><span class="se">(\b\w</span><span class="sr">+</span><span class="se">)\s</span><span class="sr">+</span><span class="se">\1</span><span class="sr">/g</span><span class="p">;</span>
+    <span class="nx">msg</span><span class="p">.</span><span class="nf">match</span><span class="p">(</span><span class="nx">doubleWordRegExp</span><span class="p">);</span> <span class="c1">//returns ["hello hello", "doing doing", "good good"]</span>
+</code></pre></div>  </div>
+</figure>
+
+<p>Text that’s captured in a grouping can also be spit out to be used in the replacement string. So continuing with our chat emoticon example, lets say that you want to replace the matched <code class="language-plaintext highlighter-rouge">:</code> delimited text with an image tag that points to the appropriate file for each emoticon.</p>
+
+<figure>
+  <figcaption>replacing groupings with captured text </figcaption>
+
+  <div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="kd">var</span> <span class="nx">msg</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">hello world :smile: :happy:</span><span class="dl">"</span><span class="p">;</span>
+    <span class="c1">//greedily match word in between colon and put it in a grouping that will be used in replace text</span>
+    <span class="kd">var</span> <span class="nx">emoteRegExpGreedy</span> <span class="o">=</span> <span class="sr">/:</span><span class="se">(\w</span><span class="sr">+</span><span class="se">)</span><span class="sr">:/g</span><span class="p">;</span>
+    <span class="nx">msg</span><span class="p">.</span><span class="nf">replace</span><span class="p">(</span><span class="sr">/:</span><span class="se">(\w</span><span class="sr">+</span><span class="se">)</span><span class="sr">:/g</span><span class="p">,</span> <span class="dl">"</span><span class="s2">&lt;img src='$1.png'&gt;</span><span class="dl">"</span><span class="p">);</span> <span class="c1">//returns "hello world &lt;img src='smile.png'&gt; &lt;img src='happy.png'&gt;"</span>
+</code></pre></div>  </div>
+</figure>
+
+<p>Parenthesis are placed around the <code class="language-plaintext highlighter-rouge">\w+</code> and is accessed with the <code class="language-plaintext highlighter-rouge">$1</code> in the replacement text. Notice how the grouping is accessed in the replacement text with the <code class="language-plaintext highlighter-rouge">$</code> symbol in JavaScript. This symbol differs in different languages from what I understand.</p>
+
+<h2 id="lookahead-and-lookbehind-to-validate-a-match">Lookahead and Lookbehind to validate a match</h2>
+
+<p>Lookahead and lookbehinds are additions to a standard expression that allow you to check whether the base expression either follows, or is followed by another expression. Lookahead and lookbehinds are not matched, as in they will not be returned by the regexp engine. This is helpful in that sometimes you just want to capture a subset of a complete expression. Lookaheads are performed with <code class="language-plaintext highlighter-rouge">(?=suchandsuch)</code> or <code class="language-plaintext highlighter-rouge">(?!notsuchandsuch)</code>. Lookbehinds are performed with <code class="language-plaintext highlighter-rouge">(?&lt;=textbehind)</code> or <code class="language-plaintext highlighter-rouge">(?&lt;!nottextbehind)</code>. Continuing the chat box example, lets say that we want to implement a feature where users can vote in a poll. Users can vote for a certain option by suffixing ‘vote’ to a number. Our goal is to intercept that number tied to the ‘vote’.</p>
+
+<figure>
+  <figcaption>regexp lookahead </figcaption>
+
+  <div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="kd">var</span> <span class="nx">msg</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">I'm going to vote for 5_vote</span><span class="dl">"</span><span class="p">;</span>
+    <span class="c1">//find matches where a digit is suffixed by '_vote'</span>
+    <span class="kd">var</span> <span class="nx">voteRegExp</span> <span class="o">=</span> <span class="sr">/</span><span class="se">\b(\d</span><span class="sr">+</span><span class="se">)(?=</span><span class="sr">_vote</span><span class="se">)</span><span class="sr">/g</span><span class="p">;</span>
+    <span class="nx">msg</span><span class="p">.</span><span class="nf">match</span><span class="p">(</span><span class="nx">voteRegExp</span><span class="p">);</span> <span class="c1">//returns ['5'];</span>
+</code></pre></div>  </div>
+</figure>
+
+<p>To be honest the example is contrived. Usually we would want to prepend ‘vote_’ but JavaScriptdoes not support lookbehind so I had to use look ahead in this example.</p>
+
+<p>Okay! That does it. I know there’s way more about regular expressions I gotta internalize but I think this is a good place to end for now.</p>
+
+<h2 id="references-and-things">References and things</h2>
+
+<ul>
+  <li><a href="http://www.regexper.com/">RegExper</a> - Regular expressions as railroad diagrams</li>
+  <li><a href="http://regexpal.com/">regexpal</a> - On the fly regular expression matching</li>
+  <li><a href="http://regexcrossword.com/">Regex Crossword</a> - Crosswords where regular expressions are the hints.</li>
+</ul>
+
+  </article>
+
+  
+  <hr>
+
+  <div class="related">
+    <h2>Other Posts</h2>
+    
+      <li><a href="/adventures-in-vibe-coding/" title="Adventures in Vibe Coding">Adventures in Vibe Coding
+       &nbsp; <span class="post-meta">September 30, 2025</span></a>
+    
+      <li><a href="/fitting-room-retrospective/" title="FittingRoom Postmortem">FittingRoom Postmortem
+       &nbsp; <span class="post-meta">August 20, 2025</span></a>
+    
+      <li><a href="/blog-migration-postmortem/" title="Blog migration postmortem">Blog migration postmortem
+       &nbsp; <span class="post-meta">July 16, 2025</span></a>
+    
+  </div>
+  
+  <div class="comments">
+    <div id="disqus_thread"></div>
+<script>
+    /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /*
+    var disqus_config = function () {
+    this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://jihoon222.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+  </div>
+</div>
+
+<script>
+var anchorForId = function (id) {
+  var anchor = document.createElement("a");
+  anchor.className = "header-link";
+  anchor.href      = "#" + id;
+  anchor.innerHTML = "<i class=\"fas fa-link\"></i>";
+  return anchor;
+};
+
+var linkifyAnchors = function (level, containingElement) {
+  var headers = containingElement.getElementsByTagName("h" + level);
+  for (var h = 0; h < headers.length; h++) {
+    var header = headers[h];
+
+    if (typeof header.id !== "undefined" && header.id !== "") {
+      header.appendChild(anchorForId(header.id));
+    }
+  }
+};
+
+document.onreadystatechange = function () {
+  if (this.readyState === "complete") {
+    linkifyAnchors(3, document.body);
+    linkifyAnchors(4, document.body);
+    linkifyAnchors(5, document.body);
+    linkifyAnchors(6, document.body);
+  }
+};
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

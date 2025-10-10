@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width initial-scale=1">
+
+  <title>Adventures in Vibe Coding</title>
+  <meta name="description" content="I paid for a month of Claude Code, leveraging Sonnet 4 to run a bunch of coding experiments. Here’s what I found. ">
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://jasonjl.me/css/style.css">
+  <link rel="canonical" href="https://jasonjl.mehttps://jasonjl.me/adventures-in-vibe-coding/">
+  <link rel="alternate" type="application/atom+xml" title="Jason Lee" href="https://jasonjl.mehttps://jasonjl.me/feed.xml" />
+  <!-- Basic favicon -->
+  <link rel="icon" type="image/x-icon" href="https://jasonjl.me/assets/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://jasonjl.me/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://jasonjl.me/assets/favicon/favicon-16x16.png">
+
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="https://jasonjl.me/assets/favicon/apple-touch-icon.png">
+
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZYPVTW1ZCS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-ZYPVTW1ZCS');
+</script>
+
+</head>
+
+  <body>
+    <div class="wrapper">
+      <div class="page-content">
+        <div class="post">
+  <h2>Jason J Lee</h2>
+  <header class="post-header">
+    <a href=" https://jasonjl.me " class="home-link">← Home</a>
+    <h1 class="post-title">Adventures in Vibe Coding</h1>
+    <p class="post-meta">September 30, 2025</p>
+    
+  </header>
+  <div>
+
+
+  </div>
+
+  <article class="post-content">
+    <p>I paid for a month of Claude Code, leveraging Sonnet 4 to run a bunch of coding experiments. Here’s what I found.</p>
+
+<h1 id="tldr">TLDR</h1>
+<p>Claude seems to be very good at greenfield development work. Here’s the workflow I’ve been using that I also see others online having success with.</p>
+<ol>
+  <li>Research</li>
+  <li>Plan your approach</li>
+  <li>Execute</li>
+</ol>
+
+<p>This flow usually leads to a fairly predictable initial implementation at least in defining a high level project skeleton.</p>
+
+<p>People who let Claude run amok with excessive command privileges and free reign to update and run anything are careless and reckless. Same for those who run agents of agents. This is a surefire way to not understand anything you co-created which leads to an unmanageable unmaintainable project. Sometimes that trade off is acceptable like if you’re building throwaway code. If you expect your code to be maintained in the future, then it is not. Don’t be rude to your teammates, use your discretion.</p>
+
+<p>Claude is well worth the twenty dollars a month in terms of developer empowerment. What’s more important than the speed of execution is the increased speed of experimentation and learning. Love the tool, don’t love how such a powerful tool for learning is paywalled.</p>
+
+<h1 id="breadnotes">breadnotes</h1>
+<figure>
+	<img src="https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/adventures-in-vibe-coding/breadnotes.png" width="" style="margin: auto" />
+	<figcaption></figcaption>
+</figure>
+
+<p><a href="https://github.com/lee-jason/breadnotes">Source code</a></p>
+
+<p>My first project was to create a simple crud app made to be highly scalable using cloud based orchestration and services. I wanted a place to publish my bread creations and thought to create a picture blog for my bread. In hindsight, the title ‘breadblog’ is much better than breadnotes, but the implementation and variables were too littered with the word ‘breadnotes’ to back out of that decision.</p>
+
+<p>Here’s what I wanted out of breadnotes.</p>
+<ol>
+  <li>Infra as code</li>
+  <li>Cheap cloud hosting</li>
+  <li>Highly scalable</li>
+  <li>Easy to setup dev environment</li>
+  <li>Easy to deploy</li>
+</ol>
+
+<p>I hashed out these ideas with Claude and went through a glut of options from languages, frameworks, servers, all in one deployment, custom deployment.</p>
+
+<p>My first approach led to something like the following. FastAPI API Server deployed on EC2, Vite front-end deployed bundled and deployed to S3 served by CloudFront, On demand Postgres DB on Aurora, artifacts created in github actions. This was a fully fledged development and deployment environment and a basic product spun up in around a few days.</p>
+
+<p>I felt very empowered to make large migrations and architecture refactors. Aurora pricing was larger than I initially imagined since I thought I’m only charged for requests. Turns out I’m charged for work units, which there is a minimum amount of work units needed to keep it running. I switched over to a very low speced RDS to see if this would help. It did but was still too high for essentially no requests per minute. I ultimately swapped over to Supabase Postgres which is free, but shuts down after around seven days. All of this infra is managed through terraform.</p>
+
+<figure>
+	<img src="https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/adventures-in-vibe-coding/costs.png" width="500" style="margin: auto" />
+	<figcaption></figcaption>
+</figure>
+
+<p>I thought the cost of paying for EC2 for my API server was too expensive so I migrated from a EC2 server to AWS Apprunner since Apprunner is a pay for requests system. I thought I would save a lot of the costs since my site receives like 0 requests per minute, but turns out Apprunner also needs to be kept alive, and is forcibly kept alive with a periodic health check ping to your api server. I accepted and ate the cost on this one.</p>
+
+<h1 id="personalstorage">personalstorage</h1>
+<figure>
+	<img src="https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/adventures-in-vibe-coding/personalcloud.png" width="" style="margin: auto" />
+	<figcaption></figcaption>
+</figure>
+
+<p><a href="https://github.com/lee-jason/personalcloud">Source code</a></p>
+
+<p>I was running out of Google Drive space and needed to clear out some data because hell if I’m going to pay $24 a year for 100GB of space. I wanted to be able to use AWS frozen storage to put some heavy files in that I rarely touch but would love to have around.</p>
+
+<p>Here’s what I wanted out of personalstorage</p>
+<ol>
+  <li>Infra as code</li>
+  <li>Portable, anyone can deploy</li>
+  <li>Can push and retrieve from other machines</li>
+  <li>Easy to use</li>
+</ol>
+
+<p>I had Claude requisition a simple glacier storage s3 bucket that I can sync to and pull from, along with a handful of make commands to make it dead simple.</p>
+
+<p>Glacier storage needs to restore files before pulling which does take time so pulling files does require ~24 hour turnaround time which makes things less convenient.
+The great thing though is that 100GB in cold storage is $1.20 a year. Since I’m storing around ~10GB I expect my bill to be $0.12 a year.</p>
+
+<h1 id="personalvpn">personalvpn</h1>
+<figure>
+	<img src="https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/adventures-in-vibe-coding/personalvpn.png" width="" style="margin: auto" />
+	<figcaption></figcaption>
+</figure>
+
+<p><a href="https://github.com/lee-jason/socksproxy">Source code</a></p>
+
+<p>With VPN services costing around $60 a year, I wanted to see if I could do it cheaper. The idea was to leverage an EC2 machine as a on the fly VPN server.</p>
+
+<p>Here’s what I wanted out of personalvpn</p>
+<ol>
+  <li>Infra as code</li>
+  <li>Create an on the fly remote proxy</li>
+  <li>Have it be cheaper than consumer offerings</li>
+  <li>Easy to use</li>
+  <li>Deployable on any machine</li>
+</ol>
+
+<p>I first let Claude handle creating all the VPN configuration and containerizing an OpenVPN setup, but the more I discovered the more I realized I was in a little over my head and I didn’t expect to invest this much time in learning how VPNs work. I also didn’t want to just let Claude take the reigns without me understanding what’s happening. I decided to just simply requisition a remote instance that had a auto time to kill. While not a true VPN, I can SSH tunnel to the instance and use it as a SOCKS proxy on my browser. The instance takes a minute to spin up and costs a few pennies for the few minutes I need to cross check travel pricing in a different region.</p>
+
+<h1 id="protobuf-playground">protobuf-playground</h1>
+<p>I was interested in seeing how big companies create interfaces across their service oriented teams. I know Google mainly ensures interfaces through protobufs so I wanted to uncover some questions I had on how it works.</p>
+
+<p>Here’s what I wanted out of protobuf-playground</p>
+<ol>
+  <li>One client, One server, client interacts with server through protobuf</li>
+</ol>
+
+<p>That’s pretty much it. This was a discovery project to understand how services communicate with each other. What I discovered is that it seems like protobufs give you too much flexibility in how teams manage their built proto files. It seems like the general consensus is for the owner to host the proto files for the client to find and build the proto files to build the modules for their language. It seems like there’s no expectation that that the client keeps up to date with the latest server version, but no enforceable way to do so. Servers are expected to make their service backwards compatible. There’s many solutions, free and paid, as to where to host the proto files.</p>
+
+<p>I never got this to successfully run and frankly I didn’t care to get a running POC since I think I answered my original question about protobufs.</p>
+
+<h1 id="codebreaker">codebreaker</h1>
+<figure>
+	<img src="https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/adventures-in-vibe-coding/codebreaker.png" width="" style="margin: auto" />
+	<figcaption></figcaption>
+</figure>
+
+<p><a href="https://github.com/lee-jason/kube-playground">Source code</a></p>
+
+<p>This was pretty much an exercise in learning about Kubernetes and Kafka. I wanted to create a toy application that would have a producer publishing events and a variable amount of consumers to consume events.</p>
+
+<p>Here’s what I wanted out of codebreaker</p>
+<ol>
+  <li>Horizontally scaling consumers / producers</li>
+  <li>Managed by Kubernetes</li>
+  <li>Queue progress observable through dashboard</li>
+  <li>Consumers auto scaled</li>
+</ol>
+
+<p>I was initially imagining that the computationally expensive task would be to crack a hashed message generated by a producer, but being able to control how long each of these would take was hard to control so I just settled on just receiving a simple message then sleeping for a controled amount of time. Producers would create messages in variable rates and periodically spike the message queue to keep things interesting for the auto balancer.</p>
+
+<p>Claude handled creating the kubernetes configuration that ran off minikube pretty flawlessly. I took a little bit of time to understand how Kafka is setup such that multiple consumers can consume (multiple partitions on topic) and set the amount of consumers to scale from 1 to 10.</p>
+
+<p>I would say in terms of a educational POC this was a success. Got to touch a bunch of services I was scared to touch before due to the high complexity cliff.</p>
+
+<h1 id="final-thoughts">Final thoughts</h1>
+<p>Five mini projects in a month of Claude Code. Its clear to see the bootstrapping capability is monumental. Its incredible that it works so well out of the box without much fuss. I liked whatever pre-set prompt they had on Claude Code to be a combination of informative without being overly wordy. Where before the friction was around learning something new, the barriers to adopting new technology is lowered significantly in that Claude can handle most of the minutia of configuration. I think this will lead to teams making tech decisions not based on the convenience of team familiarity (which today is still an important facet to consider) but more on whether its the right tool for the job.</p>
+
+  </article>
+
+  
+  <hr>
+
+  <div class="related">
+    <h2>Other Posts</h2>
+    
+      <li><a href="/fitting-room-retrospective/" title="FittingRoom Postmortem">FittingRoom Postmortem
+       &nbsp; <span class="post-meta">August 20, 2025</span></a>
+    
+      <li><a href="/blog-migration-postmortem/" title="Blog migration postmortem">Blog migration postmortem
+       &nbsp; <span class="post-meta">July 16, 2025</span></a>
+    
+      <li><a href="/deployments-advice/" title="Releasing at the speed of code">Releasing at the speed of code
+       &nbsp; <span class="post-meta">July 02, 2025</span></a>
+    
+  </div>
+  
+  <div class="comments">
+    <div id="disqus_thread"></div>
+<script>
+    /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /*
+    var disqus_config = function () {
+    this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://jihoon222.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+  </div>
+</div>
+
+<script>
+var anchorForId = function (id) {
+  var anchor = document.createElement("a");
+  anchor.className = "header-link";
+  anchor.href      = "#" + id;
+  anchor.innerHTML = "<i class=\"fas fa-link\"></i>";
+  return anchor;
+};
+
+var linkifyAnchors = function (level, containingElement) {
+  var headers = containingElement.getElementsByTagName("h" + level);
+  for (var h = 0; h < headers.length; h++) {
+    var header = headers[h];
+
+    if (typeof header.id !== "undefined" && header.id !== "") {
+      header.appendChild(anchorForId(header.id));
+    }
+  }
+};
+
+document.onreadystatechange = function () {
+  if (this.readyState === "complete") {
+    linkifyAnchors(3, document.body);
+    linkifyAnchors(4, document.body);
+    linkifyAnchors(5, document.body);
+    linkifyAnchors(6, document.body);
+  }
+};
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

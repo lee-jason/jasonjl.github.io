@@ -1,0 +1,686 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Jason Lee</title>
+    <description></description>
+    <link>https://jasonjl.mehttps://jasonjl.me/</link>
+    <atom:link href="https://jasonjl.mehttps://jasonjl.me/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Fri, 10 Oct 2025 00:51:31 +0000</pubDate>
+    <lastBuildDate>Fri, 10 Oct 2025 00:51:31 +0000</lastBuildDate>
+    <generator>Jekyll v4.4.1</generator>
+    
+      <item>
+        <title>Adventures in Vibe Coding</title>
+        <description>&lt;p&gt;I paid for a month of Claude Code, leveraging Sonnet 4 to run a bunch of coding experiments. Here’s what I found.&lt;/p&gt;
+
+&lt;h1 id=&quot;tldr&quot;&gt;TLDR&lt;/h1&gt;
+&lt;p&gt;Claude seems to be very good at greenfield development work. Here’s the workflow I’ve been using that I also see others online having success with.&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;Research&lt;/li&gt;
+  &lt;li&gt;Plan your approach&lt;/li&gt;
+  &lt;li&gt;Execute&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;This flow usually leads to a fairly predictable initial implementation at least in defining a high level project skeleton.&lt;/p&gt;
+
+&lt;p&gt;People who let Claude run amok with excessive command privileges and free reign to update and run anything are careless and reckless. Same for those who run agents of agents. This is a surefire way to not understand anything you co-created which leads to an unmanageable unmaintainable project. Sometimes that trade off is acceptable like if you’re building throwaway code. If you expect your code to be maintained in the future, then it is not. Don’t be rude to your teammates, use your discretion.&lt;/p&gt;
+
+&lt;p&gt;Claude is well worth the twenty dollars a month in terms of developer empowerment. What’s more important than the speed of execution is the increased speed of experimentation and learning. Love the tool, don’t love how such a powerful tool for learning is paywalled.&lt;/p&gt;
+
+&lt;h1 id=&quot;breadnotes&quot;&gt;breadnotes&lt;/h1&gt;
+&lt;figure&gt;
+	&lt;img src=&quot;https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/adventures-in-vibe-coding/breadnotes.png&quot; width=&quot;&quot; style=&quot;margin: auto&quot; /&gt;
+	&lt;figcaption&gt;&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/lee-jason/breadnotes&quot;&gt;Source code&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;My first project was to create a simple crud app made to be highly scalable using cloud based orchestration and services. I wanted a place to publish my bread creations and thought to create a picture blog for my bread. In hindsight, the title ‘breadblog’ is much better than breadnotes, but the implementation and variables were too littered with the word ‘breadnotes’ to back out of that decision.&lt;/p&gt;
+
+&lt;p&gt;Here’s what I wanted out of breadnotes.&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;Infra as code&lt;/li&gt;
+  &lt;li&gt;Cheap cloud hosting&lt;/li&gt;
+  &lt;li&gt;Highly scalable&lt;/li&gt;
+  &lt;li&gt;Easy to setup dev environment&lt;/li&gt;
+  &lt;li&gt;Easy to deploy&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;I hashed out these ideas with Claude and went through a glut of options from languages, frameworks, servers, all in one deployment, custom deployment.&lt;/p&gt;
+
+&lt;p&gt;My first approach led to something like the following. FastAPI API Server deployed on EC2, Vite front-end deployed bundled and deployed to S3 served by CloudFront, On demand Postgres DB on Aurora, artifacts created in github actions. This was a fully fledged development and deployment environment and a basic product spun up in around a few days.&lt;/p&gt;
+
+&lt;p&gt;I felt very empowered to make large migrations and architecture refactors. Aurora pricing was larger than I initially imagined since I thought I’m only charged for requests. Turns out I’m charged for work units, which there is a minimum amount of work units needed to keep it running. I switched over to a very low speced RDS to see if this would help. It did but was still too high for essentially no requests per minute. I ultimately swapped over to Supabase Postgres which is free, but shuts down after around seven days. All of this infra is managed through terraform.&lt;/p&gt;
+
+&lt;figure&gt;
+	&lt;img src=&quot;https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/adventures-in-vibe-coding/costs.png&quot; width=&quot;500&quot; style=&quot;margin: auto&quot; /&gt;
+	&lt;figcaption&gt;&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;I thought the cost of paying for EC2 for my API server was too expensive so I migrated from a EC2 server to AWS Apprunner since Apprunner is a pay for requests system. I thought I would save a lot of the costs since my site receives like 0 requests per minute, but turns out Apprunner also needs to be kept alive, and is forcibly kept alive with a periodic health check ping to your api server. I accepted and ate the cost on this one.&lt;/p&gt;
+
+&lt;h1 id=&quot;personalstorage&quot;&gt;personalstorage&lt;/h1&gt;
+&lt;figure&gt;
+	&lt;img src=&quot;https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/adventures-in-vibe-coding/personalcloud.png&quot; width=&quot;&quot; style=&quot;margin: auto&quot; /&gt;
+	&lt;figcaption&gt;&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/lee-jason/personalcloud&quot;&gt;Source code&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;I was running out of Google Drive space and needed to clear out some data because hell if I’m going to pay $24 a year for 100GB of space. I wanted to be able to use AWS frozen storage to put some heavy files in that I rarely touch but would love to have around.&lt;/p&gt;
+
+&lt;p&gt;Here’s what I wanted out of personalstorage&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;Infra as code&lt;/li&gt;
+  &lt;li&gt;Portable, anyone can deploy&lt;/li&gt;
+  &lt;li&gt;Can push and retrieve from other machines&lt;/li&gt;
+  &lt;li&gt;Easy to use&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;I had Claude requisition a simple glacier storage s3 bucket that I can sync to and pull from, along with a handful of make commands to make it dead simple.&lt;/p&gt;
+
+&lt;p&gt;Glacier storage needs to restore files before pulling which does take time so pulling files does require ~24 hour turnaround time which makes things less convenient.
+The great thing though is that 100GB in cold storage is $1.20 a year. Since I’m storing around ~10GB I expect my bill to be $0.12 a year.&lt;/p&gt;
+
+&lt;h1 id=&quot;personalvpn&quot;&gt;personalvpn&lt;/h1&gt;
+&lt;figure&gt;
+	&lt;img src=&quot;https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/adventures-in-vibe-coding/personalvpn.png&quot; width=&quot;&quot; style=&quot;margin: auto&quot; /&gt;
+	&lt;figcaption&gt;&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/lee-jason/socksproxy&quot;&gt;Source code&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;With VPN services costing around $60 a year, I wanted to see if I could do it cheaper. The idea was to leverage an EC2 machine as a on the fly VPN server.&lt;/p&gt;
+
+&lt;p&gt;Here’s what I wanted out of personalvpn&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;Infra as code&lt;/li&gt;
+  &lt;li&gt;Create an on the fly remote proxy&lt;/li&gt;
+  &lt;li&gt;Have it be cheaper than consumer offerings&lt;/li&gt;
+  &lt;li&gt;Easy to use&lt;/li&gt;
+  &lt;li&gt;Deployable on any machine&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;I first let Claude handle creating all the VPN configuration and containerizing an OpenVPN setup, but the more I discovered the more I realized I was in a little over my head and I didn’t expect to invest this much time in learning how VPNs work. I also didn’t want to just let Claude take the reigns without me understanding what’s happening. I decided to just simply requisition a remote instance that had a auto time to kill. While not a true VPN, I can SSH tunnel to the instance and use it as a SOCKS proxy on my browser. The instance takes a minute to spin up and costs a few pennies for the few minutes I need to cross check travel pricing in a different region.&lt;/p&gt;
+
+&lt;h1 id=&quot;protobuf-playground&quot;&gt;protobuf-playground&lt;/h1&gt;
+&lt;p&gt;I was interested in seeing how big companies create interfaces across their service oriented teams. I know Google mainly ensures interfaces through protobufs so I wanted to uncover some questions I had on how it works.&lt;/p&gt;
+
+&lt;p&gt;Here’s what I wanted out of protobuf-playground&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;One client, One server, client interacts with server through protobuf&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;That’s pretty much it. This was a discovery project to understand how services communicate with each other. What I discovered is that it seems like protobufs give you too much flexibility in how teams manage their built proto files. It seems like the general consensus is for the owner to host the proto files for the client to find and build the proto files to build the modules for their language. It seems like there’s no expectation that that the client keeps up to date with the latest server version, but no enforceable way to do so. Servers are expected to make their service backwards compatible. There’s many solutions, free and paid, as to where to host the proto files.&lt;/p&gt;
+
+&lt;p&gt;I never got this to successfully run and frankly I didn’t care to get a running POC since I think I answered my original question about protobufs.&lt;/p&gt;
+
+&lt;h1 id=&quot;codebreaker&quot;&gt;codebreaker&lt;/h1&gt;
+&lt;figure&gt;
+	&lt;img src=&quot;https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/adventures-in-vibe-coding/codebreaker.png&quot; width=&quot;&quot; style=&quot;margin: auto&quot; /&gt;
+	&lt;figcaption&gt;&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/lee-jason/kube-playground&quot;&gt;Source code&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;This was pretty much an exercise in learning about Kubernetes and Kafka. I wanted to create a toy application that would have a producer publishing events and a variable amount of consumers to consume events.&lt;/p&gt;
+
+&lt;p&gt;Here’s what I wanted out of codebreaker&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;Horizontally scaling consumers / producers&lt;/li&gt;
+  &lt;li&gt;Managed by Kubernetes&lt;/li&gt;
+  &lt;li&gt;Queue progress observable through dashboard&lt;/li&gt;
+  &lt;li&gt;Consumers auto scaled&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;I was initially imagining that the computationally expensive task would be to crack a hashed message generated by a producer, but being able to control how long each of these would take was hard to control so I just settled on just receiving a simple message then sleeping for a controled amount of time. Producers would create messages in variable rates and periodically spike the message queue to keep things interesting for the auto balancer.&lt;/p&gt;
+
+&lt;p&gt;Claude handled creating the kubernetes configuration that ran off minikube pretty flawlessly. I took a little bit of time to understand how Kafka is setup such that multiple consumers can consume (multiple partitions on topic) and set the amount of consumers to scale from 1 to 10.&lt;/p&gt;
+
+&lt;p&gt;I would say in terms of a educational POC this was a success. Got to touch a bunch of services I was scared to touch before due to the high complexity cliff.&lt;/p&gt;
+
+&lt;h1 id=&quot;final-thoughts&quot;&gt;Final thoughts&lt;/h1&gt;
+&lt;p&gt;Five mini projects in a month of Claude Code. Its clear to see the bootstrapping capability is monumental. Its incredible that it works so well out of the box without much fuss. I liked whatever pre-set prompt they had on Claude Code to be a combination of informative without being overly wordy. Where before the friction was around learning something new, the barriers to adopting new technology is lowered significantly in that Claude can handle most of the minutia of configuration. I think this will lead to teams making tech decisions not based on the convenience of team familiarity (which today is still an important facet to consider) but more on whether its the right tool for the job.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 30 Sep 2025 08:00:00 +0000</pubDate>
+        <link>https://jasonjl.mehttps://jasonjl.me/adventures-in-vibe-coding/</link>
+        <guid isPermaLink="true">https://jasonjl.mehttps://jasonjl.me/adventures-in-vibe-coding/</guid>
+        
+        
+        <category>ai,</category>
+        
+        <category>postmortem</category>
+        
+      </item>
+    
+      <item>
+        <title>FittingRoom Postmortem</title>
+        <description>&lt;p&gt;&lt;a href=&quot;https://github.com/lee-jason/stable-diffusion-playground&quot;&gt;Source code&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Trying on new clothes takes too much time and effort. You have to go to the store, find the clothes you like, try them on in the fitting room and probably put it back. If you’re a misshapen human like me, it takes even more time to find something that looks nice. This is more of a problem if you shop online for clothes. Now you don’t even get a chance to try it on before you buy it which leads to more guesswork and most likely shipping waste.&lt;/p&gt;
+
+&lt;p&gt;Now with FittingRoom, you can digitally try on clothes saving you all this time and effort in trying it on yourself!&lt;/p&gt;
+
+&lt;p&gt;From this&lt;/p&gt;
+&lt;figure&gt;
+	&lt;img src=&quot;https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/fitting-room-retrospective/source.avif&quot; width=&quot;&quot; style=&quot;margin: auto&quot; /&gt;
+	&lt;figcaption&gt;&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;Wearing this&lt;/p&gt;
+&lt;figure&gt;
+	&lt;img src=&quot;https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/fitting-room-retrospective/inspo.avif&quot; width=&quot;&quot; style=&quot;margin: auto&quot; /&gt;
+	&lt;figcaption&gt;&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;To this&lt;/p&gt;
+&lt;figure&gt;
+	&lt;img src=&quot;https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/fitting-room-retrospective/output.png&quot; width=&quot;&quot; style=&quot;margin: auto&quot; /&gt;
+	&lt;figcaption&gt;&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;Oh God.&lt;/p&gt;
+
+&lt;p&gt;My first foray in leveraging Claude Code in understanding the capabilities of AI image generation.&lt;/p&gt;
+
+&lt;h1 id=&quot;how-it-works&quot;&gt;How it works&lt;/h1&gt;
+&lt;p&gt;These are just off the shelf models from huggingface glued together to make something barely coherent. All images were generated on a M2 Macbook Pro which can explain some of the limitation on the total number of steps I can apply during image generation / refinement.&lt;/p&gt;
+
+&lt;p&gt;The script takes 3 core inputs&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;Source image - This is you in your normal clothes&lt;/li&gt;
+  &lt;li&gt;Inspo image - This is the clothing or design you want to wear&lt;/li&gt;
+  &lt;li&gt;Face image - This is your face portrait. We’ll talk about why we need this one.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Originally I stumbled on a model called &lt;a href=&quot;https://github.com/lllyasviel/ControlNet&quot;&gt;ControlNet&lt;/a&gt;. ControlNet allows for finer control over the generated image given some properties of the image (outlines, depth map, color maps, …). Without ControlNet, there would be no foundation for what the generated image would look like and would produce wildly varying results with no semblance of looking like the original.&lt;/p&gt;
+
+&lt;p&gt;ControlNet provides a &lt;a href=&quot;https://github.com/lllyasviel/ControlNet?tab=readme-ov-file#controlnet-with-depth&quot;&gt;depth pre-processor&lt;/a&gt;. I thought this would be a good foundation for building an inspired image while maintaining the original pose.&lt;/p&gt;
+
+&lt;p&gt;From this&lt;/p&gt;
+&lt;figure&gt;
+	&lt;img src=&quot;https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/fitting-room-retrospective/depth_map.png&quot; width=&quot;&quot; style=&quot;margin: auto&quot; /&gt;
+	&lt;figcaption&gt;&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;To this&lt;/p&gt;
+&lt;figure&gt;
+	&lt;img src=&quot;https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/fitting-room-retrospective/temp_source_image.png&quot; width=&quot;&quot; style=&quot;margin: auto&quot; /&gt;
+	&lt;figcaption&gt;&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;Wait, that blurry looking face looks nothing like the original model.&lt;/p&gt;
+
+&lt;p&gt;So the model uses the depth map as a foundation but really has no idea what the face should look like. Fortunately another tool, &lt;a href=&quot;https://github.com/tencent-ailab/IP-Adapter&quot;&gt;IPAdapter&lt;/a&gt; provides a feature that given an image mask, it’ll fill in the lost details (&lt;a href=&quot;https://github.com/tencent-ailab/IP-Adapter/blob/main/ip_adapter_demo.ipynb&quot;&gt;demo&lt;/a&gt;). We can use this mask to blank out the incorrect face and replace it back with some form of the original face. We use a very rudimentary face recognition library and create a simple box mask around the detected face of the generated image. Then we ask IPAdapter to fill that in.&lt;/p&gt;
+
+&lt;p&gt;From this&lt;/p&gt;
+&lt;figure&gt;
+	&lt;img src=&quot;https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/fitting-room-retrospective/source_masked_image.png&quot; width=&quot;&quot; style=&quot;margin: auto&quot; /&gt;
+	&lt;figcaption&gt;&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;With this face portrait&lt;/p&gt;
+&lt;figure&gt;
+	&lt;img src=&quot;https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/fitting-room-retrospective/source_face_image1.jpg&quot; width=&quot;300&quot; style=&quot;margin: auto&quot; /&gt;
+	&lt;figcaption&gt;&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;To this&lt;/p&gt;
+&lt;figure&gt;
+	&lt;img src=&quot;https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/fitting-room-retrospective/output.png&quot; width=&quot;&quot; style=&quot;margin: auto&quot; /&gt;
+	&lt;figcaption&gt;&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;Jesus…&lt;/p&gt;
+
+&lt;p&gt;In the above example, I picked a random headshot but imagine if the headshot is the same as the original model in the source image.&lt;/p&gt;
+
+&lt;h1 id=&quot;things-to-try-out&quot;&gt;Things to try out&lt;/h1&gt;
+&lt;p&gt;So these images were generated using a smaller Stable Diffusion 1.5 with when we could have used the much larger Stable Diffusion XL model. The XL models from my experience generate much more sensible and higher quality images at the cost of time and memory. I wasn’t able to successfully generate a fitting room picture using the highest quality model locally due to memory constraints. I also set the amount of steps to around 80. Setting it any higher would mean I would be waiting more than 5 minutes to generate a single picture. I did notice in testing that a higher amount of steps would produce a higher quality image at the expense of me context switching by walking away from the laptop waiting for the process to complete.&lt;/p&gt;
+
+&lt;p&gt;And of course the face masking could be more accurate. I really just wanted to run a POC and was fine with the square mask placed over where the face detector was, but more accurate shaping of the face mask would have of course produced a higher quality result.&lt;/p&gt;
+
+&lt;h1 id=&quot;so-does-it-work&quot;&gt;So does it work?&lt;/h1&gt;
+&lt;p&gt;I think it can work. I’m going to guess that with a higher fidelity model we can get it to look incredibly uncanny. Face swapped portraits have existed and those can look imperceptively real. I’m certain that using a higher quality model can achieve the same result.&lt;/p&gt;
+</description>
+        <pubDate>Wed, 20 Aug 2025 08:00:00 +0000</pubDate>
+        <link>https://jasonjl.mehttps://jasonjl.me/fitting-room-retrospective/</link>
+        <guid isPermaLink="true">https://jasonjl.mehttps://jasonjl.me/fitting-room-retrospective/</guid>
+        
+        
+        <category>ai,</category>
+        
+        <category>postmortem</category>
+        
+      </item>
+    
+      <item>
+        <title>Blog migration postmortem</title>
+        <description>&lt;p&gt;In 2015 I spun up a personal blog after I quit my first job. This was built off &lt;a href=&quot;https://octopress.org/&quot;&gt;Octopress&lt;/a&gt; and deployed on Github pages. Despite the compiled site existing on Github itself &lt;a href=&quot;https://github.com/lee-jason/lee-jason.github.io&quot;&gt;lee-jason.github.io&lt;/a&gt;, the source itself exists on a laptop that is long gone.&lt;/p&gt;
+
+&lt;p&gt;2025 I’m still alive and I’m once again in a similar situation. I suddenly found myself with more time and I wanted to write again, unfortunately I didn’t have the source code for my blog. I decided the only way forward is to migrate from compiled Jekyll to Jekyll 4.0.&lt;/p&gt;
+
+&lt;p&gt;Ten years have passed and Jekyll is now on version 4.0. As a chronic hackernews reader I stumble on a lot of blogs. I really liked the simplicity of &lt;a href=&quot;https://florian.github.io/&quot;&gt;florian.github.io&lt;/a&gt;. I forked his &lt;a href=&quot;https://github.com/florian/florian.github.io&quot;&gt;repo&lt;/a&gt; and built off that. Some minor changes later, I had working POC that ran on Jekyll 4.&lt;/p&gt;
+
+&lt;p&gt;I thought for a minute on using an existing blogging platform like Medium or Notion, but one of my philosophies is to build as cheaply as possible and hosted blog platform often offer you all the bells and whistles of analytics and custom domains but often do so with a fee. I was unwilling to do so.&lt;/p&gt;
+
+&lt;p&gt;I now needed to configure deployment. Josh Larsen had a great &lt;a href=&quot;https://github.com/joshlarsen/jekyll4-deploy-gh-pages&quot;&gt;Github Action&lt;/a&gt; script to deploy custom Jekyll builds and deploy the compiled code to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gh-pages&lt;/code&gt; branch. I forked that and added the option to have multiple Jekyll configs be passed in the build step. This allowed me to have a production specific config to load resources pointing in the right production area. This allows development to have different config values to load media content on a different path as well as generate link output using a different hostname.&lt;/p&gt;
+
+&lt;p&gt;I noticed my media assets were also all sitting in a single bucket. I re-organized this to follow Jekyll’s recommendation where media assets are namespaced by their specific blog’s slug. There’s also a simple sync-to-s3 command that makes it easy to sync new resources in the assets folder. I then added Cloudfront caching in front of the media assets, but then wondered what the point was when the hits to my blog are so few and far in between it would probably take longer to load the cached content in each leaf node.&lt;/p&gt;
+
+&lt;p&gt;And finally, the data migration itself, parsing the compiled content and generating clean markdown from it. This is a little bit manaual but in the age of LLM AI anything is possible. I pretty much just ask Claude page by page to convert the contents into Markdown. It does a stellar job but has trouble reading the embedded code sections which seems to be because something about the code rendering seems to have some JS post processing which the Claude web browser has problems reading.&lt;/p&gt;
+
+&lt;h1 id=&quot;improvements&quot;&gt;Improvements&lt;/h1&gt;
+
+&lt;p&gt;The tagging feature is gone! Although Jekyll supports indexing posts by tags, this theme from Florian does not support it yet. I’ll need to reimplement this but I don’t think many people use it so I’m not too pressured to implement it any time soon.&lt;/p&gt;
+
+&lt;h1 id=&quot;learnings&quot;&gt;Learnings&lt;/h1&gt;
+
+&lt;p&gt;After realizing that my past-self did present-self a disservice by leaving only the compiled content, I promised future-self that I would never do him that dirty again. From here on out, I promise to write great documentation and simplify processes such that future-self in 2035 can easily pick up this repo on his M10 chip Macbook Pro++ and deploy a new blog article in minutes.&lt;/p&gt;
+</description>
+        <pubDate>Wed, 16 Jul 2025 08:00:00 +0000</pubDate>
+        <link>https://jasonjl.mehttps://jasonjl.me/blog-migration-postmortem/</link>
+        <guid isPermaLink="true">https://jasonjl.mehttps://jasonjl.me/blog-migration-postmortem/</guid>
+        
+        
+        <category>project,</category>
+        
+        <category>postmortem</category>
+        
+      </item>
+    
+      <item>
+        <title>Releasing at the speed of code</title>
+        <description>&lt;p&gt;Something I value more recently is easily deployable software. Most engineers are probably more interested in building robust and easily maintainable code but may be divorced from the idea of deploying their code as those systems or processes may already be set in their organization. Easily deployable code means its much easier to take risks and create experiments which relieves paralysis in deciding when or how some bit of change should be released. If your company is still arguing about when to time a release or meeting some specific release window, you may want to evaluate whether your current release process is holding you back.&lt;/p&gt;
+
+&lt;h2 id=&quot;deployments-should-be-a-zero-clicks&quot;&gt;Deployments should be a zero clicks&lt;/h2&gt;
+&lt;p&gt;Any non trivial deployment needs to be automated. Manual processes are fine, but ultimately lead to more wasted time amortized across all deployments which is a friction point around deployment. Time spent to automate the process further reduces friction around deployment leading to faster release cycles, less planning conversations, and more free cycles for everyone involved in the conversation.&lt;/p&gt;
+
+&lt;h2 id=&quot;failures-should-be-accounted-for&quot;&gt;Failures should be accounted for&lt;/h2&gt;
+&lt;p&gt;Process driven deployments are tricky and are inherently stateful. A deployment can fail in any number of steps and at any point in the flow. The automated process should anticipate these. Deployments should catch and handle common breaking scenarios and rollback appropriately. This doesn’t mean that the system should be able to support rolling back to any arbitrary version, but this really just means that if any part of the step is failing, stop at that specific step and reset that step to before the change. In the case of a simple data migration, this can mean running the migration in a transaction, or in the case of a front-end code deployment a matter of having a system to deploy the previous front-end version, then auto triggering that on when new front-end failures are detected.&lt;/p&gt;
+
+&lt;h2 id=&quot;f-it-well-do-it-live&quot;&gt;“F— it, we’ll do it live!”&lt;/h2&gt;
+&lt;p&gt;Common knowledge tells us that testing before deploying is a pillar of software development, I’d like to suggest and warn that some teams may be testing too much or relying too much on manual testing. The only valid reasons to have a prolonged testing cycle is when…&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;Your software has safety implications where failure costs lives&lt;/li&gt;
+  &lt;li&gt;Its difficult to deploy/rollback your software.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;In a modern web based software engineering product we can assume that…&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;Your software does not have safety implications (consider authorization)&lt;/li&gt;
+  &lt;li&gt;Its easy to deploy/rollback your software&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;If the above are true, then why use even more precious time testing? Deploy and rollback quickly. Or Deploy and iterate quickly.&lt;/p&gt;
+
+&lt;p&gt;The suggestion is clearly provocative and there’s obviously more nuance to the idea, but I’m not suggesting you to abandon your internal test cycle and have your customers be your guinea pigs. I’m suggesting that there may be opportunities to cut your test cycles shorter if you are confident in being able to deploy/rollback quickly. Shorter internal test times, may mean more time spent bug fixing or working on the next release.&lt;/p&gt;
+
+&lt;p&gt;I’ve been on a big ‘reduce friction’ kick, and from my previous companies, I see the deployment problem being a huge friction point to getting code to customers. I think this is a critical area in software development that should not be overlooked and should be given a second look to see how close we can get to a zero click deployment.&lt;/p&gt;
+</description>
+        <pubDate>Wed, 02 Jul 2025 08:00:00 +0000</pubDate>
+        <link>https://jasonjl.mehttps://jasonjl.me/deployments-advice/</link>
+        <guid isPermaLink="true">https://jasonjl.mehttps://jasonjl.me/deployments-advice/</guid>
+        
+        
+        <category>advice</category>
+        
+      </item>
+    
+      <item>
+        <title>Memoirs of my second startup in Silicon Valley</title>
+        <description>&lt;p&gt;Day in and out, I was clocking in my shift in a malaise. Days were spent running a meeting, aligning goals, working on a design, prototyping, reviewing, implementing, typical alignment and synergy, you know the deal… I was enjoying the respect I had as a tenured employee. The work-life balance was great. Work was predictable, comfortable. Despite the comfortable position I made for myself, I couldn’t shake the idea that I should be doing something more challenging.&lt;/p&gt;
+
+&lt;p&gt;A friend called again to recruit me for his seed stage startup. It wasn’t the first time he reached out, but this one time out of many I was finally in the right place and the right time. I weighed the risk of jumping from a cushy job to something that potentally had more opportunity. I mulled over that this may be my last chance to give it my all and try something risky. Recognizing the allure of opportunity and with a dose of a fear of missing out, I joined my second startup as a founding engineer.&lt;/p&gt;
+
+&lt;h2 id=&quot;philosophy-of-a-founding-engineer&quot;&gt;Philosophy of a Founding Engineer&lt;/h2&gt;
+
+&lt;p&gt;I anticipated that the roles and responsibilities of a founding engineer would be much more involved than from any early stage employee. I knew the experiences I carried with me from my first startup would not help me much here. I needed to be comfortable with the idea that carrying my own weight is not enough. I would have to carry the weight of my team. This was the first time in a long time that I was feeling the pressure. But as they say, ‘Something pressure creates strong diamonds…’.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;How do I build this in a way so that the next developer doesn’t mess it up&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Years of engineering baggage from my previous company greatly influenced the engineering philosophies I wanted to carry at my new job. One value my CTO and I were focused on was  building systems and patterns to not only make mistakes unlikely but impossible. Along with all the typical systems needed to build a web app, we built systems around composable permissions, ‘fail proof’ transactional emails, system-wide consistent api error structure, logging and handling, front-end resource caching… A new category of design consideration for me was “How do I build this in a way so that the next developer doesn’t mess it up”  We were only 6 months in into a fresh codebase and already had ~500 regression tests written for a huge swath of POC’d features.&lt;/p&gt;
+
+&lt;p&gt;I experienced coding nirvana as I had full context and understanding of why decisions were made how systems interacted with each other. I felt empowered to tear systems down and replace it if needed. I experienced the joy of building everything from a blank canvas and the frustration of having that code be replaced. Previously I only experienced carefully tiptoeing around monolithic code bases to insert my tweak, fix, or feature. I never realized the joy of creating the system, defending it, then seeing the decisions be validated by your team being productive. The joy of having a command of an entire codebase or architecture is something I would encourage every developer to pursue and experience.&lt;/p&gt;
+
+&lt;p&gt;I also experienced coding hell as the team ignored the vision. New team members were brought on, constraints were being introduced which resulted in the slow complacent degredation of the code base. Small hacky allowances were made to meet a deadline. Deployment processes were side-stepped to reach the customer faster. Team members start rewriting parts of your vision, fundamentally misunderstanding the intention. You build your castle out of Legos and yet a few weeks later you find a load bearing Duplo block. This I saw as inevitable but it hurt more when you own a bigger part of it.&lt;/p&gt;
+
+&lt;h2 id=&quot;product-market-fit&quot;&gt;Product Market Fit&lt;/h2&gt;
+
+&lt;p&gt;We had an engineering team but we struggled to find a product to ‘engineer’. It seemed that we were working backwards where we had the tools (AI.) and were trying to find a product, instead of looking at the problem (job readiness) and solving for that. We tried a few ideas but they never took off. Whether its because we didn’t give them enough time to bake, or if it was clear there was no impactful solution. Regardless, we were grasping for straws. Day by day, it became clearer to me that the well intentioned mission statement of helping university students find jobs would require more than just spinning up a new AI powered product; it’s AI itself that is actually the problem.&lt;/p&gt;
+
+&lt;p&gt;The advent of generative AI and the speed of adoption is truly a poison on recent graduates. Organization are disincentived to hire junior talent in lieu of a computer that can produce similar output in minutes rather than days. Not only that, organizations today are using AI as an excuse to mask slowing quarterly profits, reduce hiring, layoff workers in the hopes to both pad their quarterly balance sheet and stifle worker wages. This means that university students will have to compete against both AI as well as those senior talent that have been laid off by AI. Attempting to fulfil the mission of helping university students to find jobs using an AI product is a well intentioned but misguided shot at the core problem.&lt;/p&gt;
+
+&lt;h1 id=&quot;onwards&quot;&gt;Onwards&lt;/h1&gt;
+
+&lt;p&gt;Shortly after one year, I became redundant. The company didn’t have a need for a large technical team for a product that didn’t need a technical solution. I was given an offer to leave which I took.&lt;/p&gt;
+
+&lt;p&gt;Working here transformed my understanding of work and motivation. There was about 3 months where I’d be on the laptop from 9AM to 11PM moving from task to task deploying at least 2 non-trivial feature prs and providing feedback for my team every day. Weekends are normal work hours from 10AM to 6PM. This is not an exaggeration. I’m incredulous myself to see this written down in ink but I have to iterate again, this is not an exaggeration. I felt possessed. I didn’t feel fatigue, I didn’t feel hunger. I felt numb in the same way you feel numb on a good run. It was a fast acting loop of problem, solution, dopamine, problem, solution, dopamine. If I thought of something quick to implement late at night, I’d go for it. Problem, Solution, Dopamine. It wasn’t the dopamine I was chasing, but my shot at filling the chip on my shoulder. Even today, I still have something to prove.&lt;/p&gt;
+
+&lt;p&gt;I’m incredibly proud of the high quality code base I left behind. The frameworks, the patterns, the components, I wish I could have taken with me. I gave a lot of love to the platform and it loved me back in return.&lt;/p&gt;
+
+&lt;p&gt;Onwards to better things.&lt;/p&gt;
+
+</description>
+        <pubDate>Mon, 30 Jun 2025 08:00:00 +0000</pubDate>
+        <link>https://jasonjl.mehttps://jasonjl.me/memoirs-of-my-second-startup/</link>
+        <guid isPermaLink="true">https://jasonjl.mehttps://jasonjl.me/memoirs-of-my-second-startup/</guid>
+        
+        
+        <category>work,</category>
+        
+        <category>about</category>
+        
+        <category>me</category>
+        
+      </item>
+    
+      <item>
+        <title>How I roast great coffee at home</title>
+        <description>&lt;p&gt;You ever get sucked in so deep into a hobby that you start writing a guide on it then realize how much of a freak you are? Well if you haven’t got there yet, I hope this guide will help you get a little closer to your goal.&lt;/p&gt;
+
+&lt;p&gt;If you’re already into brewing your own coffee, then learning how to roast your own beans is a natural next step in your path to understanding and pursuit of the perfect cup. The subtle and nuanced decisions you make during the roasting process are arguably more influential on the resulting cup than any decision you make during the brewing process. By mastering the roasting process, you’ll be able to have fine tune control over the resulting cup’s character (bright vs bold) and the cup’s texture (tea vs thick).&lt;/p&gt;
+
+&lt;h2 id=&quot;tools&quot;&gt;Tools&lt;/h2&gt;
+&lt;p&gt;Here’s what I use
+Links are provided for convenience. I’m not affiliated with any of the products.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.amazon.com/dp/B07Z9Q3TLQ&quot;&gt;FreshRoast SR800&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.amazon.com/Mastech-MS6514-Thermometer-Temperature-Interface/dp/B00KXC8YNK&quot;&gt;Mastech MS6514&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.amazon.com/Thermocouple-Headprobe-Mini-Connector-Temperature/dp/B0BGXXGR1M&quot;&gt;K Type Thermocouple&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;USB Mini to USB Adapter (Pick whatever your device takes)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Optional&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.amazon.com/dp/B07S9XYC48&quot;&gt;Bean Cooler&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.etsy.com/shop/RazzoRoasting&quot;&gt;FreshRoast Extension Tube&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;software&quot;&gt;Software&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://artisan-scope.org/download/&quot;&gt;Artisan Scope&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.silabs.com/software-and-tools/usb-to-uart-bridge-vcp-drivers?tab=downloads&quot;&gt;USB to UART Driver&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;hooking-things-up&quot;&gt;Hooking things up&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Turn on your Mastech and connect the Mastech to your computer.&lt;/li&gt;
+  &lt;li&gt;Hold the USB button until it beeps. Your PC should acknowledge a new USB device as connected.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;figure&gt;
+	&lt;img src=&quot;https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/mastech-artisan/mastech-usb-setup.jpg&quot; width=&quot;400&quot; style=&quot;margin: auto&quot; /&gt;
+	&lt;figcaption&gt;&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Open Artisan and configure the Device to use the identified Mastech device (Menu -&amp;gt; Config -&amp;gt; Device…)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;figure&gt;
+	&lt;img src=&quot;https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/mastech-artisan/mastech-device-config.png&quot; width=&quot;&quot; style=&quot;margin: auto&quot; /&gt;
+	&lt;figcaption&gt;&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Configure the Port to use the usb port the Mastech is connected to (Menu -&amp;gt; Config -&amp;gt; Port…).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;figure&gt;
+	&lt;img src=&quot;https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/mastech-artisan/mastech-port-config.png&quot; width=&quot;&quot; style=&quot;margin: auto&quot; /&gt;
+	&lt;figcaption&gt;&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;At this point Artisan should be receiving temperature data from your Mastech device.&lt;/p&gt;
+
+&lt;h2 id=&quot;whats-next&quot;&gt;What’s next&lt;/h2&gt;
+
+&lt;p&gt;You thought I was going to go into roasting theory in this guide? Sorry to say but there’s too much on that topic to fit in this micro guide.
+Here’s a few links to get you started on the right path&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://library.sweetmarias.com/&quot;&gt;Sweet Maria’s Coffee Library&lt;/a&gt; &lt;br /&gt;
+Incredibly thorough and easily consumable resource to answer any question you may have about roasting&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.youtube.com/TheCaptainsCoffee&quot;&gt;The Captains Coffee&lt;/a&gt; &lt;br /&gt;
+&lt;a href=&quot;https://www.youtube.com/@VirtualCoffeeLab&quot;&gt;Virtual Coffee Lab&lt;/a&gt; &lt;br /&gt;
+Both very good examples of what proper procedure looks like what the nuanced decision making that goes into it&lt;/p&gt;
+
+&lt;p&gt;Happy roasting&lt;/p&gt;
+
+&lt;figure&gt;
+	&lt;img src=&quot;https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/mastech-artisan/Analyze1.png&quot; width=&quot;&quot; style=&quot;margin: auto&quot; /&gt;
+	&lt;figcaption&gt;&lt;/figcaption&gt;
+&lt;/figure&gt;
+</description>
+        <pubDate>Sat, 21 Jun 2025 08:00:00 +0000</pubDate>
+        <link>https://jasonjl.mehttps://jasonjl.me/mastech-artisan/</link>
+        <guid isPermaLink="true">https://jasonjl.mehttps://jasonjl.me/mastech-artisan/</guid>
+        
+        
+        <category>coffee</category>
+        
+      </item>
+    
+      <item>
+        <title>AI: The Trojan Horse in Engineering</title>
+        <description>&lt;p&gt;Foreward: When I mention ‘AI’ in this article, I’m referencing generative AI of today.&lt;/p&gt;
+
+&lt;p&gt;First off, big props to the real ones, the researchers. Everyone else is just benefiting / suffering from the trickle down effects of their monumental efforts. I am still so blown away at the creativity of solutions and tenacity of the researchers to use raw math for such an incredible effect. People are now literally falling in love with something that’s just a mathmatical formula. I’m still very curious to know if the original researchers anticipated the emergent effects of preceived ‘intelligence’ from their transformer attention architecture or if they simply thought that this was just a minor advancement in text generation.&lt;/p&gt;
+
+&lt;p&gt;The conversation around AI is muddied by voices of multiple competing interests. The loudest stakeholders always seem to be the CEOs of the leading AI companies themselves. Other supporting voices are those that see the promise in AI. With how quickly and impressively AI has advanced, its easy for any person to see the promise and join in on the pro-AI crowd. The fact that it also is easy to adopt in your professional or personal life further drives the point.&lt;/p&gt;
+
+&lt;p&gt;The consequence to all this support is that the voices of the dissenters are drowned out. Skilled creators in writing, arts, music, and programming are all slowly having their livelihoods taken by this monumental force. The technological advancements of AI on its own are good enough to adopt as a tool through organic means, but the people with the largest stakes in AI are constantly yapping about its progress and its potential. The CEO class are blatantly speedrunning the obsolescence of the creator.&lt;/p&gt;
+
+&lt;p&gt;It upsets me that the software engineering world readily adopted AI without thinking of the implications against their own job security. Meta and Microsoft are now forcing their employees to use AI, it doesn’t matter in what context, or what application, just that they have to use it. Large tech giants have a huge interest stake in the AI field taking off so that they can continue to flaunt how their research and partnerships with AI will make them massive amounts of money.&lt;/p&gt;
+
+&lt;p&gt;I recognize that software engineers in this case don’t have much choice to say no to the AI wave. Every engineer stands to improve our effectiveness by some multiple whether through knowledge gained or output delivered so why wouldn’t we adopt it. Unfortunately by playing into the system, we are actively reducing the availability of jobs for new hires and eventually one day for ourselves. In a fantasy world, software engineers could stand in together to reject AI in their workplace to protect their future interests but in this day and age, with the prevailing idea being that software engineering is a meritocracy and its every man for themselves, it is highly unlikely that engineers would ever agree to forming a union at least in the next five years.&lt;/p&gt;
+
+&lt;p&gt;It dissapoints me that engineers are not more antagonistic against AI. It also dissapoints me that the profit motive forces engineers to use it to survive. If you want to stay at the top it would be in your best interest to adopt it. But the more we adopt it, the less workers we’ll need. It is a cycle of job destruction and the billionaires are speedrunning the course to its final end.&lt;/p&gt;
+</description>
+        <pubDate>Mon, 16 Dec 2024 08:00:00 +0000</pubDate>
+        <link>https://jasonjl.mehttps://jasonjl.me/ai-the-trojan-horse/</link>
+        <guid isPermaLink="true">https://jasonjl.mehttps://jasonjl.me/ai-the-trojan-horse/</guid>
+        
+        
+        <category>AI</category>
+        
+      </item>
+    
+      <item>
+        <title>Memoirs of my first startup in Silicon Valley</title>
+        <description>&lt;h1 id=&quot;2011&quot;&gt;2011&lt;/h1&gt;
+&lt;p&gt;Although I graduated college with a CS degree, I was too fresh faced and I knew it. I had no internship experience and no understanding of what was expected of me for my first job. I applied pretty much anywhere for vaguely defined roles that required ‘5 years in Java’ knowing full well I wasn’t qualified for any of them. I clearly remember creating and submitting a CV directly to the recruiting company that was displaying a job listing from their client. How embarassing.&lt;/p&gt;
+
+&lt;p&gt;Wanting to stick around in the Irvine area, I applied to local hot companies that seem to suck talent directly through the UCI engineering straw. I applied to Google, Blizzard, Amazon. No responses. I applied to local contract shops. Some bites. I bumble through the interview. And these weren’t even very technical. They were effectively vibe checks that I catastrophically fumbled. These series of failures was a huge blow to my confidence, of which I already had very little of.&lt;/p&gt;
+
+&lt;p&gt;In my spare time I learned how to make websites. People shit on &lt;a href=&quot;https://www.w3schools.com/&quot;&gt;W3Schools&lt;/a&gt; but this free resource arguably was more impactful on my career than my university education was.&lt;/p&gt;
+
+&lt;p&gt;I interviewed and got an offer to join Experian Consumer Direct as a web developer. Ironically, this role didn’t really need any of the knowledge I gained in the UCI CS program as it was mostly centered around converting mockups in .psds and putting them down as HTML and CSS, something I got very good at. Daily tasks were making minor tweaks to verbiage or colors or images, or placing a tracking pixel on marketing materials or emails to feed their finely tuned AB testing machine. I envied the backend team for what I thought was handling real programming. I would open the .Net code base, only to peer into an undecipherable mess of connectors. I enjoyed writing front-end code, but I wanted to do more. I wanted to be better. I wanted to move up. I left after three years.&lt;/p&gt;
+
+&lt;h1 id=&quot;2014&quot;&gt;2014&lt;/h1&gt;
+&lt;p&gt;I should have left much sooner. I blame popular boomer advice at the time to stick around a company for three years. I had nothing lined up but I set my sights on Silicon Valley. I took six months to get my ass ready, work on personal projects, buy my first domain, start my blog. You can take a look at a &lt;a href=&quot;https://jasonjl.me/text-twist-bot-postmortem/&quot;&gt;good&lt;/a&gt; &lt;a href=&quot;https://jasonjl.me/bejeweled-bot-postmortem/&quot;&gt;amount&lt;/a&gt; &lt;a href=&quot;https://jasonjl.me/quiz-with-me-postmortem/&quot;&gt;of&lt;/a&gt; &lt;a href=&quot;https://jasonjl.me/share-codes-postmortem/&quot;&gt;them&lt;/a&gt; on this blog itself/&lt;/p&gt;
+
+&lt;p&gt;Built my first web app on Java and Spring, a Slashdot clone that was running on my off the shelf desktop HP Pentium setup with a static ip. I’d leave the computer running 24/7 inspecting traffic mainly from Russia and India. In hindsight, I really shouldn’t have exposed my computer to the greater net, pretty sure I was host to a bacterial farm of trojans and viruses.&lt;/p&gt;
+
+&lt;p&gt;Started interviewing and despite the deliberate practice it was still tough. Rejections left and right. Once again taking massive hits to my confidence.&lt;/p&gt;
+
+&lt;p&gt;Alation eventually dropped into my interview queue. I never heard of them, something to do with data. I interviewed with resignation. I passed the phone interview. They flew me out. I ‘passed’ the onsite. They flew me out for a week trial. They liked my vibes and gave me an offer at the end of the week. They really needed a front-end developer and I guess I fit that bill somewhat perfectly; a guy that can make a site look pretty and has something to prove. Despite being a startup, the offer was double my previous salary, and despite being hungry, there was a buffet of knowledge to consume that I could ever chew off. I joined my first startup, a series A company as employee #13.&lt;/p&gt;
+
+&lt;h1 id=&quot;2015&quot;&gt;2015&lt;/h1&gt;
+&lt;p&gt;The most striking thing as an outsider coming into working at a Silicon Valley company is the calibur of people you’re surrounded with. No shade on my previous coworkers at Experian, I pretty much had immediate incredible admiration for all of my peers at Alation. Each person brought a unique exceptional self and skills to the team. They were mostly all young or new to the engineering field but some how they’ve already gained all this understanding of how to develop ‘robust’ code. Not only that but they were exceptionally skilled at picking up new things.&lt;/p&gt;
+
+&lt;p&gt;I started as a front-end developer but as expected of a startup, you kind of just sign up to do anything.&lt;/p&gt;
+
+&lt;h1 id=&quot;2017&quot;&gt;2017&lt;/h1&gt;
+&lt;p&gt;One of the worst roles I had was ‘scapegoat’. We had a fairly large client that used our product who was unhappy with the performance of our cloud querying service, so much so that they wanted to have an in person meeting with the engineering team that manages it, namely me.&lt;/p&gt;
+
+&lt;p&gt;To this day, I still am not sure what they were hoping to accomplish with that meeting. I truly do think it was a venting session for the client team and I just had to be the messenger and receiver of all their frustration and curiosity as to why there were so many outages. For the record, I found the issue in a Java connector dependency which was resolved with a version upgrade where the bug was fixed. Unfortunately by this time it was too late.&lt;/p&gt;
+
+&lt;h1 id=&quot;2020-onward&quot;&gt;2020 Onward&lt;/h1&gt;
+&lt;p&gt;The years went on and during that time, just generally learned how to conduct myself. Naturally ended up being lead on most projects from here onward managing execution and expectations for all stakeholders. I think I found out I was pretty good at it, but I know I could be better. I realized communications are ephemeral. Even things that are written down can be lost. The best thing to do here is to internalize and harden the plan yourself such that you can defend and repeat as needed for the team.&lt;/p&gt;
+
+&lt;h1 id=&quot;2023&quot;&gt;2023&lt;/h1&gt;
+&lt;p&gt;I realized the company no longer needed me, maybe it even forgot I existed. I was coasting a bit on my tenure but I don’t think I was able to effectively execute against the main problem around data organization. My last problem I worked on broke me a little bit as the problem was clear, but the path we wanted to take way not. It was hard for the team to pick a direction and approach that balances technical implementation as well as product fit. I thought to take the lead by being more assertive in pushing what I saw as the best outcome but this led to more resistance and the ideas were shot down over many meetings. After multiple performance reviews of getting the highest marks of ‘exceeds expectation’ but not getting the recognition in compensation or title, I decided to move on.&lt;/p&gt;
+
+&lt;p&gt;I still have a lot of growth ahead of me.&lt;/p&gt;
+</description>
+        <pubDate>Fri, 01 Mar 2024 08:00:00 +0000</pubDate>
+        <link>https://jasonjl.mehttps://jasonjl.me/memoirs-of-my-first-startup/</link>
+        <guid isPermaLink="true">https://jasonjl.mehttps://jasonjl.me/memoirs-of-my-first-startup/</guid>
+        
+        
+        <category>work,</category>
+        
+        <category>about</category>
+        
+        <category>me</category>
+        
+      </item>
+    
+      <item>
+        <title>Engineer Archetypes</title>
+        <description>&lt;p&gt;After working in the industry for a decade, I’ve noticed that the software engineers I work with have a tendency to bucket themselves into a specific kind of personality archetype. 
+Here’s a list of some of the archetypes I noticed ordered in terms of beneficial, blissfully innocent, or just outright demonic.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-truth-seeker&quot;&gt;The Truth Seeker&lt;/h3&gt;
+&lt;p&gt;The truth seeker desires nothing more than to pursue the truth. Makes good faith research and provides solidly backed defense of their proposals using concrete numbers. Always great to have one on your team. Considers complete context and constraints of all aspects of the project not just engineering.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-nerd&quot;&gt;The Nerd&lt;/h3&gt;
+&lt;p&gt;Reads W3C proposals. Knows the nuances of all of Postgres’s locking levels. Loves and proselytizes Rust. Probably into cryptographic algorithms. If you ever wanted a deep dive in an area you just wanted a shallow introduction to, the Nerd is your guy.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-doctor&quot;&gt;The Doctor&lt;/h3&gt;
+&lt;p&gt;Has a PHD in Astrophysics. Why are they data plumbling web software… Similar to The Nerd, but more book smart and less knowledgeable about engineering topics specifically. Still obviously very smart.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-bureaucrat&quot;&gt;The Bureaucrat&lt;/h3&gt;
+&lt;p&gt;Creates processes that you better follow. Otherwise will get very upset at you. Do not ignore the procedures. Read the documentation first before consulting.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-tourist&quot;&gt;The Tourist&lt;/h3&gt;
+&lt;p&gt;Keeps up to date with all the latest trendy frameworks / technologies. Will always try to suggest it despite how new and untested it is.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-hacker&quot;&gt;The Hacker&lt;/h3&gt;
+&lt;p&gt;Given a problem, will get it done in a quarter time than anyone else. How…&lt;/p&gt;
+
+&lt;h3 id=&quot;cargo-culter&quot;&gt;Cargo Culter&lt;/h3&gt;
+&lt;p&gt;The &lt;a href=&quot;https://en.wikipedia.org/wiki/Cargo_cult&quot;&gt;Cargo Culture&lt;/a&gt; loves to stay educated. Always has their pulse on hot technologies or what tech influencers are saying. Proselytizes the last thing they learned despite the solution being only tangentially applicable to the current code base, or directly detrimental (Introducing GraphQL to fix dynamic querying performance problems). Very convincing due to strong but usually incorrect convictions.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-gollum&quot;&gt;The Gollum&lt;/h3&gt;
+&lt;p&gt;Maintaining the same feature for years and very protective of it. Very difficult to ask for changes or improvements to their feature. Very difficult to get a PR approved against their feature. Feature most likely underperformant more crusty hacked on layers than the earth itself.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-dick&quot;&gt;The Dick&lt;/h3&gt;
+&lt;p&gt;Probably very smart, otherwise would have gotten fired. Is usually helpful, but you’ll probably feel bad about it.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-complexity-demon&quot;&gt;The Complexity Demon&lt;/h3&gt;
+&lt;p&gt;Always will try to suggest a more complicated solution first. Is more interested in the challenge than addressing the customer’s problem. Most likely has ulterior motives around career advancement.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-ai-evangelist&quot;&gt;The AI Evangelist&lt;/h3&gt;
+&lt;p&gt;Is very bullish on AI. Often vibe codes most of their PR. Also vibe reviews their PR.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-dogeler&quot;&gt;The DOGEler&lt;/h3&gt;
+&lt;p&gt;Deleting / Rewriting code at all costs. Ignores context in the name of reducing lines of code or rewriting existing features to fit their model. Almost always introduces a critical regression and many smaller regressions.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-buffoon&quot;&gt;The Buffoon&lt;/h3&gt;
+&lt;p&gt;Very confident. Very wrong. Talks a lot. Says nothing.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-absentee&quot;&gt;The Absentee&lt;/h3&gt;
+&lt;p&gt;The guy probably working two jobs. Isn’t responsive for several days, then releases a batch of sloppy prs. Repeat.&lt;/p&gt;
+
+&lt;p&gt;Which one are you?&lt;/p&gt;
+</description>
+        <pubDate>Wed, 16 Aug 2023 08:00:00 +0000</pubDate>
+        <link>https://jasonjl.mehttps://jasonjl.me/engineer-archetypes/</link>
+        <guid isPermaLink="true">https://jasonjl.mehttps://jasonjl.me/engineer-archetypes/</guid>
+        
+        
+        <category>work</category>
+        
+      </item>
+    
+      <item>
+        <title>Logging Information on Browser Crashes</title>
+        <description>&lt;p&gt;Every now and then your web application does something so wild and unpredictable that it crashes the browser that you’re running it on. In order to create a better product for our users, we would need to log pertinent information every time our app crashes. Unfortunately there is no way to send a crash log before or during the crash due to the unpredictable nature of the crash and the browser’s web environment no longer working. The best thing to do is to send the logs after the crash. This post will go through a technique to detect when the user’s previous session has crashed so that we can perform the relevant logging actions.&lt;/p&gt;
+
+&lt;h2 id=&quot;preface&quot;&gt;Preface&lt;/h2&gt;
+
+&lt;p&gt;Currently I’ve only been able to support this technique on Google’s Chrome and Mozilla’s Firefox browser. This technique takes advantage of these two browser’s support for restorable sessionStorage. The &lt;a href=&quot;https://wiki.whatwg.org/wiki/FAQ#What_is_the_WHATWG.3F&quot;&gt;WHATWG&lt;/a&gt; HTML spec currently describes sessionStorage to delete itself once the browser context ends but also makes a note that browsing contexts can continue to persist even after the browser is closed. This is useful if the browser chooses to save the session to reload it after the user closes the browser window or if the browser window crashes.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://html.spec.whatwg.org/multipage/webstorage.html#the-sessionstorage-attribute&quot;&gt;WHATWG spec on sessionStorage&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;simulating-the-crash&quot;&gt;Simulating the Crash&lt;/h2&gt;
+
+&lt;p&gt;First, we’ll have to find out ways to simulate crashes on our browsers. Fortunately for our sake, its pretty easy to do for both Mozilla and Chrome.&lt;/p&gt;
+
+&lt;h3 id=&quot;crashing-on-chrome&quot;&gt;Crashing on Chrome&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Go to the page you want to crash&lt;/li&gt;
+  &lt;li&gt;Paste this into your url ‘chrome://crash’&lt;/li&gt;
+  &lt;li&gt;Press Enter&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;That was pretty easy. This brings up Chrome’s ‘Aw Snap!’ error page which simulates as if an irrecoverable error actually happened on the previous site you were on.&lt;/p&gt;
+
+&lt;h3 id=&quot;crashing-on-firefox&quot;&gt;Crashing on Firefox&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Go to the page you want to crash&lt;/li&gt;
+  &lt;li&gt;Open your Task Manager on Windows or Activity Monitor on OSX&lt;/li&gt;
+  &lt;li&gt;Find your firefox process and end the process or force quit it&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Force stopping the processes trigger’s Firefox’s crash conditions and emulates a real crash scenario. Firefox should ask you to restore your previous tabs along with your previous session as well.&lt;/p&gt;
+
+&lt;h3 id=&quot;go-ahead-try-it&quot;&gt;Go ahead, try it!&lt;/h3&gt;
+
+&lt;p&gt;Now that we know how to crash this page, go ahead and try it! When you come back there should be an alert letting you know that you came back from a crash and at what time&lt;/p&gt;
+
+&lt;h2 id=&quot;acting-on-the-crash&quot;&gt;Acting on the Crash&lt;/h2&gt;
+
+&lt;p&gt;Now that we know how to crash the browsers we just need to place the code in.&lt;/p&gt;
+
+&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// Check if we&apos;re coming back from a crash&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;if &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;sessionStorage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;getItem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;good_exit&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;===&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;pending&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// We&apos;re coming back from a crash&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;alert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;You came back from a crash at &lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Date&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;());&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// Do your crash logging here&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// You can access any sessionStorage data from the crashed session&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Set the good_exit flag to pending when the page loads&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;sessionStorage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;setItem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;good_exit&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;pending&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Set up listeners for successful exits&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;window&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;addEventListener&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;beforeunload&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;sessionStorage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;setItem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;good_exit&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The code above is checking if the user successfully closes, refreshes, or browses to another page by applying a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;good_exit = true&lt;/code&gt; flag in our sessionStorage. When the user successfully loads the page, the ‘good_exit’ flag will be set to ‘pending’ as we’re not sure if the user will successfully exit from this session. If the user unsuccessfully closes, refreshes, or browsers to another page and manages to crash the browser, the ‘good_exit’ flag will not be changed to ‘true’ and will stay as ‘pending. Everytime the user loads the page we check whether they’re coming back from a crash. If they are, then we apply our crashalytics code.&lt;/p&gt;
+
+&lt;h2 id=&quot;things-to-do-after-a-crash&quot;&gt;Things to do after a crash&lt;/h2&gt;
+
+&lt;p&gt;Remember that your sessionStorage is saved and recovered so anything that your user was doing before the crash can be recovered. This means you can store the last visited url, the time that they visited your site, any actions they have taken on the page, anything that you can store in sessionStorage can be recovered.&lt;/p&gt;
+
+&lt;p&gt;Say for instance the last thing the user was doing before the crash was typing a very long response in a text box. You can save the contents of the text box every few seconds into sessionStorage so that you can reload it once the user comes back from the crash. Or if you just want some analytics on the last actions the user took you can create a sessionStorage item to log and trace the actions taken by the user by listening to clicks and key inputs on your document. When the visitor returns you can post that information back to your server so you have something to go on when trying to fix your buggy site. Or when a user comes back to your page you can directly ask them to submit a bug report about what they were doing before they crashed. Many native desktop programs already do something like this and now you too can bring this feature to your buggy web application!&lt;/p&gt;
+
+&lt;h2 id=&quot;caveats&quot;&gt;Caveats&lt;/h2&gt;
+
+&lt;p&gt;An already listed caveat is this may or may not currently work for Internet Explorer or Safari. I wasn’t able to reliable crash those browsers to test whether they bring back sessions after crashes. Another caveat is that since sessionStorage content isn’t shared between tabs, users will have to refresh or reload the same tab with the same sessionStorage in order for the crash logging code to execute. If users open a new tab to connect after a crash then there will be no record of there being a crash. It will act as if you started a new browser session. As you can see this method isn’t 100% reliable, but it does give options to cover some of your user base.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;tested on Chrome version 43.0.2357.81 and Firefox 38.0.5 on June 21, 2015&lt;/em&gt;&lt;/p&gt;
+</description>
+        <pubDate>Sun, 21 Jun 2015 01:00:00 +0000</pubDate>
+        <link>https://jasonjl.mehttps://jasonjl.me/logging-information-on-browser-crash/</link>
+        <guid isPermaLink="true">https://jasonjl.mehttps://jasonjl.me/logging-information-on-browser-crash/</guid>
+        
+        
+        <category>browsers,</category>
+        
+        <category>javascript,</category>
+        
+        <category>logging</category>
+        
+      </item>
+    
+  </channel>
+</rss>

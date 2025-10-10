@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width initial-scale=1">
+
+  <title>Confess.me Postmortem</title>
+  <meta name="description" content="Confess.me is an anonymous real-time secret posting website. Other supportive members can send comforting messages of support to the anonymous secret sharer. The secret sharer can thank these anony...">
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://jasonjl.me/css/style.css">
+  <link rel="canonical" href="https://jasonjl.mehttps://jasonjl.me/confess-me-postmortem/">
+  <link rel="alternate" type="application/atom+xml" title="Jason Lee" href="https://jasonjl.mehttps://jasonjl.me/feed.xml" />
+  <!-- Basic favicon -->
+  <link rel="icon" type="image/x-icon" href="https://jasonjl.me/assets/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://jasonjl.me/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://jasonjl.me/assets/favicon/favicon-16x16.png">
+
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="https://jasonjl.me/assets/favicon/apple-touch-icon.png">
+
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZYPVTW1ZCS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-ZYPVTW1ZCS');
+</script>
+
+</head>
+
+  <body>
+    <div class="wrapper">
+      <div class="page-content">
+        <div class="post">
+  <h2>Jason J Lee</h2>
+  <header class="post-header">
+    <a href=" https://jasonjl.me " class="home-link">← Home</a>
+    <h1 class="post-title">Confess.me Postmortem</h1>
+    <p class="post-meta">January 27, 2015</p>
+    
+  
+  
+  
+  
+  
+    <video autoplay muted playsinline loop>
+      <source src="https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/confess-me-postmortem/confessme.mp4">
+      Your browser does not support the video tag.
+    </video>
+  
+
+  </header>
+  <div>
+
+
+  </div>
+
+  <article class="post-content">
+    <p>Confess.me is an anonymous real-time secret posting website. Other supportive members can send comforting messages of support to the anonymous secret sharer. The secret sharer can thank these anonymous eyes and ears for their support in turn. All of this is done in real time letting users have an outlet for those things that they hide to themselves.</p>
+
+<h2 id="the-backend">The Backend</h2>
+
+<p>This site was made with node with express with the addition of the socket.io plugin for websockets. One of the tricky things to manage was sessions. Websockets aren’t actually remembered within the same session so it was necessary to create a session to websocket object storage in the server memory. This ensures that users maintain the same websocket identity as long as they keep the same session identity. After that it was smooth sailing. The socket.io documentation is very basic but explains all there is to know about real-time communication. Set the server up to listen for events, have the client send those events. Have the client listen for events, make the server send those events. Its very basic but I can imagine so much more could be done with sockets ranging from real-time games, polls, data, and even parallel computing.</p>
+
+<p>In terms of persistence, there wasn’t supposed to be any message persistence. Lacking message persistence gives each message a fleeting property as if your secret will be seen but soon let go and forgotten. This was the initial plan, but since there is a severe lack of a userbase many new users would be confused and see nothing on the homepage. I felt the need to store some of the latest messages so that new visitors will see that there’s actually some content. I use the hip new document storage system mongo wrapped with the mongoose framework. The mongoose framework includes the ability to create object schemas for the mongo database. Even though mongo is naturally a schemaless storage system, I feel like it gives too much freedom for the user which would ultimately result in errors and confusion. Mongo as itself is a pretty simple concept to understand for people already familiar with JavaScript objects. My only wish is that it would carry some familiar SQL syntax for table searching but unfortunately its a new syntax, still simple, but new. Mongoose required a bit more reading to understand though. Its documentation is decent but <a href="http://jasonjl.me/blog/2014/10/17/framework-frustration/">I never really liked frameworks</a>.</p>
+
+<h2 id="the-frontend">The Frontend</h2>
+
+<p>The front end is pretty simple, uses the client side javascript for socket.io and some extra javascript to accomodate the multi-column layout. The front end is media query responsive so it’ll shrink itself to as many or little columns needed on smaller devices. It was fun trying to get the messages to organize themselves based on a multi-column layout vs a single column mobile layout. My rule for the multi-column layout was to always places the message in the smallest column as well as have newer messages up top, that way all column heights would be relatively even. When users resize their window, messages get reorganized so that it always follows this rule. I also used google’s third party library on html sanitization to prevent the page from accepting links and to protect users against XSS attacks. The problem with this real time updating of content is that the site has zero SEO. All content is dynamically injected through javascript so there is no content to scrape on the index.html page. To be fair though, I didn’t really optimize the page to be picked up by search engines, otherwise I would have included an about page, or help, or a blog, or something with actual content, or server side rendering, but at this moment I’m just happy that its primary function works, even when there’s no audience.</p>
+
+<p>I’ve always been fascinated with real time communication and what that could mean for the web. I thought for this project having someone respond with immediate results would be better than having to refresh the page constantly to see if someone replied to your secret.</p>
+
+<h2 id="the-good-the-bad">The good, the bad</h2>
+
+<p>The good part about the site is that it works. The bad part about the site is that it has no user base so it can’t really function as intended. Ideally there will always be more than a single person on, but at this point it has no user base other than my multiple testing browser windows. At this point I’m not sure if it can even handle more than five people at a time much less a hundred or even a thousand. Currently the code is sitting on a free Heroku dyno, I never intend on taking it to a real production level plan unless it happens to explode with popularity which I doubt. This was also my first experience in javascript server side programming. It was interesting imagining how code jumps around to different functions in a non-sequential manner and to be honest, I’m still not entirely sure how to handle errors. I haven’t yet fallen into callback hell but I can imagine that it can get pretty nasty in larger applications.</p>
+
+<p>Well there you have it. I hope this site will be useful as an outlet for the things that trouble you.</p>
+
+  </article>
+
+  
+  <hr>
+
+  <div class="related">
+    <h2>Other Posts</h2>
+    
+      <li><a href="/adventures-in-vibe-coding/" title="Adventures in Vibe Coding">Adventures in Vibe Coding
+       &nbsp; <span class="post-meta">September 30, 2025</span></a>
+    
+      <li><a href="/fitting-room-retrospective/" title="FittingRoom Postmortem">FittingRoom Postmortem
+       &nbsp; <span class="post-meta">August 20, 2025</span></a>
+    
+      <li><a href="/blog-migration-postmortem/" title="Blog migration postmortem">Blog migration postmortem
+       &nbsp; <span class="post-meta">July 16, 2025</span></a>
+    
+  </div>
+  
+  <div class="comments">
+    <div id="disqus_thread"></div>
+<script>
+    /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /*
+    var disqus_config = function () {
+    this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://jihoon222.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+  </div>
+</div>
+
+<script>
+var anchorForId = function (id) {
+  var anchor = document.createElement("a");
+  anchor.className = "header-link";
+  anchor.href      = "#" + id;
+  anchor.innerHTML = "<i class=\"fas fa-link\"></i>";
+  return anchor;
+};
+
+var linkifyAnchors = function (level, containingElement) {
+  var headers = containingElement.getElementsByTagName("h" + level);
+  for (var h = 0; h < headers.length; h++) {
+    var header = headers[h];
+
+    if (typeof header.id !== "undefined" && header.id !== "") {
+      header.appendChild(anchorForId(header.id));
+    }
+  }
+};
+
+document.onreadystatechange = function () {
+  if (this.readyState === "complete") {
+    linkifyAnchors(3, document.body);
+    linkifyAnchors(4, document.body);
+    linkifyAnchors(5, document.body);
+    linkifyAnchors(6, document.body);
+  }
+};
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

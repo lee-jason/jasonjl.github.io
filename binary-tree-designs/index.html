@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width initial-scale=1">
+
+  <title>Problems: Binary Tree Designs</title>
+  <meta name="description" content="So I’ve been brushing up and working with binary trees recently and I was pleasantly reminded how binary trees can flex and change while still maintaining the same data. It was fun testing self bal...">
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://jasonjl.me/css/style.css">
+  <link rel="canonical" href="https://jasonjl.mehttps://jasonjl.me/binary-tree-designs/">
+  <link rel="alternate" type="application/atom+xml" title="Jason Lee" href="https://jasonjl.mehttps://jasonjl.me/feed.xml" />
+  <!-- Basic favicon -->
+  <link rel="icon" type="image/x-icon" href="https://jasonjl.me/assets/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://jasonjl.me/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://jasonjl.me/assets/favicon/favicon-16x16.png">
+
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="https://jasonjl.me/assets/favicon/apple-touch-icon.png">
+
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZYPVTW1ZCS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-ZYPVTW1ZCS');
+</script>
+
+</head>
+
+  <body>
+    <div class="wrapper">
+      <div class="page-content">
+        <div class="post">
+  <h2>Jason J Lee</h2>
+  <header class="post-header">
+    <a href=" https://jasonjl.me " class="home-link">← Home</a>
+    <h1 class="post-title">Problems: Binary Tree Designs</h1>
+    <p class="post-meta">November 6, 2014</p>
+    
+  
+  
+  
+  
+  
+    <img src="https://jasonjlblog.s3.us-east-1.amazonaws.com/assets/posts/binary-tree-designs/herobinarytreeexample.png" />
+  
+
+  </header>
+  <div>
+
+
+  </div>
+
+  <article class="post-content">
+    <p>So I’ve been brushing up and working with binary trees recently and I was pleasantly reminded how binary trees can flex and change while still maintaining the same data. It was fun testing self balancing trees when they would keep changing up on me. I got a little annoyed and my mind started to wander and wondered just how many different kinds of trees can a set of numbers create?</p>
+
+<p><strong>Problem: Given the amount of nodes in a set, how many different binary tree structures can be made from it?</strong></p>
+
+<p>The picture above shows three different tree examples based off three nodes. If we keep going, we find out that there’s five total unique tree structures just through brute force. I don’t care about which numbers fill in which node in this problem (although that does sound like quite the problem) I just care about the shape of the tree structure. With that said, I was having trouble figuring out all the different tree types for four nodes and I didn’t even try for five nodes. That’s the point where we give up and ask the computer</p>
+
+<figure>
+  <figcaption>Recursive solution to tree pattern count </figcaption>
+
+  <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kt">int</span> <span class="nf">binaryTreeCount</span><span class="o">(</span><span class="kt">int</span> <span class="n">nodes</span><span class="o">,</span> <span class="kt">int</span> <span class="n">count</span><span class="o">){</span>
+    <span class="k">if</span><span class="o">(</span><span class="n">nodes</span><span class="o">==</span><span class="mi">1</span><span class="o">){</span>
+        <span class="k">return</span> <span class="n">count</span><span class="o">+</span><span class="mi">1</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="c1">//simulate left node path</span>
+    <span class="n">count</span><span class="o">=</span><span class="n">binaryCount</span><span class="o">(</span><span class="n">nodes</span><span class="o">-</span><span class="mi">1</span><span class="o">,</span> <span class="n">count</span><span class="o">);</span>
+    <span class="c1">//simulate right node path</span>
+    <span class="n">count</span><span class="o">=</span><span class="n">binaryCount</span><span class="o">(</span><span class="n">nodes</span><span class="o">-</span><span class="mi">1</span><span class="o">,</span> <span class="n">count</span><span class="o">);</span>
+    <span class="c1">//simulate left right node path</span>
+    <span class="k">if</span><span class="o">(</span><span class="n">nodes</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="o">){</span>
+        <span class="n">count</span><span class="o">=</span><span class="n">binaryCount</span><span class="o">(</span><span class="n">nodes</span><span class="o">-</span><span class="mi">2</span><span class="o">,</span> <span class="n">count</span><span class="o">);</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="n">count</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div>  </div>
+</figure>
+
+<p>This recursive function is simulating a depth first search that’s limited by the amount of nodes available to it. Once it reaches the end of a path, it adds one to the ‘count’ counter that gets passed back up and down the recursive stack. The function goes down the left path, and the right path, and also considers paths that can be generated from a node that branches into two paths with the third condition. I’m not a mathmagician but the runtime of this isn’t so hot. I’m pretty sure I can make it better by storing the path counts for amount of nodes down a certain path in a reference table so I don’t have to calculate the repeated calculations every time but I’m just kind of glad right now that I got the answer I wanted.</p>
+
+  </article>
+
+  
+  <hr>
+
+  <div class="related">
+    <h2>Other Posts</h2>
+    
+      <li><a href="/adventures-in-vibe-coding/" title="Adventures in Vibe Coding">Adventures in Vibe Coding
+       &nbsp; <span class="post-meta">September 30, 2025</span></a>
+    
+      <li><a href="/fitting-room-retrospective/" title="FittingRoom Postmortem">FittingRoom Postmortem
+       &nbsp; <span class="post-meta">August 20, 2025</span></a>
+    
+      <li><a href="/blog-migration-postmortem/" title="Blog migration postmortem">Blog migration postmortem
+       &nbsp; <span class="post-meta">July 16, 2025</span></a>
+    
+  </div>
+  
+  <div class="comments">
+    <div id="disqus_thread"></div>
+<script>
+    /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /*
+    var disqus_config = function () {
+    this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://jihoon222.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+  </div>
+</div>
+
+<script>
+var anchorForId = function (id) {
+  var anchor = document.createElement("a");
+  anchor.className = "header-link";
+  anchor.href      = "#" + id;
+  anchor.innerHTML = "<i class=\"fas fa-link\"></i>";
+  return anchor;
+};
+
+var linkifyAnchors = function (level, containingElement) {
+  var headers = containingElement.getElementsByTagName("h" + level);
+  for (var h = 0; h < headers.length; h++) {
+    var header = headers[h];
+
+    if (typeof header.id !== "undefined" && header.id !== "") {
+      header.appendChild(anchorForId(header.id));
+    }
+  }
+};
+
+document.onreadystatechange = function () {
+  if (this.readyState === "complete") {
+    linkifyAnchors(3, document.body);
+    linkifyAnchors(4, document.body);
+    linkifyAnchors(5, document.body);
+    linkifyAnchors(6, document.body);
+  }
+};
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
