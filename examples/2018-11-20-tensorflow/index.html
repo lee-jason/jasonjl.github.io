@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width initial-scale=1">
+
+  <title>TensorFlow</title>
+  <meta name="description" content="">
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://jasonjl.me/css/style.css">
+  <link rel="canonical" href="https://jasonjl.mehttps://jasonjl.me/examples/2018-11-20-tensorflow/">
+  <link rel="alternate" type="application/atom+xml" title="Jason Lee" href="https://jasonjl.mehttps://jasonjl.me/feed.xml" />
+  <!-- Basic favicon -->
+  <link rel="icon" type="image/x-icon" href="https://jasonjl.me/assets/favicon/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://jasonjl.me/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://jasonjl.me/assets/favicon/favicon-16x16.png">
+
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="https://jasonjl.me/assets/favicon/apple-touch-icon.png">
+
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZYPVTW1ZCS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-ZYPVTW1ZCS');
+</script>
+
+</head>
+
+  <body>
+    <div class="wrapper">
+      <div class="page-content">
+        <div class="post">
+  <h2>Jason J Lee</h2>
+  <header class="post-header">
+    <a href=" https://jasonjl.me " class="home-link">← Home</a>
+    <h1 class="post-title">TensorFlow</h1>
+    <p class="post-meta">November 20, 2018</p>
+    
+  </header>
+  <div>
+
+
+  </div>
+
+  <article class="post-content">
+    <p><em>Note: TensorFlow has changed quite a lot since this post was originally written in 2018. The fundamental concepts in this post still mostly transfer to TF2. The APIs, such as placeholders or sessions, do not. For the code below to work in TF2, you would have to import the <code class="language-plaintext highlighter-rouge">tf.compat.v1</code> module.</em></p>
+
+<p>After I started working at Google this year, I had to learn how to use TensorFlow.
+This turned out to be a lot of fun and I ended up liking it much more than I had anticipated.
+While there are already a lot of TensorFlow tutorials on the web, I decided to write my own version since explaining things generally helps me to understand them more clearly.</p>
+
+<p>It is worth noting that this blog post introduces TensorFlow in a bottom-up manner.
+I first go through the fundamental concepts, such as tensors and computational graphs, and only afterwards shows how everything can be connected in code.</p>
+
+<h3 id="motivation">Motivation</h3>
+
+<p>There are several problems with writing machine learning (ML) algorithms from scratch.
+Since most of ML is based on gradient descent, knowing the gradients is required to make the optimization process work.
+Computing derivatives from hand and then hardcoding them is error-prone and costs a lot of time.
+This slows down research and makes it difficult to experiment with new ideas.</p>
+
+<p>A second problem stems from the fact that ML is used in a lot of different environments.
+Since ML is extremely computationally expensive, the computing power of clusters is required when training large models on a lot of data.
+Still, for development and prototyping, we would like to work on our personal machines.
+Finally, when deploying the model for inference, it needs to be used in an even different environment, e.g. on a mobile phone.
+We would really like to easily re-use code for all these environments, without, for example, losing out on the computational power of the cluster.</p>
+
+<p>Libraries like Tensorflow aim to solve all these problems.
+By first constructing a <em>computational graph</em> that symbolically describes what we want to compute, gradients can be computed automatically.
+This graph can then be executed in different environments.
+TensorFlow takes care of properly distributing the computation among compute nodes on a cluster.
+It also makes inference on mobile phones or in a web browser more efficient, by properly using possible GPU accelerations and other available hardware advantages.</p>
+
+<h3 id="tensors">Tensors</h3>
+
+<p>Tensors are <em>n</em>-dimensional arrays that represent all data in TensorFlow.
+Similarly to how we can go from scalars to vectors and from vectors to matrices, we can create differently structured data by adding more dimensions.
+This, for example, allows us to represent RGB images.
+If there are three channels (red, green, blue) and the image has a width of <code class="language-plaintext highlighter-rouge">w</code> and a height of <code class="language-plaintext highlighter-rouge">h</code>, then we want to store the image as a <code class="language-plaintext highlighter-rouge">w × h × 3</code> tensor.
+This is similar to a <code class="language-plaintext highlighter-rouge">w × h</code> matrix, except that each pixel has three values associated with it.</p>
+
+<p>Conceptually, tensors are nearly equivalent to NumPy’s <code class="language-plaintext highlighter-rouge">np.array</code> function.
+This is really just a helper function for creating <code class="language-plaintext highlighter-rouge">np.ndarray</code>s, which are <em>n</em>-dimensional arrays.
+Even though the term tensor is not used as much in NumPy docs, NumPy users will already be familiar with the idea of tensors.</p>
+
+<p>To understand the terminology used around tensors in ML, it is useful to know the following two terms:</p>
+<ul>
+  <li>The <em>shape</em> of a tensor is an array detailing the number of values in each dimension. In the case of the image described above, the shape would be <code class="language-plaintext highlighter-rouge">[w, h, 3]</code></li>
+  <li>The <em>rank</em> of a tensor is the number of dimensions it has. RGB images are typically encoded as rank-3 tensors</li>
+</ul>
+
+<p>Finally, it is worth noting that there is a whole subfield of <a href="https://en.wikipedia.org/wiki/Tensor">linear algebra around tensors</a>.
+When friends from fields like physics ask me about tensors, they usually wonder if ML is based on some of these ideas.
+However, ML uses virtually none of that theory.
+We mostly just borrow the term tensor to describe <em>n</em>-dimensional arrays.</p>
+
+<h3 id="computational-graphs">Computational Graphs</h3>
+
+<p>All computations in TensorFlow are represented using graphs.
+Nodes in those graphs correspond to elementary functions, referred to as <em>operations</em>.
+Data in the form of tensors flows along the edges, thus giving birth to the name <em>TensorFlow</em>.</p>
+
+<p>Using TensorFlow is generally a two-step process:</p>
+<ol>
+  <li>Construct a graph that represents a function we want to compute</li>
+  <li>Execute the graph in a given environment</li>
+</ol>
+
+<p>The core TensorFlow library has implemented most low-level functions one might want to use.
+This naturally includes common linear algebra functions, like matrix multiplication.
+Python operators like <code class="language-plaintext highlighter-rouge">+</code> or <code class="language-plaintext highlighter-rouge">*</code> are overloaded to use internal TensorFlow operations if necessary.
+This means if you have two tensors <code class="language-plaintext highlighter-rouge">a</code> and <code class="language-plaintext highlighter-rouge">b</code>, calling <code class="language-plaintext highlighter-rouge">a + b</code> or <code class="language-plaintext highlighter-rouge">a * 3</code> will automatically use the appropriate TensorFlow operations <code class="language-plaintext highlighter-rouge">tf.add</code> and <code class="language-plaintext highlighter-rouge">tf.multiply</code>.
+The TensorFlow library is usually imported as <code class="language-plaintext highlighter-rouge">tf</code> in Python.</p>
+
+<p>Operations can have zero or more inputs and zero or more outputs.
+Beside standard operations, such as the ones mentioned above, there are three special kinds of nodes that are described in the following.
+They all hold data, take zero inputs and just output the data they currently contain.</p>
+
+<h4 id="constants">Constants</h4>
+
+<p><em>Constants</em> are trivial operations that take no inputs and always output the same value.
+This value has to be known during graph construction time and is hardcoded into the graph.
+After importing TensorFlow as <code class="language-plaintext highlighter-rouge">tf</code>, we can create new constants using <code class="language-plaintext highlighter-rouge">tf.constant</code> by passing in the value the node should hold.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">tensorflow</span> <span class="k">as</span> <span class="n">tf</span>
+
+<span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">constant</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">constant</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>We can then use these nodes for arbitrary operations:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">c</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="mi">3</span>
+</code></pre></div></div>
+
+<p>In the last line, TensorFlow implicitly creates a constant node, holding the value <code class="language-plaintext highlighter-rouge">3</code>.</p>
+
+<h4 id="placeholders">Placeholders</h4>
+
+<p><em>Placeholders</em> are similar to constants in the sense that they always have a constant value during the execution of a graph.
+However, the value is only determined just before the graph is executed.
+It does not have to be known when the graph is constructed.
+If we think of our graph as one huge function that we are computing, then placeholders represent the inputs to that function, while constants are just values encapsulated inside the function.</p>
+
+<p>In ML, we typically represent our training data, e.g. a feature tensor <code class="language-plaintext highlighter-rouge">X</code> and a label vector <code class="language-plaintext highlighter-rouge">y</code>, using placeholders.
+Values for them are only passed in when the training starts, i.e. when the graph is executed.</p>
+
+<p>To create a placeholder, we use <code class="language-plaintext highlighter-rouge">tf.placeholder</code> and declare the type of data that it will hold.
+Optionally, the shape of the data can be fixed as well.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">X</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">128</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+</code></pre></div></div>
+
+<h4 id="variables">Variables</h4>
+
+<p>Finally, <em>variables</em> represent values that can change during the execution of the graph.
+This is typically because we want to optimize them.
+Thus, all weights are generally represented using variables.</p>
+
+<p>This in contrast to our input data.
+We typically do not want to optimize the inputs to the model, so they are just represented using placeholders.
+If placeholders are the input to our function, or model, then variables are parameters of the function that we want to select as well as possible.</p>
+
+<p>To create a new variable, we use <code class="language-plaintext highlighter-rouge">tf.Variable</code> and pass in a default value.
+This could be any NumPy array, but in this case we directly create a random tensor of shape <code class="language-plaintext highlighter-rouge">[128, 50]</code>:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">W</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nc">Variable</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="nf">random_uniform</span><span class="p">([</span><span class="mi">128</span><span class="p">,</span> <span class="mi">50</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>It is worth noting that variables maintain state during separate executions of the graph.
+We describe the graph in a declarative style but it contains state, in the form of variables.
+This makes sense for ML: We iteratively want to improve our weights, variables here, step by step.</p>
+
+<h3 id="sessions">Sessions</h3>
+
+<p>Once the graph is fully constructed, we want to execute it.
+This is where TensorFlow’s other major abstraction, a <em>session</em>, comes into play.
+A session represents an execution environment in which we can evaluate nodes of computational graphs.
+This might be a cluster of GPUs or just our local development environment.</p>
+
+<p>This abstraction is crucial to TensorFlow:
+By describing what we want to compute using a declarative style, in the form of a computational graph, TensorFlow is able to do the work of figuring out how to perform the computation in an efficient way in various environments.
+For example, in the case of matrix multiplication, it can make use of special instructions on GPUs or at least use efficiently implemented system libraries for CPUs.</p>
+
+<p>Sessions are created using the <code class="language-plaintext highlighter-rouge">tf.Session</code> constructor.
+We can then evaluate individual nodes:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">constant</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="mi">2</span>
+
+<span class="n">sess</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nc">Session</span><span class="p">()</span>
+<span class="n">sess</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="c1"># =&gt; 6
+</span></code></pre></div></div>
+
+<p>TensorFlow evaluates the graph in a lazy way.
+If we add additional nodes to the computational graph above, calling <code class="language-plaintext highlighter-rouge">sess.run(b)</code> would only evaluate the nodes that are required the compute the value of <code class="language-plaintext highlighter-rouge">b</code>.
+To do this, TensorFlow searches through the graph backwards from <code class="language-plaintext highlighter-rouge">b</code> on and finds all required nodes.</p>
+
+<p>If our graph contains placeholders, we need to pass in their values using the <code class="language-plaintext highlighter-rouge">feed_dict</code> argument of <code class="language-plaintext highlighter-rouge">sess.run</code>.
+We can also fetch the value of several nodes using a single graph evaluation:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">5</span>
+<span class="n">h</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">6</span>
+
+<span class="n">sess</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nc">Session</span><span class="p">()</span>
+<span class="n">sess</span><span class="p">.</span><span class="nf">run</span><span class="p">([</span><span class="n">g</span><span class="p">,</span> <span class="n">h</span><span class="p">],</span> <span class="n">feed_dict</span><span class="o">=</span><span class="p">{</span> <span class="n">x</span><span class="p">:</span> <span class="mf">2.</span> <span class="p">})</span> <span class="c1"># =&gt; [10., 12.]
+</span></code></pre></div></div>
+
+<p>When using variables, we need to initialize them before they are first used.
+A simple way of doing this is using the <code class="language-plaintext highlighter-rouge">tf.global_variables_initializer</code>:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nc">Variable</span><span class="p">(</span><span class="mf">3.</span><span class="p">)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">abs</span><span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="n">x</span><span class="p">)</span>
+
+<span class="n">sess</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nc">Session</span><span class="p">()</span>
+<span class="n">sess</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="nf">global_variables_initializer</span><span class="p">())</span>
+<span class="n">sess</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span> <span class="c1"># =&gt; 5.
+</span></code></pre></div></div>
+
+<h3 id="optimization">Optimization</h3>
+
+<p>At this point we are able to perform arbitrary computations using TensorFlow, and can automatically distribute them on clusters.
+The missing component for ML is optimization: To be able to do any sort of training, we need to optimize for our weights.
+This is where the automatic differentiation and the <code class="language-plaintext highlighter-rouge">tf.train</code> library come in.</p>
+
+<p>Optimization is just another operation in a computational graph, albeit a fairly complex one.
+It is parameterized by the node whose value we want to optimize.
+When the resulting optimization operation is called, it automatically computes required gradients and uses them to update all variables.</p>
+
+<p>A simple example is the vanilla <code class="language-plaintext highlighter-rouge">tf.train.GradientDescentOptimizer</code>.
+We need to provide the learning rate using the first argument and define what we want to optimize for:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nc">Variable</span><span class="p">(</span><span class="mf">3.</span><span class="p">)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">abs</span><span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="n">x</span><span class="p">)</span>
+
+<span class="n">opt</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">train</span><span class="p">.</span><span class="nc">GradientDescentOptimizer</span><span class="p">(</span><span class="mf">0.5</span><span class="p">).</span><span class="nf">minimize</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+
+<span class="n">sess</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nc">Session</span><span class="p">()</span>
+<span class="n">sess</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="nf">global_variables_initializer</span><span class="p">())</span>
+<span class="n">sess</span><span class="p">.</span><span class="nf">run</span><span class="p">([</span><span class="n">loss</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">x</span><span class="p">])</span> <span class="c1"># =&gt; [5., None, 2.5]
+</span></code></pre></div></div>
+
+<p>In the above example, we called the <code class="language-plaintext highlighter-rouge">opt</code> operation to optimize our variable <code class="language-plaintext highlighter-rouge">x</code>.
+While this operation has no return value, it changed the value of the variable as a side effect.
+This effectively corresponds to one step of gradient descent.
+To fully minimize the loss, we need to take more than one step:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nc">Variable</span><span class="p">(</span><span class="mf">3.</span><span class="p">)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">abs</span><span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="n">x</span><span class="p">)</span>
+
+<span class="n">opt</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">train</span><span class="p">.</span><span class="nc">GradientDescentOptimizer</span><span class="p">(</span><span class="mf">1.</span><span class="p">).</span><span class="nf">minimize</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+
+<span class="n">sess</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nc">Session</span><span class="p">()</span>
+<span class="n">sess</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="nf">global_variables_initializer</span><span class="p">())</span>
+
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">7</span><span class="p">):</span>
+  <span class="nf">print</span><span class="p">(</span><span class="n">sess</span><span class="p">.</span><span class="nf">run</span><span class="p">([</span><span class="n">loss</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">x</span><span class="p">]))</span>
+</code></pre></div></div>
+
+<p>This is a standard pattern in TensorFlow code: We iteratively optimize our weights by calling <code class="language-plaintext highlighter-rouge">sess.run</code> several times.
+The resulting output shows that we reached the optimal value for <code class="language-plaintext highlighter-rouge">x</code> after five iterations:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[</span><span class="mf">5.0</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">]</span>
+<span class="p">[</span><span class="mf">4.0</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+<span class="p">[</span><span class="mf">3.0</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+<span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">]</span>
+<span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">]</span>
+<span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">]</span>
+<span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">tf.train</code> library contains many <a href="https://www.tensorflow.org/api_docs/python/tf/compat/v1/train">other popular optimization algorithms</a>.</p>
+
+<h3 id="example-matrix-factorization">Example: Matrix Factorization</h3>
+
+<p>The code above is the minimal example for optimization in TensorFlow.
+Another easy, but a bit more interesting one, is matrix factorization.
+Given a matrix <code class="language-plaintext highlighter-rouge">C</code>, we want to find two matrices <code class="language-plaintext highlighter-rouge">A</code> and <code class="language-plaintext highlighter-rouge">B</code> with <code class="language-plaintext highlighter-rouge">A * B = C</code>.
+The common dimension of <code class="language-plaintext highlighter-rouge">A</code> and <code class="language-plaintext highlighter-rouge">B</code> is a hyperparameter, called <code class="language-plaintext highlighter-rouge">dims</code> below.</p>
+
+<p>One way of finding an approximate solution for the factorization task is gradient descent.
+TensorFlow makes this fairly easy:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">factorize</span><span class="p">(</span><span class="n">C_val</span><span class="p">,</span> <span class="n">dims</span><span class="p">):</span>
+  <span class="c1"># Two variables with a common dimension `dim`. When these are
+</span>  <span class="c1"># multiplied, they produce a matrix of C's shape.
+</span>  <span class="n">A</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nc">Variable</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="nf">random_uniform</span><span class="p">([</span><span class="n">C_val</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dims</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+  <span class="n">B</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nc">Variable</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="nf">random_uniform</span><span class="p">([</span><span class="n">dims</span><span class="p">,</span> <span class="n">C_val</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+  <span class="n">C</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">constant</span><span class="p">(</span><span class="n">C_val</span><span class="p">)</span>
+  <span class="n">C_hat</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">matmul</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
+
+  <span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">losses</span><span class="p">.</span><span class="nf">mean_squared_error</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">C_hat</span><span class="p">)</span>
+  <span class="n">opt</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">train</span><span class="p">.</span><span class="nc">GradientDescentOptimizer</span><span class="p">(</span><span class="mf">5.</span><span class="p">).</span><span class="nf">minimize</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+
+  <span class="n">sess</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nc">Session</span><span class="p">()</span>
+  <span class="n">sess</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="nf">global_variables_initializer</span><span class="p">())</span>
+
+  <span class="n">A_val</span><span class="p">,</span> <span class="n">B_val</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+
+  <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+    <span class="n">A_val</span><span class="p">,</span> <span class="n">B_val</span><span class="p">,</span> <span class="n">loss_val</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">sess</span><span class="p">.</span><span class="nf">run</span><span class="p">([</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">opt</span><span class="p">])</span>
+
+  <span class="k">return</span> <span class="n">A_val</span><span class="p">,</span> <span class="n">B_val</span>
+
+<span class="nf">factorize</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">uniform</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)),</span> <span class="n">dims</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The result is pretty cool.
+We can now factorize arbitrary matrices.
+When checking the loss, we can see that it works fairly well for most random matrices.</p>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>To develop in TensorFlow, you describe graphs of computations in a declarative manner.
+TensorFlow can then automatically compute gradients for these graphs, allowing you to easily optimize any given variable.
+It can also execute and distribute your computations on many different platforms.
+All of these things enable ML development at scale.</p>
+
+<h3 id="further-resources">Further Resources</h3>
+
+<p>The TensorFlow team published two <a href="https://www.tensorflow.org/about/bib">papers</a>, both of which are very readable.
+There’s some overlap between these but I found both to be worth reading:</p>
+<ul>
+  <li>The first paper <a href="#citation-1" id="ref-1" class="ref-link">[1]</a>
+ has more details about TensorFlow’s programming model</li>
+  <li>The second one <a href="#citation-2" id="ref-2" class="ref-link">[2]</a>
+ gives some historical context and describes more advanced features</li>
+</ul>
+
+<p>I also wrote <a href="https://github.com/florian/reading-notes/#papers">reading notes</a> for both papers.</p>
+
+<h3 id="references">References</h3>
+
+<ol class="references-list">
+	
+	<li><span id="citation-1">Abadi, Martín, et al. "TensorFlow: Large-scale machine learning on heterogeneous distributed systems." Preliminary White Paper 2015
+		 <a href="https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/45166.pdf" class="pdf-link"></a> 
+		 <a href="https://github.com/florian/reading-notes/blob/master/papers/007_TensorFlow_Large-Scale_Machine_Learning_on_Heterogeneous_Distributed_Systems.md" class="notes-link"></a> 
+		
+		<a href="#ref-1" class="ref-backlink"></a>
+		
+	</span>
+</li>
+
+	<li><span id="citation-2">Abadi, Martín, et al. "TensorFlow: a system for large-scale machine learning." OSDI. Vol. 16. 2016.
+		 <a href="https://www.usenix.org/system/files/conference/osdi16/osdi16-abadi.pdf" class="pdf-link"></a> 
+		 <a href="https://github.com/florian/reading-notes/blob/master/papers/006_TensorFlow_A_system_for_large-scale_machine_learning.md" class="notes-link"></a> 
+		
+		<a href="#ref-2" class="ref-backlink"></a>
+		
+	</span>
+</li>
+
+
+</ol>
+
+<script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
+
+<script>
+var alreadySeenRefs = {};
+
+document.querySelectorAll(".ref-link").forEach(function (a) {
+  var id = a.getAttribute("id");
+  var citationPath = "#" + id.replace("ref", "citation");
+
+  tippy(a, {
+  	  content: document.querySelector(citationPath).textContent, placement: "bottom",
+  	  arrow: true
+  })
+
+  if (id in alreadySeenRefs) return;
+
+  var p = a.closest("p");
+  var currentId = p.getAttribute("id");
+
+  if (currentId == null) {
+    p.setAttribute("id", id)
+  } else {
+    document.querySelector(citationPath + " a.ref-backlink").setAttribute("href", "#" + currentId)
+  }
+
+  alreadySeenRefs[id] = true;
+  a.removeAttribute("id")
+})
+</script>
+
+
+  </article>
+
+  
+  <div class="comments">
+    <div id="disqus_thread"></div>
+<script>
+    /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /*
+    var disqus_config = function () {
+    this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://jihoon222.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+  </div>
+</div>
+
+<script>
+var anchorForId = function (id) {
+  var anchor = document.createElement("a");
+  anchor.className = "header-link";
+  anchor.href      = "#" + id;
+  anchor.innerHTML = "<i class=\"fas fa-link\"></i>";
+  return anchor;
+};
+
+var linkifyAnchors = function (level, containingElement) {
+  var headers = containingElement.getElementsByTagName("h" + level);
+  for (var h = 0; h < headers.length; h++) {
+    var header = headers[h];
+
+    if (typeof header.id !== "undefined" && header.id !== "") {
+      header.appendChild(anchorForId(header.id));
+    }
+  }
+};
+
+document.onreadystatechange = function () {
+  if (this.readyState === "complete") {
+    linkifyAnchors(3, document.body);
+    linkifyAnchors(4, document.body);
+    linkifyAnchors(5, document.body);
+    linkifyAnchors(6, document.body);
+  }
+};
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
